@@ -49,6 +49,14 @@
       "cache": false,
       "persistent": true
     },
+    "bundle": {
+      "dependsOn": ["build"],
+      "outputs": ["dist/bundle/**/*"]
+    },
+    "bundle:n8n": {
+      "dependsOn": ["bundle"],
+      "outputs": ["dist/bundle/**/*"]
+    },
     "clean": {
       "dependsOn": ["^clean"]
     },
