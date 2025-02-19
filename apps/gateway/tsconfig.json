@@ -15,6 +15,7 @@
   "exclude": ["**/*.test.ts", "node_modules"],
   "swc": true,
   "ts-node": {
-    "swc": true
+    "swc": true,
+    "esm": true
   }
 }

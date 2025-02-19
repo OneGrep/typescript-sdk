@@ -1,5 +1,5 @@
 {
-  "name": "@repo/onegrep-sdk-langchain",
+  "name": "@onegrep-sdk/langchain",
   "version": "0.0.1",
   "private": false,
   "type": "module",
@@ -13,6 +13,13 @@
   "bugs": {
     "url": "https://github.com/onegrep/typescript-sdk/issues"
   },
+  "types": "dist/types/index.d.ts",
+  "main": "dist/cjs/index.cjs",
+  "module": "dist/esm/index.js",
+  "exports": {
+    "require": "./dist/cjs/index.cjs",
+    "import": "./dist/esm/index.js"
+  },
   "files": [
     "dist/**/*"
   ],
@@ -22,9 +29,11 @@
   "scripts": {
     "check-types": "tsc -p tsconfig.check.json --noEmit",
     "build:types": "tsc -p tsconfig.types.json",
-    "build:cjs": "tsc -p tsconfig.cjs.json",
-    "build:esm": "tsc -p tsconfig.esm.json",
+    "build:cjs": "tsup src/index.ts --tsconfig tsconfig.cjs.json --out-dir dist/cjs --format cjs --dts",
+    "build:esm": "tsup src/index.ts --tsconfig tsconfig.esm.json --out-dir dist/esm --format esm --dts",
     "build": "echo 'build success'",
+    "pack": "mkdir -p pack && npm pack --pack-destination pack",
+    "pack:dryrun": "npm pack --pack-destination pack --dry-run",
     "test": "vitest --config vitest.config.ts --disable-console-intercept ",
     "test:watch": "vitest --config vitest.config.ts --disable-console-intercept --watch",
     "clean:dist": "rimraf ./dist",
@@ -44,7 +53,7 @@
     "vitest": "^3.0.5"
   },
   "dependencies": {
-    "@repo/onegrep-sdk": "workspace:*",
+    "onegrep-sdk": "workspace:*",
     "@langchain/core": "^0.3.40",
     "@modelcontextprotocol/sdk": "^1.5.0",
     "eventsource": "^3.0.5",

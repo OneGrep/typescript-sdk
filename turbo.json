@@ -4,12 +4,12 @@
   "globalEnv": ["NODE_ENV", "ONEGREP_*"],
   "globalDependencies": ["**/.env.*local"],
   "tasks": {
-    "trim": {
+    "openapi:trim": {
       "dependsOn": [],
       "outputs": ["openapi/*"]
     },
     "generate": {
-      "dependsOn": ["trim"],
+      "dependsOn": ["openapi:trim"],
       "outputs": ["src/**/*.ts"]
     },
     "compile": {
@@ -57,6 +57,13 @@
       "dependsOn": ["bundle"],
       "outputs": ["dist/bundle/**/*"]
     },
+    "pack": {
+      "dependsOn": ["build"],
+      "outputs": ["pack/**/*"]
+    },
+    "pack:dryrun": {
+      "dependsOn": ["build"]
+    },
     "clean": {
       "dependsOn": ["^clean"]
     },
@@ -91,7 +98,7 @@
     "start": {
       "env": ["ONEGREP_API_KEY", "ONEGREP_API_URL"],
       "inputs": ["$TURBO_DEFAULT$", ".env", ".env.*local"],
-      "dependsOn": ["^build"],
+      "dependsOn": ["build"],
       "persistent": true
     }
   }

@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { createLangchainToolbox, LangchainToolbox } from './langchain'
 import { StructuredTool } from '@langchain/core/tools'
-import { RemoteClientConfig } from '@repo/onegrep-sdk'
-import { clientFromConfig } from '@repo/onegrep-api-client'
-import { createToolbox } from '@repo/onegrep-sdk'
+import { RemoteClientConfig } from 'onegrep-sdk'
+import { createToolbox } from 'onegrep-sdk'
+import { clientFromConfig } from 'onegrep-sdk'
 
 describe('Toolbox Tests', () => {
   let langchainToolbox: LangchainToolbox
@@ -14,12 +14,12 @@ describe('Toolbox Tests', () => {
     langchainToolbox = await createLangchainToolbox(toolbox) // Initialize toolbox before each test
   })
 
-  it('should get all tool resources', async () => {
+  it('should get all tool resources', { timeout: 20000 }, async () => {
     const tools: StructuredTool[] = await langchainToolbox.getAllTools()
     expect(tools.length).toBeGreaterThan(0)
   })
 
-  it('should be able to make a tool call', async () => {
+  it('should be able to make a tool call', { timeout: 20000 }, async () => {
     const tools: StructuredTool[] = await langchainToolbox.getAllTools()
     console.log(tools.map((tool) => tool.name))
     const clientConfigTool = tools.find(

@@ -1,5 +1,10 @@
-import { createApiKeyClient } from '@repo/onegrep-api-client'
-import { AndFilter, createToolbox, ServerNameFilter, ToolNameFilter } from '@repo/onegrep-sdk'
+import {
+  AndFilter,
+  createToolbox,
+  ServerNameFilter,
+  ToolNameFilter,
+  createApiKeyClient
+} from 'onegrep-sdk'
 import {
   INodeType,
   INodeTypeDescription,
@@ -18,10 +23,10 @@ export class Onegrep implements INodeType {
     version: 1,
     description: 'Use OneGrep tools',
     defaults: {
-      name: 'OneGrep',
-   },
-   inputs: [NodeConnectionType.Main],
-   outputs: [NodeConnectionType.Main],
+      name: 'OneGrep'
+    },
+    inputs: [NodeConnectionType.Main],
+    outputs: [NodeConnectionType.Main],
     credentials: [
       {
         name: 'onegrep',
@@ -29,17 +34,17 @@ export class Onegrep implements INodeType {
       }
     ],
     properties: [
-        {
-            displayName: 'Server',
-            name: 'server',
-            type: 'options',
-            options: [
-              { name: 'Time', value: 'time' },
-              { name: 'Git', value: 'git' }
-            ],
-            default: 'time',
-            required: true
-          },
+      {
+        displayName: 'Server',
+        name: 'server',
+        type: 'options',
+        options: [
+          { name: 'Time', value: 'time' },
+          { name: 'Git', value: 'git' }
+        ],
+        default: 'time',
+        required: true
+      },
       {
         displayName: 'Tool',
         name: 'tool',
@@ -97,7 +102,6 @@ export class Onegrep implements INodeType {
     const apiClient = createApiKeyClient(apiKey, 'https://api.onegrep.dev')
     const toolbox = await createToolbox(apiClient)
 
-
     // const channel = this.getNodeParameter('channel', 0) as string
     // const recipients = this.getNodeParameter('recipients', 0) as string
 
@@ -117,17 +121,17 @@ export class Onegrep implements INodeType {
 
     const json_content_list: IDataObject[] = []
     for (const content of result.content) {
-        if (content.type === 'text') {
+      if (content.type === 'text') {
         const parsedContent = JSON.parse(content.text) as IDataObject
         json_content_list.push(parsedContent)
-        } else {
+      } else {
         throw new Error(`Unsupported content type: ${content.type}`)
-        }
+      }
     }
     // TODO: handle parse as output schema?
     const data_content_list: INodeExecutionData[] = []
     for (const content of json_content_list) {
-        data_content_list.push({ json: content })
+      data_content_list.push({ json: content })
     }
 
     return [data_content_list]

@@ -1,15 +1,19 @@
-import { ICredentialTestRequest, ICredentialType, INodeProperties } from 'n8n-workflow'
+import {
+  ICredentialTestRequest,
+  ICredentialType,
+  INodeProperties
+} from 'n8n-workflow'
 
 export class OneGrepApi implements ICredentialType {
-  name = 'onegrep';
-  displayName = 'OneGrep API Credentials API';
+  name = 'onegrep'
+  displayName = 'OneGrep API Credentials API'
   documentationUrl = 'https://onegrep.dev/docs'
   properties: INodeProperties[] = [
     {
       displayName: 'API Key',
       name: 'apiKey',
       type: 'string',
-						typeOptions: { password: true },
+      typeOptions: { password: true },
       default: '',
       description: 'The API key for the OneGrep API'
     }

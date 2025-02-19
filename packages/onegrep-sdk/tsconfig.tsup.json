@@ -1,12 +1,12 @@
 {
   "compilerOptions": {
     "target": "es2020",
-    "module": "commonjs",
-    "outDir": "dist/cjs",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "outDir": "dist",
     "strict": true,
     "skipLibCheck": true,
     "esModuleInterop": true
   },
-  "include": ["src"],
-  "exclude": ["**/*.test.ts", "node_modules"]
+  "include": ["src"]
 }

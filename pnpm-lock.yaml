@@ -24,11 +24,11 @@ importers:
         specifier: ^15.2.10
         version: 15.4.3
       prettier:
-        specifier: ^3.5.0
-        version: 3.5.0
+        specifier: ^3.5.1
+        version: 3.5.1
       pretty-quick:
         specifier: ^4.0.0
-        version: 4.0.0(prettier@3.5.0)
+        version: 4.0.0(prettier@3.5.1)
       rimraf:
         specifier: ^6.0.1
         version: 6.0.1
@@ -44,9 +44,6 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.5.0
         version: 1.5.0
-      '@repo/onegrep-sdk':
-        specifier: workspace:*
-        version: link:../../packages/onegrep-sdk
       '@repo/utils':
         specifier: workspace:*
         version: link:../../packages/utils
@@ -59,6 +56,9 @@ importers:
       express:
         specifier: 4.18.2
         version: 4.18.2
+      onegrep-sdk:
+        specifier: workspace:*
+        version: link:../../packages/onegrep-sdk
       typescript:
         specifier: 4.9.4
         version: 4.9.4
@@ -78,6 +78,12 @@ importers:
       nodemon:
         specifier: 3.1.7
         version: 3.1.7
+      pino:
+        specifier: ^9.6.0
+        version: 9.6.0
+      pino-pretty:
+        specifier: ^13.0.0
+        version: 13.0.0
       regenerator-runtime:
         specifier: 0.13.11
         version: 0.13.11
@@ -132,15 +138,12 @@ importers:
 
   packages/n8n-nodes-onegrep:
     dependencies:
-      '@repo/onegrep-api-client':
-        specifier: workspace:*
-        version: link:../onegrep-api-client
-      '@repo/onegrep-sdk':
-        specifier: workspace:*
-        version: link:../onegrep-sdk
       n8n-workflow:
         specifier: '*'
         version: 1.70.0
+      onegrep-sdk:
+        specifier: workspace:*
+        version: link:../onegrep-sdk
       zod:
         specifier: ^3.24.2
         version: 3.24.2
@@ -168,7 +171,7 @@ importers:
         version: 1.16.3(eslint@8.57.1)(typescript@5.7.3)
       n8n:
         specifier: '*'
-        version: 1.78.1(mkpzngqbgkmvtbnlyyzcxsnwum)
+        version: 1.78.1(89628cfb1b52b71f95a236d1370012cb)
       tsup:
         specifier: ^8.3.6
         version: 8.3.6(@swc/core@1.10.16(@swc/helpers@0.5.15))(jiti@2.4.2)(postcss@8.5.2)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0)
@@ -218,28 +221,25 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.5.0
         version: 1.5.0
+      '@repo/onegrep-api-client':
+        specifier: workspace:*
+        version: link:../onegrep-api-client
       '@repo/utils':
         specifier: workspace:*
         version: link:../utils
+      '@zodios/core':
+        specifier: ^10.9.6
+        version: 10.9.6(axios@1.7.9)(zod@3.24.2)
       eventsource:
         specifier: ^3.0.5
         version: 3.0.5
       json-schema-to-zod:
         specifier: ^2.6.0
         version: 2.6.0
-      pino:
-        specifier: ^9.6.0
-        version: 9.6.0
-      pino-pretty:
-        specifier: ^13.0.0
-        version: 13.0.0
       zod:
         specifier: ^3.24.2
         version: 3.24.2
     devDependencies:
-      '@repo/onegrep-api-client':
-        specifier: workspace:*
-        version: link:../onegrep-api-client
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
@@ -270,15 +270,15 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.5.0
         version: 1.5.0
-      '@repo/onegrep-sdk':
-        specifier: workspace:*
-        version: link:../onegrep-sdk
       eventsource:
         specifier: ^3.0.5
         version: 3.0.5
       json-schema-to-zod:
         specifier: ^2.6.0
         version: 2.6.0
+      onegrep-sdk:
+        specifier: workspace:*
+        version: link:../onegrep-sdk
       pino:
         specifier: ^9.6.0
         version: 9.6.0
@@ -318,15 +318,15 @@ importers:
       dotenv:
         specifier: ^16.4.7
         version: 16.4.7
-      esbuild-plugin-pino:
-        specifier: ^2.2.1
-        version: 2.2.1(esbuild@0.24.2)
       pino:
         specifier: ^9.6.0
         version: 9.6.0
       pino-pretty:
         specifier: ^13.0.0
         version: 13.0.0
+      ts-log:
+        specifier: ^2.2.7
+        version: 2.2.7
       zod:
         specifier: ^3.24.2
         version: 3.24.2
@@ -4630,11 +4630,6 @@ packages:
     resolution: {integrity: sha512-w+5mJ3GuFL+NjVtJlvydShqE1eN3h3PbI7/5LAsYJP/2qtuMXjfL2LpHSRqo4b4eSF5K/DH1JXKUAHSB2UW50g==}
     engines: {node: '>= 0.4'}
 
-  esbuild-plugin-pino@2.2.1:
-    resolution: {integrity: sha512-aVy1BxxzkeFlWhUyRtt/G94p3fqwnydpePFz9GjWccJ/NiZf+3BCFjHlojwy2KO2AYfWsBxL7ie80HN9rwFBDg==}
-    peerDependencies:
-      esbuild: '>=0.17.1 <=0.24.0'
-
   esbuild@0.23.1:
     resolution: {integrity: sha512-VVNz/9Sa0bs5SELtn3f7qhJCDPCF5oMEl5cO9/SSinpE9hbPVvxbd572HH5AKiP7WD8INO53GgfDDhRjkylHEg==}
     engines: {node: '>=18'}
@@ -7033,8 +7028,8 @@ packages:
     engines: {node: '>=10.13.0'}
     hasBin: true
 
-  prettier@3.5.0:
-    resolution: {integrity: sha512-quyMrVt6svPS7CjQ9gKb3GLEX/rl3BCL2oa/QkNcXv4YNVBC9olt3s+H7ukto06q7B1Qz46PbrKLO34PR6vXcA==}
+  prettier@3.5.1:
+    resolution: {integrity: sha512-hPpFQvHwL3Qv5AdRvBFMhnKo4tYxp0ReXiPn2bxkiohEX6mBeBwEpBSQTkD458RaaDKQMYSp4hX4UtfUTA5wDw==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -8011,6 +8006,9 @@ packages:
 
   ts-interface-checker@0.1.13:
     resolution: {integrity: sha512-Y/arvbn+rrz3JCKl9C4kVNfTfSm2/mEp5FSz5EsZSANGPSlQrpRI5M4PKF+mJnE52jOO90PnPSc3Ur3bTQw0gA==}
+
+  ts-log@2.2.7:
+    resolution: {integrity: sha512-320x5Ggei84AxzlXp91QkIGSw5wgaLT6GeAH0KsqDmRZdVWW2OiSeVvElVoatk3f7nicwXlElXsoFkARiGE2yg==}
 
   ts-node-dev@2.0.0:
     resolution: {integrity: sha512-ywMrhCfH6M75yftYvrvNarLEY+SUXtUvU8/0Z6llrHQVBx12GiFk5sStF8UdfE/yfzk9IAq7O5EEbTQsxlBI8w==}
@@ -10513,7 +10511,7 @@ snapshots:
   '@gar/promisify@1.1.3':
     optional: true
 
-  '@getzep/zep-cloud@1.0.12(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.1)))(encoding@0.1.13)(langchain@0.3.11(ss433jzu4jqx445o2c7nx3j6ii))':
+  '@getzep/zep-cloud@1.0.12(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.1)))(encoding@0.1.13)(langchain@0.3.11(783ec86e55f6359f998bded8c270964b))':
     dependencies:
       form-data: 4.0.0
       node-fetch: 2.7.0(encoding@0.1.13)
@@ -10522,7 +10520,7 @@ snapshots:
       zod: 3.24.2
     optionalDependencies:
       '@langchain/core': 0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.1))
-      langchain: 0.3.11(ss433jzu4jqx445o2c7nx3j6ii)
+      langchain: 0.3.11(783ec86e55f6359f998bded8c270964b)
     transitivePeerDependencies:
       - encoding
 
@@ -10726,7 +10724,7 @@ snapshots:
       - aws-crt
       - encoding
 
-  '@langchain/community@0.3.24(eaybfinqnxdf3uieza3g32lxa4)':
+  '@langchain/community@0.3.24(0245848533b8a937fe9ded2a0fe2701b)':
     dependencies:
       '@browserbasehq/stagehand': 1.12.0(@playwright/test@1.50.1)(deepmerge@4.3.1)(dotenv@16.4.7)(encoding@0.1.13)(openai@4.78.1(encoding@0.1.13)(zod@3.24.1))(zod@3.24.2)
       '@ibm-cloud/watsonx-ai': 1.5.0(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.1)))
@@ -10737,7 +10735,7 @@ snapshots:
       flat: 5.0.2
       ibm-cloud-sdk-core: 5.1.3
       js-yaml: 4.1.0
-      langchain: 0.3.11(ss433jzu4jqx445o2c7nx3j6ii)
+      langchain: 0.3.11(783ec86e55f6359f998bded8c270964b)
       langsmith: 0.2.15(openai@4.78.1(encoding@0.1.13)(zod@3.24.1))
       openai: 4.78.1(encoding@0.1.13)(zod@3.24.2)
       uuid: 10.0.0
@@ -10752,7 +10750,7 @@ snapshots:
       '@aws-sdk/credential-provider-node': 3.750.0
       '@azure/storage-blob': 12.18.0(encoding@0.1.13)
       '@browserbasehq/sdk': 2.3.0(encoding@0.1.13)
-      '@getzep/zep-cloud': 1.0.12(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.1)))(encoding@0.1.13)(langchain@0.3.11(ss433jzu4jqx445o2c7nx3j6ii))
+      '@getzep/zep-cloud': 1.0.12(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.1)))(encoding@0.1.13)(langchain@0.3.11(783ec86e55f6359f998bded8c270964b))
       '@getzep/zep-js': 0.9.0
       '@google-ai/generativelanguage': 2.6.0(encoding@0.1.13)
       '@google-cloud/storage': 7.15.1(encoding@0.1.13)
@@ -11027,10 +11025,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@n8n/n8n-nodes-langchain@1.78.0(tj56dlgq5wcf7uxteimoy4gcrq)':
+  '@n8n/n8n-nodes-langchain@1.78.0(986fabdd95d0c52f114288aaf07faf22)':
     dependencies:
       '@aws-sdk/client-sso-oidc': 3.666.0(@aws-sdk/client-sts@3.750.0)
-      '@getzep/zep-cloud': 1.0.12(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.1)))(encoding@0.1.13)(langchain@0.3.11(ss433jzu4jqx445o2c7nx3j6ii))
+      '@getzep/zep-cloud': 1.0.12(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.1)))(encoding@0.1.13)(langchain@0.3.11(783ec86e55f6359f998bded8c270964b))
       '@getzep/zep-js': 0.9.0
       '@google-ai/generativelanguage': 2.6.0(encoding@0.1.13)
       '@google-cloud/resource-manager': 5.3.0(encoding@0.1.13)
@@ -11039,7 +11037,7 @@ snapshots:
       '@langchain/anthropic': 0.3.11(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.1)))(encoding@0.1.13)
       '@langchain/aws': 0.1.3(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.1)))
       '@langchain/cohere': 0.3.2(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.1)))(encoding@0.1.13)
-      '@langchain/community': 0.3.24(eaybfinqnxdf3uieza3g32lxa4)
+      '@langchain/community': 0.3.24(0245848533b8a937fe9ded2a0fe2701b)
       '@langchain/core': 0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.1))
       '@langchain/google-genai': 0.1.6(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.1)))(zod@3.24.2)
       '@langchain/google-vertexai': 0.1.8(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.1)))(encoding@0.1.13)(zod@3.24.2)
@@ -11068,7 +11066,7 @@ snapshots:
       generate-schema: 2.6.0
       html-to-text: 9.0.5
       jsdom: 23.0.1(canvas@2.11.2)
-      langchain: 0.3.11(ss433jzu4jqx445o2c7nx3j6ii)
+      langchain: 0.3.11(783ec86e55f6359f998bded8c270964b)
       lodash: 4.17.21
       mammoth: 1.7.2
       mime-types: 2.1.35
@@ -14524,10 +14522,6 @@ snapshots:
       is-date-object: 1.1.0
       is-symbol: 1.1.1
 
-  esbuild-plugin-pino@2.2.1(esbuild@0.24.2):
-    dependencies:
-      esbuild: 0.24.2
-
   esbuild@0.23.1:
     optionalDependencies:
       '@esbuild/aix-ppc64': 0.23.1
@@ -16102,7 +16096,7 @@ snapshots:
 
   kuler@2.0.0: {}
 
-  langchain@0.3.11(ss433jzu4jqx445o2c7nx3j6ii):
+  langchain@0.3.11(783ec86e55f6359f998bded8c270964b):
     dependencies:
       '@langchain/core': 0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.1))
       '@langchain/openai': 0.3.17(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.1)))(encoding@0.1.13)(ws@8.17.1)
@@ -16844,7 +16838,7 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
-  n8n@1.78.1(mkpzngqbgkmvtbnlyyzcxsnwum):
+  n8n@1.78.1(89628cfb1b52b71f95a236d1370012cb):
     dependencies:
       '@azure/identity': 4.6.0
       '@azure/keyvault-secrets': 4.9.0
@@ -16854,7 +16848,7 @@ snapshots:
       '@n8n/config': 1.28.0
       '@n8n/di': 0.3.0
       '@n8n/localtunnel': 3.0.0
-      '@n8n/n8n-nodes-langchain': 1.78.0(tj56dlgq5wcf7uxteimoy4gcrq)
+      '@n8n/n8n-nodes-langchain': 1.78.0(986fabdd95d0c52f114288aaf07faf22)
       '@n8n/permissions': 0.17.0
       '@n8n/task-runner': 1.16.0(openai@4.78.1(encoding@0.1.13)(zod@3.24.1))
       '@n8n/typeorm': 0.3.20-12(@sentry/node@8.52.1)(ioredis@5.3.2)(mssql@10.0.2)(mysql2@3.11.0)(pg@8.12.0)(redis@4.6.12)(sqlite3@5.1.7)(ts-node@10.9.2(@swc/core@1.10.16(@swc/helpers@0.5.15))(@types/node@22.13.4)(typescript@5.7.3))
@@ -17758,11 +17752,11 @@ snapshots:
 
   prettier@2.8.8: {}
 
-  prettier@3.5.0: {}
+  prettier@3.5.1: {}
 
   pretty-bytes@5.6.0: {}
 
-  pretty-quick@4.0.0(prettier@3.5.0):
+  pretty-quick@4.0.0(prettier@3.5.1):
     dependencies:
       execa: 5.1.1
       find-up: 5.0.0
@@ -17770,7 +17764,7 @@ snapshots:
       mri: 1.2.0
       picocolors: 1.1.1
       picomatch: 3.0.1
-      prettier: 3.5.0
+      prettier: 3.5.1
       tslib: 2.8.1
 
   process-nextick-args@2.0.1: {}
@@ -18965,6 +18959,8 @@ snapshots:
       zod: 3.24.1
 
   ts-interface-checker@0.1.13: {}
+
+  ts-log@2.2.7: {}
 
   ts-node-dev@2.0.0(@swc/core@1.10.16(@swc/helpers@0.5.15))(@types/node@22.13.4)(typescript@4.9.4):
     dependencies:

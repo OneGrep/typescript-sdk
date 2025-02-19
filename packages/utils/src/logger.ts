@@ -1,51 +1,61 @@
-import pino, { Logger } from 'pino'
-import path from 'path'
+import { dummyLogger, Logger } from 'ts-log'
+import { Env, getEnv } from './env'
+import { getPinoLogger } from './pino'
 
-import { getEnv } from './env'
+export function getNoOpLogger(): Logger {
+  return dummyLogger
+}
 
-export type LogMode = 'stdout' | 'file'
+class ConsoleLogger implements Logger {
+  trace(message?: any, ...optionalParams: any[]): void {
+    console.trace(message, ...optionalParams)
+  }
 
-const DEFAULT_LOG_FILEPATH = path.join(process.cwd(), 'logs', 'onegrep-sdk.log')
+  debug(message?: any, ...optionalParams: any[]): void {
+    console.debug(message, ...optionalParams)
+  }
 
-function prettyTransport() {
-  return {
-    target: 'pino-pretty',
-    options: {
-      colorize: true,
-      levelFirst: true,
-      translateTime: 'HH:MM:ss'
-    }
+  info(message?: any, ...optionalParams: any[]): void {
+    console.info(message, ...optionalParams)
+  }
+
+  warn(message?: any, ...optionalParams: any[]): void {
+    console.warn(message, ...optionalParams)
+  }
+
+  error(message?: any, ...optionalParams: any[]): void {
+    console.error(message, ...optionalParams)
+  }
+
+  [x: string]: any // Allow for additional properties
+}
+
+export function getConsoleLogger(): Logger {
+  return new ConsoleLogger()
+}
+
+async function getLoggerFromEnv(env: Env): Promise<Logger> {
+  try {
+    return await getPinoLogger(env)
+  } catch (error) {
+    console.warn('Unable to initialize pino logger', error)
+    return getConsoleLogger()
   }
 }
 
-function fileTransport(logFile: string) {
-  return {
-    target: 'pino/file',
-    options: {
-      destination: logFile,
-      level: 'debug',
-      mkdir: true
-    }
-  }
-}
+export let log: Logger = getNoOpLogger()
 
-export function getLogger(
-  logLevel: string,
-  logMode: LogMode,
-  logFilepath?: string
-): Logger {
-  return pino({
-    level: logLevel,
-    transport:
-      logMode === 'stdout'
-        ? prettyTransport()
-        : fileTransport(logFilepath || DEFAULT_LOG_FILEPATH)
-  })
-}
-
-export function getLoggerFromConfig(): Logger {
+export function initLogger(): void {
   const env = getEnv()
-  return getLogger(env.LOG_LEVEL, env.LOG_MODE, env.LOG_FILEPATH)
+  getLoggerFromEnv(env)
+    .then((logger) => {
+      log = logger
+      log.info('Logger initialized')
+    })
+    .catch((error) => {
+      console.error('Failed to initialize logger', error)
+      log = getNoOpLogger()
+    })
 }
 
-export const log: Logger = getLoggerFromConfig()
+initLogger()

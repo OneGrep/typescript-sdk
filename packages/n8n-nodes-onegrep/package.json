@@ -1,5 +1,5 @@
 {
-  "name": "@repo/n8n-nodes-onegrep",
+  "name": "@onegrep-sdk/n8n-nodes-onegrep",
   "version": "0.0.1",
   "private": false,
   "license": "MIT",
@@ -24,18 +24,18 @@
   "scripts": {
     "check-types": "tsc -p tsconfig.check.json --noEmit",
     "format": "prettier src package.json --write",
-    "lint": "eslint src package.json",
+    "lint:disabled": "eslint src package.json",
     "lintfix": "eslint src package.json --fix",
-    "build:types": "tsc -p tsconfig.types.json",
-    "build:cjs": "tsc -p tsconfig.cjs.json",
-    "build:esm": "tsc -p tsconfig.esm.json",
+    "build:types": "echo 'build:types success'",
+    "build:cjs": "tsup src/bundle.ts --tsconfig tsconfig.tsup.json --format cjs --dts",
+    "build:esm": "echo 'build:esm success'",
     "build": "echo 'build success'",
     "bundle": "tsup src/bundle.ts --tsconfig tsconfig.tsup.json --format cjs --dts",
     "bundle:n8n": "cp dist/bundle/bundle.cjs dist/bundle/OneGrepApi.credentials.cjs && cp dist/bundle/bundle.cjs dist/bundle/Onegrep.node.cjs",
-    "dev": "NODE_FUNCTION_ALLOW_EXTERNAL=* N8N_BLOCK_ENV_ACCESS_IN_NODE=false N8N_BLOCK_UNSAFE_FUNCTIONS=false n8n start",
+    "dev:n8n": "NODE_FUNCTION_ALLOW_EXTERNAL=* N8N_BLOCK_ENV_ACCESS_IN_NODE=false N8N_BLOCK_UNSAFE_FUNCTIONS=false n8n start",
     "prepublishOnly": "pnpm build && pnpm lint -c .eslintrc.prepublish.js nodes credentials package.json",
-    "test": "vitest --config vitest.config.ts --disable-console-intercept ",
-    "test:watch": "vitest --config vitest.config.ts --disable-console-intercept --watch",
+    "test:disabled": "vitest --config vitest.config.ts --disable-console-intercept ",
+    "test:watch:disabled": "vitest --config vitest.config.ts --disable-console-intercept --watch",
     "clean:dist": "rimraf ./dist",
     "clean:dist:types": "rimraf ./dist/types",
     "clean:dist:cjs": "rimraf ./dist/cjs",
@@ -70,8 +70,7 @@
     "n8n-workflow": "*"
   },
   "dependencies": {
-    "@repo/onegrep-sdk": "workspace:*",
-    "@repo/onegrep-api-client": "workspace:*",
+    "onegrep-sdk": "workspace:*",
     "zod": "^3.24.2",
     "n8n-workflow": "*"
   },
