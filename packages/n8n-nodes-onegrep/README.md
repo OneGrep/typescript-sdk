@@ -6,10 +6,10 @@ This is an n8n community node. It lets you use [OneGrep Tools](https://onegrep.d
 
 [n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/reference/license/) workflow automation platform.
 
-- [Installation](#installation)  
+- [Installation](#installation)
 - [Credentials](#credentials)
 - [Usage](#usage)
-- [Resources](#resources)  
+- [Resources](#resources)
 
 ## Installation
 
@@ -48,11 +48,11 @@ The linter enforces the following naming conventions:
 - `credentials/{CapitalizedCredentialName}.credentials.cjs`
 - `nodes/{lowercase-node-name}/{CapitalizedNodeName}.node.cjs`
 
-Then on the package.json, you must define two *separate* files, one for credentials and one for the node.  It appears that it isn't support to have a single file for both, which is unfortunate because it's best if we bundle everything together for distribution in this case.  Thus, we have a packaging post-processing step to fit the naming conventions.
+Then on the package.json, you must define two _separate_ files, one for credentials and one for the node. It appears that it isn't support to have a single file for both, which is unfortunate because it's best if we bundle everything together for distribution in this case. Thus, we have a packaging post-processing step to fit the naming conventions.
 
 ### Packaging Support
 
-According to [this issue](https://github.com/n8n-io/n8n/issues/9464), n8n does not support ESM modules at this time.  As such, we only support a CommonJS distribution.
+According to [this issue](https://github.com/n8n-io/n8n/issues/9464), n8n does not support ESM modules at this time. As such, we only support a CommonJS distribution.
 
 ## Licenses
 

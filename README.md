@@ -85,9 +85,9 @@ For more detailed documentation about each package, please refer to their respec
 
 ## Additional Notes
 
-- All packages in the repo that are part of a `pnpm pack` dependency chain must have a version (even if it's 0.0.0).  [Related issue](https://github.com/pnpm/pnpm/issues/4164#issuecomment-1236762286)
+- All packages in the repo that are part of a `pnpm pack` dependency chain must have a version (even if it's 0.0.0). [Related issue](https://github.com/pnpm/pnpm/issues/4164#issuecomment-1236762286)
 
-- Pino v7-9 depends on thread-stream, which is not bundled in CJS automatically.  Additionally, for some runtimes (like n8n), which use CommonJS, it's not easy to load Pino with dynamic imports, so we don't bundle it directly and expose it as a peer dependency.  If Pino is not present, we fallback to logging to the console (which is not ideal for the Gateway running in MCP stdio mode).
+- Pino v7-9 depends on thread-stream, which is not bundled in CJS automatically. Additionally, for some runtimes (like n8n), which use CommonJS, it's not easy to load Pino with dynamic imports, so we don't bundle it directly and expose it as a peer dependency. If Pino is not present, we fallback to logging to the console (which is not ideal for the Gateway running in MCP stdio mode).
 
 ## 📝 License
 
