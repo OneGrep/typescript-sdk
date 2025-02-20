@@ -17,14 +17,5 @@ pnpm run lint:staged ||
   false; 
 )
 
-# Building...
-echo '🛠 Trying to build the code... '
-
-pnpm run build ||
-(
-  echo '❌😱 Next build failed: View the errors above to see why.'
-  false;
-)
-
 # If everything passes... Now we can check commit message
 echo '👨‍💻 Checking commit message '
