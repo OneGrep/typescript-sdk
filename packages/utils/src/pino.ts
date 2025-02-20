@@ -6,6 +6,7 @@ export async function getPinoLogger(env: Env): Promise<Logger> {
   type PinoLogger = import('pino').Logger
 
   const path = await import('path')
+  const dirname = path.dirname(__filename)
 
   class LoggerInstance implements Logger {
     private logger: PinoLogger
@@ -50,6 +51,7 @@ export async function getPinoLogger(env: Env): Promise<Logger> {
       target: 'pino-pretty',
       options: {
         colorize: true,
+        colorizeObjects: true,
         levelFirst: true,
         translateTime: 'HH:MM:ss'
       }
@@ -82,7 +84,11 @@ export async function getPinoLogger(env: Env): Promise<Logger> {
   }
 
   function getLoggerFromEnv(env: Env): PinoLogger {
-    return getLogger(env.LOG_LEVEL, env.LOG_MODE, env.LOG_FILEPATH)
+    return getLogger(
+      env.LOG_LEVEL,
+      env.PINO_LOG_TRANSPORT,
+      env.PINO_LOG_FILEPATH
+    )
   }
 
   return new LoggerInstance(getLoggerFromEnv(env))

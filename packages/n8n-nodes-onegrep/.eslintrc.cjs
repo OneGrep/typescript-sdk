@@ -13,8 +13,9 @@ module.exports = {
 	parser: '@typescript-eslint/parser',
 
 	parserOptions: {
-		project: ['./tsconfig.esm.json'],
 		sourceType: 'module',
+		tsconfigRootDir: __dirname,
+		project: './tsconfig.tsup.json',
 		extraFileExtensions: ['.json'],
 	},
 
@@ -46,6 +47,8 @@ module.exports = {
 				'n8n-nodes-base/node-execute-block-missing-continue-on-fail': 'off',
 				'n8n-nodes-base/node-resource-description-filename-against-convention': 'off',
 				'n8n-nodes-base/node-param-fixed-collection-type-unsorted-items': 'off',
+				'n8n-nodes-base/node-class-description-inputs-wrong-regular-node': 'off',
+				'n8n-nodes-base/node-class-description-outputs-wrong': 'off',
 			},
 		},
 	],

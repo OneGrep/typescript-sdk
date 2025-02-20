@@ -5,7 +5,7 @@ import {
 } from 'n8n-workflow'
 
 export class OneGrepApi implements ICredentialType {
-  name = 'onegrep'
+  name = 'onegrepApi'
   displayName = 'OneGrep API Credentials API'
   documentationUrl = 'https://onegrep.dev/docs'
   properties: INodeProperties[] = [

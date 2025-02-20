@@ -10,17 +10,24 @@ _default:
 install:
     pnpm install
 
+reinstall:
+    just clean
+    just install
+
 generate:
-    pnpm generate
+    pnpm turbo run generate
 
 format:
     pnpm format
 
 lint:
-    pnpm lint
+    pnpm turbo run lint
+
+lint-fix:
+    pnpm turbo run lint:fix
 
 build:
-    pnpm build
+    pnpm turbo run build
 
 build-types:
     pnpm turbo run build:types
@@ -31,20 +38,20 @@ build-cjs:
 build-esm:
     pnpm turbo run build:esm
 
+build-utils:
+    pnpm turbo run build --filter=@repo/utils
+
 build-sdk:
     pnpm turbo run build --filter=onegrep-sdk
 
-bundle:
-    pnpm bundle
-
-bundle-sdk:
-    pnpm turbo run bundle --filter=onegrep-sdk
+check-types:
+    pnpm turbo run check-types
 
 dev:
-    pnpm turbo run dev
+    pnpm turbo run dev --filter=onegrep-gateway
 
-start:
-    pnpm turbo run start
+dev-n8n:
+    pnpm turbo run dev --filter=@onegrep-sdk/n8n-nodes-onegrep
 
 gateway:
     pnpm turbo run start --filter=onegrep-gateway
@@ -52,24 +59,40 @@ gateway:
 test:
     pnpm turbo run test
 
-test-watch:
-    pnpm turbo run test:watch
-
 inspect:
     just inspect-sse
 
 inspect-sse:
-    pnpm turbo run dev inspector:sse
+    pnpm turbo run dev --filter=onegrep-gateway inspector:sse
 
 inspect-stdio:
     pnpm turbo run inspector:stdio
 
+pre-commit:
+    .husky/pre-commit
+
+commit-msg:
+    .husky/commit-msg
+
 pack:
-    pnpm turbo run pack
+    pnpm turbo run package
 
-pack-dry-run:
-    pnpm turbo run pack:dryrun
+clean-dist:
+    pnpm turbo run clean:dist
 
+clean-dist-types:
+    pnpm turbo run clean:dist:types
 
+clean-dist-cjs:
+    pnpm turbo run clean:dist:cjs
+
+clean-dist-esm:
+    pnpm turbo run clean:dist:esm
+
+clean-modules:
+    pnpm turbo run clean:modules
+
+clean:
+    pnpm turbo run clean
 
 

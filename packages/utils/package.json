@@ -1,5 +1,6 @@
 {
   "name": "@repo/utils",
+  "version": "0.0.0",
   "type": "module",
   "author": "OneGrep, Inc.",
   "types": "dist/types/index.d.ts",
@@ -19,7 +20,12 @@
     "check-types": "tsc --noEmit",
     "build:types": "tsc --emitDeclarationOnly --declaration --declarationDir dist/types",
     "build:cjs": "tsup src/index.ts --tsconfig tsconfig.json --out-dir dist/cjs --format cjs --dts",
-    "build:esm": "tsup src/index.ts --tsconfig tsconfig.json --out-dir dist/esm --format esm --dts"
+    "build:esm": "tsup src/index.ts --tsconfig tsconfig.json --out-dir dist/esm --format esm --dts",
+    "clean:dist": "rimraf ./dist",
+    "clean:dist:types": "rimraf ./dist/types",
+    "clean:dist:cjs": "rimraf ./dist/cjs",
+    "clean:dist:esm": "rimraf ./dist/esm",
+    "clean:modules": "rimraf ./node_modules"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",

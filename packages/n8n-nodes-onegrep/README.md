@@ -20,3 +20,9 @@ Pino v7-9 depends on thread-stream, which is not bundled in CJS automatically.
 We can provide a mode where it has no logging, but we can additionally bring in the thread-stream dependency as part of tsup config. Related docs: https://github.com/pinojs/pino/blob/main/docs/bundling.md
 
 n8n requires Node <=22, so for now we should use 20.
+
+NOTE: all packages in the repo that are part of a 'pnpm pack' step must have a version (even if it's 0.0.0).
+
+Bug in pnpm: https://github.com/pnpm/pnpm/issues/4164#issuecomment-1236762286
+
+Can't use 'npm pack' because it doesn't support 'workspace:' protocol in package.json

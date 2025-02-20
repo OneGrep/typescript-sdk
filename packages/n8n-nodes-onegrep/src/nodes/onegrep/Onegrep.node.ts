@@ -13,6 +13,7 @@ import {
   NodeConnectionType,
   IDataObject
 } from 'n8n-workflow'
+import { NodeOperationError } from 'n8n-workflow/dist/errors/node-operation.error.js'
 
 export class Onegrep implements INodeType {
   description: INodeTypeDescription = {
@@ -29,7 +30,7 @@ export class Onegrep implements INodeType {
     outputs: [NodeConnectionType.Main],
     credentials: [
       {
-        name: 'onegrep',
+        name: 'onegrepApi',
         required: true
       }
     ],
@@ -96,8 +97,12 @@ export class Onegrep implements INodeType {
   }
 
   async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
-    const credentials = await this.getCredentials('onegrep')
+    const credentials = await this.getCredentials('onegrepApi')
     const apiKey = credentials.apiKey as string
+
+    // TODO: this is a hack to get the API key into the environment for other packages
+    // Set the API key in the environment
+    process.env.ONEGREP_API_KEY = apiKey
 
     const apiClient = createApiKeyClient(apiKey, 'https://api.onegrep.dev')
     const toolbox = await createToolbox(apiClient)
@@ -125,7 +130,8 @@ export class Onegrep implements INodeType {
         const parsedContent = JSON.parse(content.text) as IDataObject
         json_content_list.push(parsedContent)
       } else {
-        throw new Error(`Unsupported content type: ${content.type}`)
+        const error = new Error(`Unsupported content type: ${content.type}`)
+        throw new NodeOperationError(this.getNode(), error)
       }
     }
     // TODO: handle parse as output schema?

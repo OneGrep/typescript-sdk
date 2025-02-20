@@ -1,6 +1,7 @@
 import { dummyLogger, Logger } from 'ts-log'
 import { Env, getEnv } from './env'
 import { getPinoLogger } from './pino'
+import { env } from 'process'
 
 export function getNoOpLogger(): Logger {
   return dummyLogger
@@ -35,12 +36,17 @@ export function getConsoleLogger(): Logger {
 }
 
 async function getLoggerFromEnv(env: Env): Promise<Logger> {
-  try {
-    return await getPinoLogger(env)
-  } catch (error) {
-    console.warn('Unable to initialize pino logger', error)
-    return getConsoleLogger()
+  let logger: Logger
+  if (env.LOG_MODE === 'silent') {
+    logger = getNoOpLogger()
+  } else if (env.LOG_MODE === 'console') {
+    logger = getConsoleLogger()
+  } else if (env.LOG_MODE === 'pino') {
+    logger = await getPinoLogger(env)
+  } else {
+    throw new Error(`Invalid log mode: ${env.LOG_MODE}`)
   }
+  return logger
 }
 
 export let log: Logger = getNoOpLogger()
@@ -50,12 +56,15 @@ export function initLogger(): void {
   getLoggerFromEnv(env)
     .then((logger) => {
       log = logger
-      log.info('Logger initialized')
     })
     .catch((error) => {
-      console.error('Failed to initialize logger', error)
-      log = getNoOpLogger()
+      log = getConsoleLogger()
+      log.error(
+        'Failed to initialize requested logger, using console logger',
+        error
+      )
     })
+  log.info('Logger initialized')
 }
 
 initLogger()

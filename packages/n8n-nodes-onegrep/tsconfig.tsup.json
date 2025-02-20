@@ -8,5 +8,6 @@
     "skipLibCheck": true,
     "esModuleInterop": true
   },
-  "include": ["src"]
+  "include": ["src", "package.json"],
+  "exclude": ["**/*.test.ts", "node_modules"]
 }
