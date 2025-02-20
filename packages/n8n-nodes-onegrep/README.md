@@ -1,28 +1,59 @@
-ESM Moduels not supported in n8n?
+![Banner image](https://user-images.githubusercontent.com/10284570/173569848-c624317f-42b1-45a6-ab09-f0ea3c247648.png)
 
-https://github.com/n8n-io/n8n/issues/9464
+# n8n-nodes-onegrep
 
-Everything must be in CJS format, including all dependencies.
+This is an n8n community node. It lets you use [OneGrep Tools](https://onegrep.dev) in your n8n workflows.
 
-This means that it's best to bundle it all together for distribution.
+[n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/reference/license/) workflow automation platform.
 
-However, it also expects certain naming conventions, which the linter will complain about.
+- [Installation](#installation)  
+- [Credentials](#credentials)
+- [Usage](#usage)
+- [Resources](#resources)  
 
-In the package.json, you must define two SEPARATE files, one for credentials and one for the node.
+## Installation
 
-The credentials file must be named `credentials/{CapitalizedCredentialName}.credentials.cjs`.
-The node file must be named `nodes/{lowercase-node-name}/{CapitalizedNodeName}.node.cjs`
+Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes/installation/) in the n8n community nodes documentation.
 
-Thus, I was able to get it to work with a local n8n install when we create a CJS only bundle, copy the bundle file to be named according to convention, then install in the `.n8n/nodes` directory with the package.json for testing. If this is published to npm, we should be able to install using the standard UI for community nodes.
+Use the package at [here](https://www.npmjs.com/package/n8n-nodes-onegrep).
 
-Pino v7-9 depends on thread-stream, which is not bundled in CJS automatically.
+## Credentials
 
-We can provide a mode where it has no logging, but we can additionally bring in the thread-stream dependency as part of tsup config. Related docs: https://github.com/pinojs/pino/blob/main/docs/bundling.md
+Add your OneGrep API Key to the n8n credentials store.
 
-n8n requires Node <=22, so for now we should use 20.
+TODO: add screenshot
 
-NOTE: all packages in the repo that are part of a 'pnpm pack' step must have a version (even if it's 0.0.0).
+## Usage
 
-Bug in pnpm: https://github.com/pnpm/pnpm/issues/4164#issuecomment-1236762286
+TODO: add usage instructions
 
-Can't use 'npm pack' because it doesn't support 'workspace:' protocol in package.json
+### Example
+
+TODO: add example
+
+## Resources
+
+- [n8n community nodes documentation](https://docs.n8n.io/integrations/community-nodes/)
+
+## Development
+
+## Node Runtime
+
+n8n currently requires Node <=22 at runtime.
+
+### Naming Conventions
+
+The linter enforces the following naming conventions:
+
+- `credentials/{CapitalizedCredentialName}.credentials.cjs`
+- `nodes/{lowercase-node-name}/{CapitalizedNodeName}.node.cjs`
+
+Then on the package.json, you must define two *separate* files, one for credentials and one for the node.  It appears that it isn't support to have a single file for both, which is unfortunate because it's best if we bundle everything together for distribution in this case.  Thus, we have a packaging post-processing step to fit the naming conventions.
+
+### Packaging Support
+
+According to [this issue](https://github.com/n8n-io/n8n/issues/9464), n8n does not support ESM modules at this time.  As such, we only support a CommonJS distribution.
+
+## Licenses
+
+[MIT](https://github.com/n8n-io/n8n-nodes-starter/blob/master/LICENSE.md)
