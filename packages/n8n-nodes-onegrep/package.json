@@ -41,6 +41,7 @@
     "build:cjs": "tsup src/index.ts --tsconfig tsconfig.tsup.json --out-dir dist/cjs --format cjs --dts",
     "build:esm": "echo 'ESM not supported for n8n nodes'",
     "build": "echo 'build success'",
+    "licenses": "pnpm licenses list --prod --long > .licenses.txt",
     "package": "mkdir -p pack && pnpm pack --pack-destination pack",
     "prepack": "cp dist/cjs/index.js dist/cjs/OneGrepApi.credentials.cjs && cp dist/cjs/index.js dist/cjs/Onegrep.node.cjs",
     "dev": "NODE_FUNCTION_ALLOW_EXTERNAL=* N8N_BLOCK_ENV_ACCESS_IN_NODE=false N8N_BLOCK_UNSAFE_FUNCTIONS=false n8n start",

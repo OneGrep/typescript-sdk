@@ -68,6 +68,9 @@ inspect-sse:
 inspect-stdio:
     pnpm turbo run inspector:stdio
 
+licenses:
+    pnpm turbo run licenses
+
 pre-commit:
     .husky/pre-commit
 

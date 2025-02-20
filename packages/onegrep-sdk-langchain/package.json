@@ -32,6 +32,7 @@
     "build:cjs": "tsup src/index.ts --tsconfig tsconfig.cjs.json --out-dir dist/cjs --format cjs --dts",
     "build:esm": "tsup src/index.ts --tsconfig tsconfig.esm.json --out-dir dist/esm --format esm --dts",
     "build": "echo 'build success'",
+    "licenses": "pnpm licenses list --prod --long > .licenses.txt",
     "package": "mkdir -p pack && pnpm pack --pack-destination pack",
     "package:dryrun": "pnpm pack --pack-destination pack --dry-run",
     "test": "LOG_MODE=pino LOG_LEVEL=debug vitest --config vitest.config.ts --disable-console-intercept ",

@@ -75,8 +75,8 @@
       "dependsOn": ["build"],
       "outputs": ["pack/**/*"]
     },
-    "package:dryrun": {
-      "dependsOn": ["build"]
+    "licenses": {
+      "dependsOn": ["package"]
     },
     "clean": {
       "cache": false,

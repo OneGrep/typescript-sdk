@@ -32,8 +32,8 @@
     "build:cjs": "tsup src/index.ts --tsconfig tsconfig.cjs.json --out-dir dist/cjs --format cjs --dts",
     "build:esm": "tsup src/index.ts --tsconfig tsconfig.esm.json --out-dir dist/esm --format esm --dts",
     "build": "echo 'build success'",
+    "licenses": "pnpm licenses list --prod --long > .licenses.txt",
     "package": "mkdir -p pack && pnpm pack --pack-destination pack",
-    "package:dryrun": "pnpm pack --pack-destination pack --dry-run",
     "test": "LOG_MODE=pino LOG_LEVEL=debug vitest --config vitest.config.ts --disable-console-intercept ",
     "test:watch": "LOG_MODE=pino LOG_LEVEL=debug vitest --config vitest.config.ts --disable-console-intercept --watch",
     "clean:dist": "rimraf ./dist",
@@ -43,10 +43,11 @@
     "clean:modules": "rimraf ./node_modules"
   },
   "devDependencies": {
+    "@repo/onegrep-api-client": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@repo/utils": "workspace:*",
-    "@repo/onegrep-api-client": "workspace:*",
     "@types/node": "^22.13.4",
+    "check-licenses": "^1.1.0",
     "dotenv": "^16.4.7",
     "rimraf": "^6.0.1",
     "tsup": "^8.3.6",
@@ -55,10 +56,10 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.5.0",
-    "json-schema-to-zod": "^2.6.0",
+    "@zodios/core": "^10.9.6",
     "eventsource": "^3.0.5",
-    "zod": "^3.24.2",
-    "@zodios/core": "^10.9.6"
+    "json-schema-to-zod": "^2.6.0",
+    "zod": "^3.24.2"
   },
   "peerDependencies": {
     "dotenv": "^16.4.7"
