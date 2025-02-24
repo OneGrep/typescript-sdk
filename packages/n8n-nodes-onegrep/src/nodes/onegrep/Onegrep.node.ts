@@ -122,7 +122,10 @@ export class Onegrep implements INodeType {
     )
     const toolResource = await toolbox.matchUniqueToolResource(resourceFilter)
 
-    const result = await toolResource.callTool(args || {})
+    const result = await toolResource.call_async_mcp({
+      args: args || {},
+      approval: undefined
+    })
 
     const json_content_list: IDataObject[] = []
     for (const content of result.content) {

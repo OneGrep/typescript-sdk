@@ -4,26 +4,17 @@ import {
   StructuredTool
 } from '@langchain/core/tools'
 import { Toolbox } from 'onegrep-sdk'
-import { ToolResource } from 'onegrep-sdk'
+import { MCPToolResource } from 'onegrep-sdk'
 import { z } from 'zod'
 
-async function _call(resource: ToolResource, input: any): Promise<any> {
-  const result = await resource.callTool(input)
-  const json_content: any[] = []
-  for (const content of result.content) {
-    if (content.type === 'text') {
-      const parsedContent = JSON.parse(content.text)
-      json_content.push(parsedContent)
-    } else {
-      throw new Error(`Unsupported content type: ${content.type}`)
-    }
-  }
-  // TODO: handle parse as output schema?
-  return json_content
+async function _call(resource: MCPToolResource, input: any): Promise<any> {
+  const result = await resource.call_async({ args: input, approval: undefined })
+  // TODO: Check for ObjectResultContent if validated output schema?
+  return JSON.stringify(result.content)
 }
 
 const convertToStructuredTool = (
-  resource: ToolResource,
+  resource: MCPToolResource,
   enforceInputSchema: boolean = true
 ): StructuredTool => {
   // TODO: How best to translate zodInputType to zodObject?
@@ -31,8 +22,8 @@ const convertToStructuredTool = (
   const outputSchema = z.object({})
 
   const dynamicToolInput: DynamicStructuredToolInput = {
-    name: resource.toolMetadata.name,
-    description: resource.toolMetadata.description,
+    name: resource.metadata.name,
+    description: resource.metadata.description,
     schema: enforceInputSchema ? inputSchema : z.object({}), // TODO: enforcing input schema breaks?
     func: async (
       input: z.infer<typeof inputSchema>

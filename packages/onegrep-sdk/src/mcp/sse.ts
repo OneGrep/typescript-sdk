@@ -1,22 +1,32 @@
 import { FetchLikeInit } from 'eventsource'
 import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js'
 import { RemoteClientConfig } from './types.js'
-import { getEnv } from '@repo/utils'
+import { log } from '@repo/utils'
 
-export const createClientTransport = (
-  remoteClientConfig: RemoteClientConfig
+// Get an SSE transport for a remote client
+export const createSSEClientTransport = (
+  clientConfig: RemoteClientConfig,
+  apiKey: string | undefined,
+  ignoreReadyCheck: boolean
 ) => {
-  const env = getEnv() // TODO: inject?
-  if (!env.ONEGREP_API_KEY) {
-    throw new Error('ONEGREP_API_KEY is not set')
+  // Check if the client config reports server as ready
+  if (!clientConfig.ready) {
+    if (!ignoreReadyCheck) {
+      throw new Error(`Server ${clientConfig.name} is not ready`)
+    } else {
+      log.warn(`Server ${clientConfig.name} reporting as not ready`)
+    }
   }
 
-  const url = remoteClientConfig.endpoint
+  const url = clientConfig.endpoint
   if (!url) {
     throw new Error('Endpoint is undefined')
   }
-  const headers = remoteClientConfig.required_headers || {}
-  headers['X-ONEGREP-API-KEY'] = env.ONEGREP_API_KEY // TODO: get api key from env
+  const headers = clientConfig.required_headers || {}
+  if (apiKey) {
+    log.debug(`Adding api key to headers`)
+    headers['X-ONEGREP-API-KEY'] = apiKey
+  }
 
   const fetchLikeWithHeaders = (url: string | URL, init?: FetchLikeInit) => {
     return fetch(url, {

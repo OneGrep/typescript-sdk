@@ -20,7 +20,8 @@ import {
   ResourceTemplate,
   CompatibilityCallToolResultSchema,
   GetPromptResultSchema,
-  Implementation
+  Implementation,
+  CallToolResult
 } from '@modelcontextprotocol/sdk/types.js'
 
 import { clientFromConfig } from '../../client.js'
@@ -30,20 +31,21 @@ import {
   ServerNameFilter,
   ToolNameFilter
 } from '../../toolbox.js'
-import { ToolResource } from '../../resource.js'
+import { MCPToolResource } from '../../resource.js'
 import { log } from '@repo/utils'
 import { z } from 'zod'
+import { ToolCallInput, ToolResource } from '../../types.js'
 
 export const ToolNamespaceDelimiter = '_TOOL_'
 
-const asGatewayTool = (toolResource: ToolResource): Tool => {
-  const inputSchema = toolResource.toolMetadata.inputSchema
+const asGatewayTool = (toolResource: MCPToolResource): Tool => {
+  const inputSchema = toolResource.metadata.inputSchema
   log.info(`Input schema: ${JSON.stringify(inputSchema)}`)
   try {
     return {
       name: `${toolResource.serverName()}${ToolNamespaceDelimiter}${toolResource.toolName()}`,
-      description: toolResource.toolMetadata.description,
-      inputSchema: toolResource.toolMetadata.inputSchema
+      description: toolResource.metadata.description,
+      inputSchema: toolResource.metadata.inputSchema
     } as Tool
   } catch (error) {
     log.error(`Error creating gateway tool: ${error}`)
@@ -104,13 +106,18 @@ export const createGateway = async () => {
 
     log.info(`Calling tool: ${name} from ${serverName}`)
 
-    const result = await toolResource.callTool(args || {})
+    const toolInput: ToolCallInput = {
+      args: args || {},
+      approval: undefined
+    }
+
+    const result: CallToolResult = await toolResource.call_async_mcp(toolInput)
     log.info(`Tool call succeeded`)
     return result
   })
 
   server.onclose = async () => {
-    await toolbox.cleanup()
+    await toolbox.close()
   }
 
   return gateway
