@@ -18,10 +18,10 @@
     "dist/**/*"
   ],
   "scripts": {
-    "dev": "LOG_MODE=pino LOG_LEVEL=debug node --loader ts-node/esm src/main.ts --transport sse",
+    "dev": "LOG_MODE=console LOG_LEVEL=debug node --loader ts-node/esm src/main.ts --transport sse",
     "inspector:stdio": "npx -y @modelcontextprotocol/inspector -e LOG_MODE=pino -e LOG_LEVEL=debug -e PINO_LOG_TRANSPORT=file -e PINO_LOG_FILEPATH=./logs/gateway.log -e ONEGREP_API_KEY=${ONEGREP_API_KEY} -e ONEGREP_API_URL=${ONEGREP_API_URL} -- node --loader ts-node/esm src/main.ts",
     "inspector:sse": "npx -y @modelcontextprotocol/inspector",
-    "start": "LOG_MODE=pino LOG_LEVEL=debug tsx dist/esm/index.js --transport sse",
+    "start": "LOG_MODE=console LOG_LEVEL=debug tsx dist/esm/index.js --transport sse",
     "check-types": "tsc -p tsconfig.check.json --noEmit",
     "build:types": "tsc -p tsconfig.types.json",
     "build:cjs": "tsc -p tsconfig.cjs.json",
