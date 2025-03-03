@@ -104,6 +104,11 @@ export class MCPToolResource implements ToolResource {
       this.clientConfig
     )
     const remoteToolCallArgs = this._toolCallArgs(toolInput.args)
+    const validator = jsonSchemaUtils.getValidator(this.metadata.inputSchema)
+    const valid = validator(toolInput.args)
+    if (!valid) {
+      throw new Error('Invalid tool input arguments')
+    }
     return await connected_client.callTool(remoteToolCallArgs)
   }
 
