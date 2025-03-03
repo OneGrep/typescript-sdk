@@ -75,7 +75,7 @@ const createConnectedClient = async (
     apiKey,
     ignoreReadyCheck
   )
-  log.debug(`Transport created for ${remoteClientConfig.name}`, transport)
+  log.debug(`SSE Transport created for ${remoteClientConfig.name}`)
 
   const client = new Client(
     {

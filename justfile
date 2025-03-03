@@ -29,6 +29,9 @@ lint-fix:
 build:
     pnpm turbo run build
 
+rebuild:
+    pnpm turbo run build --force
+
 build-types:
     pnpm turbo run build:types
 
