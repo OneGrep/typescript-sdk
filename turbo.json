@@ -32,23 +32,20 @@
       "inputs": ["$TURBO_DEFAULT$", ".env", ".env.*local"],
       "cache": false
     },
-    "onegrep-gateway#build:types": {
-      "dependsOn": ["onegrep-sdk#build:types"]
+    "onegrep-gateway#build": {
+      "dependsOn": ["^build:types"]
     },
-    "@onegrep-sdk/n8n-nodes-onegrep#build:types": {
-      "dependsOn": ["onegrep-sdk#build:types"]
-    },
-    "@onegrep-sdk/langchain#build:types": {
-      "dependsOn": ["onegrep-sdk#build:types"]
+    "@onegrep-sdk/langchain#build": {
+      "dependsOn": ["^build:types"]
     },
     "@onegrep-sdk/n8n-nodes-onegrep#build": {
-      "dependsOn": ["build:types", "build:cjs", "prepack"],
+      "dependsOn": ["^build:types", "^build:cjs", "prepack"],
       "inputs": ["$TURBO_DEFAULT$", ".env", ".env.*local"],
       "cache": false
     },
     "@onegrep-sdk/n8n-nodes-onegrep#prepack": {
       "dependsOn": ["build:cjs"],
-      "outputs": ["pack/**/*"]
+      "outputs": ["dist/**/*"]
     },
     "lint": {
       "dependsOn": ["^lint"]
