@@ -1,6 +1,6 @@
 {
   "name": "onegrep-sdk",
-  "version": "0.0.3",
+  "version": "0.0.1",
   "private": false,
   "type": "module",
   "license": "MIT",
@@ -43,10 +43,10 @@
     "clean:modules": "rimraf ./node_modules"
   },
   "devDependencies": {
+    "@onegrep/json-schema-to-zod": "link:./node_modules/@onegrep/json-schema-to-zod",
     "@repo/onegrep-api-client": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@repo/utils": "workspace:*",
-    "@types/node": "^22.13.4",
     "check-licenses": "^1.1.0",
     "dotenv": "^16.4.7",
     "rimraf": "^6.0.1",
@@ -56,11 +56,14 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.5.0",
+    "@types/node": "^22.13.4",
     "@zodios/core": "^10.9.6",
+    "ajv": "^8.17.1",
+    "buffer": "^6.0.3",
     "eventsource": "^3.0.5",
     "json-schema-to-zod": "^2.6.0",
-    "zod": "^3.24.2",
-    "buffer": "^6.0.3"
+    "uuid": "^11.1.0",
+    "zod": "^3.24.2"
   },
   "peerDependencies": {
     "dotenv": "^16.4.7"

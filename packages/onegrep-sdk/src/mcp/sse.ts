@@ -28,6 +28,8 @@ export const createSSEClientTransport = (
     headers['X-ONEGREP-API-KEY'] = apiKey
   }
 
+  log.debug(`SSE headers: ${Object.keys(headers).join(', ')}`)
+
   const fetchLikeWithHeaders = (url: string | URL, init?: FetchLikeInit) => {
     return fetch(url, {
       ...init,
@@ -52,5 +54,19 @@ export const createSSEClientTransport = (
     requestInit: requestInit
   }
 
-  return new SSEClientTransport(new URL(url), sse_opts)
+  const transport = new SSEClientTransport(new URL(url), sse_opts)
+
+  transport.onclose = () => {
+    log.debug(`SSE transport closed`)
+  }
+
+  transport.onerror = (error) => {
+    log.error(`SSE transport error: ${error}`)
+  }
+
+  transport.onmessage = (message) => {
+    log.debug(`SSE transport message`)
+  }
+
+  return transport
 }

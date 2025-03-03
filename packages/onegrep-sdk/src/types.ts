@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 export type ToolId = string
 
-export type JsonSchema = Record<string, any>
+export type JsonSchema = Record<string, any> | boolean
 
 export type ExtraProperties = Record<string, any>
 
@@ -38,8 +38,8 @@ export interface ToolMetadata {
   outputSchema?: JsonSchema
   extraProperties?: ExtraProperties
 
-  zodInputType(): z.ZodTypeAny | undefined
-  zodOutputType(): z.ZodTypeAny | undefined
+  zodInputType: () => z.ZodTypeAny
+  zodOutputType: () => z.ZodTypeAny
 }
 
 export interface ToolCallApproval {}
@@ -49,13 +49,17 @@ export interface ToolCallInput {
   approval: ToolCallApproval | undefined
 }
 
-export interface ToolCallOutput {
+export type ToolCallOutputMode = 'single' | 'multiple'
+
+export interface ToolCallOutput<T> {
   content: ToolCallResultContent
+  mode: ToolCallOutputMode
+  toZod: () => T
 }
 
 export interface ToolResource {
   id: ToolId
   metadata: ToolMetadata
 
-  call_async(input: ToolCallInput): Promise<ToolCallOutput>
+  call_async<T>(input: ToolCallInput): Promise<ToolCallOutput<T>>
 }
