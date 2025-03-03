@@ -37,8 +37,8 @@ function parseOutputContent(
       throw new Error(`Tool output content is not valid`)
     }
     return { type: 'object', data: parsedJson }
-  } catch (e) {
-    throw new Error(`JSON parsing failed: ${e}`)
+  } catch (error) {
+    throw new Error(`JSON parsing failed: ${error}`)
   }
 }
 
@@ -99,8 +99,8 @@ function parseMcpContent(
         try {
           const parsedJson = JSON.parse(content.text)
           resultContent.push({ type: 'object', data: parsedJson })
-        } catch (e) {
-          log.debug(`Invalid JSON: ${e}`)
+        } catch (error) {
+          log.debug(`Invalid JSON: ${error}`)
           resultContent.push({ type: 'text', text: content.text })
         }
       } else {
@@ -158,10 +158,15 @@ export function parseMcpResult<T>(
       return zodOutput.data
     }
 
-    return { content, mode, toZod } as ToolCallOutput<T>
+    return { isError: false, content, mode, toZod } as ToolCallOutput<T>
   } else {
     log.warn(`No output schema provided for tool: ${toolMetadata.name}`)
     const content = parseMcpContent(result.content)
-    return { content, mode, toZod: () => undefined } as ToolCallOutput<T>
+    return {
+      isError: false,
+      content,
+      mode,
+      toZod: () => undefined
+    } as ToolCallOutput<T>
   }
 }

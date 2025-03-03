@@ -49,17 +49,25 @@ export interface ToolCallInput {
   approval: ToolCallApproval | undefined
 }
 
+export interface ToolCallError {
+  isError: true
+  message: string
+}
+
 export type ToolCallOutputMode = 'single' | 'multiple'
 
 export interface ToolCallOutput<T> {
+  isError: false
   content: ToolCallResultContent
   mode: ToolCallOutputMode
   toZod: () => T
 }
 
+export type ToolCallResponse<T> = ToolCallOutput<T> | ToolCallError
+
 export interface ToolResource {
   id: ToolId
   metadata: ToolMetadata
 
-  call_async<T>(input: ToolCallInput): Promise<ToolCallOutput<T>>
+  call_async<T>(input: ToolCallInput): Promise<ToolCallResponse<T>>
 }

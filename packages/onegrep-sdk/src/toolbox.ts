@@ -2,7 +2,6 @@ import { clientFromConfig, OneGrepApiClient } from './client.js'
 import { ConnectedClientManager } from './mcp/client.js'
 import { MCPToolResource, toolResourceFromTool } from './resource.js'
 import { log } from '@repo/utils'
-import { ToolResource } from './types.js'
 import { RemoteClientConfig } from './mcp/types.js'
 
 export interface ToolFilter {
@@ -91,14 +90,18 @@ async function getToolResources(
   const toolResourcesMap = new Map<string, MCPToolResource[]>()
   await Promise.all(
     clientConfigs.map(async (clientConfig) => {
-      const connected_client =
-        await connectedClientManager.createClient(clientConfig)
-      const resources = await connected_client.listTools().then((tools) => {
-        return tools.map((tool) =>
-          toolResourceFromTool(tool, clientConfig, connectedClientManager)
-        )
-      })
-      toolResourcesMap.set(clientConfig.name, resources)
+      try {
+        const connected_client =
+          await connectedClientManager.createClient(clientConfig)
+        const resources = await connected_client.listTools().then((tools) => {
+          return tools.map((tool) =>
+            toolResourceFromTool(tool, clientConfig, connectedClientManager)
+          )
+        })
+        toolResourcesMap.set(clientConfig.name, resources)
+      } catch (error) {
+        log.error(`Error creating client for ${clientConfig.name}: ${error}`)
+      }
     })
   )
   toolResourcesMap.forEach((resources, name) => {

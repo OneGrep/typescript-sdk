@@ -3,38 +3,65 @@ import {
   DynamicStructuredToolInput,
   StructuredTool
 } from '@langchain/core/tools'
-import { Toolbox } from 'onegrep-sdk'
+import { log } from '@repo/utils'
+import { Toolbox, ToolCallOutput, ToolCallResponse } from 'onegrep-sdk'
 import { MCPToolResource } from 'onegrep-sdk'
-import { z } from 'zod'
+import { z, ZodTypeAny } from 'zod'
 
-async function _call(resource: MCPToolResource, input: any): Promise<any> {
-  const result = await resource.call_async({ args: input, approval: undefined })
-  // TODO: Check for ObjectResultContent if validated output schema?
-  return JSON.stringify(result.content)
+type ExtractZodShape<T> = T extends z.ZodObject<infer Shape> ? Shape : never
+
+function ensureZodObject<T extends z.ZodTypeAny>(
+  schema: T
+): T extends z.ZodObject<any> ? T : z.ZodObject<{ value: T }> {
+  if (schema instanceof z.ZodObject) {
+    return schema as any
+  }
+  return z.object({ value: schema }) as any
 }
 
-const convertToStructuredTool = (
-  resource: MCPToolResource,
-  enforceInputSchema: boolean = true
-): StructuredTool => {
-  // TODO: How best to translate zodInputType to zodObject?
-  const inputSchema = z.object({})
-  const outputSchema = z.object({})
+const convertToStructuredTool = (resource: MCPToolResource): StructuredTool => {
+  // Input zod type is required for Langchain to enforce input schema
+  const zodInputType: ZodTypeAny = resource.metadata.zodInputType()
 
-  const dynamicToolInput: DynamicStructuredToolInput = {
+  // Output zod type is required for Langchain to provide structured output (we use z.any() if not provided)
+  const zodOutputType: ZodTypeAny = resource.metadata.zodOutputType()
+
+  const inputZodObject: z.ZodObject<any> = ensureZodObject(zodInputType)
+  const outputZodObject: z.ZodObject<any> = ensureZodObject(zodOutputType)
+
+  type ToolInputType = z.infer<typeof inputZodObject>
+  type ToolOutputType = z.infer<typeof outputZodObject>
+
+  // The tool call function
+  const toolcallFunc = async (
+    input: ToolInputType
+  ): Promise<ToolCallOutput<ToolOutputType>> => {
+    const response: ToolCallResponse<ToolOutputType> =
+      await resource.call_async({
+        args: input,
+        approval: undefined // TODO: approvals
+      })
+    if (response.isError) {
+      log.error(`Tool call error: ${response.message}`)
+      // TODO: How does Langchain want us to handle errors?
+      throw new Error(response.message)
+    }
+    return response
+  }
+
+  // Create the dynamic structured tool
+  const dynamicToolInput: DynamicStructuredToolInput<ToolInputType> = {
     name: resource.metadata.name,
     description: resource.metadata.description,
-    schema: enforceInputSchema ? inputSchema : z.object({}), // TODO: enforcing input schema breaks?
-    func: async (
-      input: z.infer<typeof inputSchema>
-    ): Promise<z.infer<typeof outputSchema>> => {
-      console.log(input)
-      return await _call(resource, input)
-    }
+    schema: inputZodObject,
+    func: toolcallFunc
   }
   return new DynamicStructuredTool(dynamicToolInput)
 }
 
+/**
+ * A Langchain Toolbox that provides StructuredTools for all the tools in the toolbox
+ */
 export class LangchainToolbox {
   toolbox: Toolbox
 
@@ -44,7 +71,7 @@ export class LangchainToolbox {
 
   async getAllTools(): Promise<StructuredTool[]> {
     const resources = await this.toolbox.getToolResources()
-    return resources.map((resource) => convertToStructuredTool(resource, false)) // TODO: enforce input schema?
+    return resources.map((resource) => convertToStructuredTool(resource))
   }
 }
 

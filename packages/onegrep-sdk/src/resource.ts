@@ -6,7 +6,9 @@ import {
   ExtraProperties,
   JsonSchema,
   ToolMetadata,
-  ToolCallInput
+  ToolCallInput,
+  ToolCallResponse,
+  ToolCallError
 } from './types.js'
 import { ToolCallOutput } from './types'
 import { z } from 'zod'
@@ -107,12 +109,26 @@ export class MCPToolResource implements ToolResource {
 
   async call_async(
     toolInput: ToolCallInput
-  ): Promise<ToolCallOutput<z.infer<typeof this._outputZodType>>> {
-    const result = await this.call_async_mcp(toolInput)
-    return parseMcpResult<z.infer<typeof this._outputZodType>>(
-      result,
-      this.metadata
-    )
+  ): Promise<ToolCallResponse<z.infer<typeof this._outputZodType>>> {
+    try {
+      const result = await this.call_async_mcp(toolInput)
+      return parseMcpResult<z.infer<typeof this._outputZodType>>(
+        result,
+        this.metadata
+      )
+    } catch (error) {
+      if (error instanceof Error) {
+        return {
+          isError: true,
+          message: error.message
+        } as ToolCallError
+      } else {
+        return {
+          isError: true,
+          message: 'An unknown error occurred'
+        } as ToolCallError
+      }
+    }
   }
 }
 
