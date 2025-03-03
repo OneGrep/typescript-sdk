@@ -62,7 +62,15 @@
     "test": {
       "dependsOn": ["lint", "build"],
       "env": ["ONEGREP_API_KEY", "ONEGREP_API_URL", "LOG_MODE", "LOG_LEVEL"],
-      "inputs": ["**/*.tsx", "**/*.ts", "test/**/*.ts", "test/**/*.tsx"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env",
+        ".env.*local",
+        "**/*.tsx",
+        "**/*.ts",
+        "test/**/*.ts",
+        "test/**/*.tsx"
+      ],
       "outputs": []
     },
     "test:watch": {
