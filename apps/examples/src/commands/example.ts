@@ -3,7 +3,7 @@ import ora from 'ora'
 import { Command } from 'commander'
 import { logger } from '../utils/logger'
 
-import { getToolbox, JsonSchema, MCPToolResource } from 'onegrep-sdk'
+import { getToolbox, JsonSchema, MCPToolResource } from '@onegrep/sdk'
 
 const spinner = ora({
   text: 'Loading...',
@@ -22,10 +22,10 @@ export const showTools = new Command()
   })
 
 export async function runTools(integration: string, verbose: boolean) {
-  // Log mode for 'onegrep-sdk' can be: 'silent' or 'console'
+  // Log mode for '@onegrep/sdk' can be: 'silent' or 'console'
   const logMode = process.env.LOG_MODE
   const logLevel = process.env.LOG_LEVEL
-  logger.info(`Log mode for 'onegrep-sdk': ${logMode}`)
+  logger.info(`Log mode for '@onegrep/sdk': ${logMode}`)
 
   // Make sure that your API key is set via the environment variable ONEGREP_API_KEY
   const apiUrl = process.env.ONEGREP_API_URL
@@ -108,6 +108,4 @@ export async function runTools(integration: string, verbose: boolean) {
       `${chalk.green('Example:')} ${chalk.grey.bold('npm run cli show-tools -- --integration notion')}`
     )
   }
-
-  process.exit(0)
 }

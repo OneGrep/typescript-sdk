@@ -3,7 +3,7 @@ import ora from 'ora'
 import { Command } from 'commander'
 import { logger } from '../utils/logger'
 
-import { getToolbox } from 'onegrep-sdk'
+import { getToolbox } from '@onegrep/sdk'
 
 const spinner = ora({
   text: 'Loading...',

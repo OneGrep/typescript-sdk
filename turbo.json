@@ -35,15 +35,15 @@
     "onegrep-gateway#build": {
       "dependsOn": ["^build:types"]
     },
-    "@onegrep-sdk/langchain#build": {
+    "@onegrep/langchain#build": {
       "dependsOn": ["^build:types"]
     },
-    "@onegrep-sdk/n8n-nodes-onegrep#build": {
+    "@onegrep/n8n-nodes-onegrep#build": {
       "dependsOn": ["^build:types", "^build:cjs", "prepack"],
       "inputs": ["$TURBO_DEFAULT$", ".env", ".env.*local"],
       "cache": false
     },
-    "@onegrep-sdk/n8n-nodes-onegrep#prepack": {
+    "@onegrep/n8n-nodes-onegrep#prepack": {
       "dependsOn": ["build:cjs"],
       "outputs": ["dist/**/*"]
     },

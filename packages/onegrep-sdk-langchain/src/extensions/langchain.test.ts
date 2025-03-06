@@ -10,9 +10,9 @@ import {
   ToolCallOutput,
   ToolCallResponse,
   ToolResource
-} from 'onegrep-sdk'
-import { createToolbox } from 'onegrep-sdk'
-import { clientFromConfig } from 'onegrep-sdk'
+} from '@onegrep/sdk'
+import { createToolbox } from '@onegrep/sdk'
+import { clientFromConfig } from '@onegrep/sdk'
 import { log } from '@repo/utils'
 
 describe('Toolbox Tests', () => {

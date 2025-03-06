@@ -4,7 +4,7 @@ import {
   ServerNameFilter,
   ToolNameFilter,
   createApiKeyClient
-} from 'onegrep-sdk'
+} from '@onegrep/sdk'
 import {
   INodeType,
   INodeTypeDescription,

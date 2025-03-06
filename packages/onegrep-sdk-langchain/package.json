@@ -1,5 +1,5 @@
 {
-  "name": "@onegrep-sdk/langchain",
+  "name": "@onegrep/sdk/langchain",
   "version": "0.0.1",
   "private": false,
   "type": "module",
@@ -55,7 +55,7 @@
     "vitest": "^3.0.5"
   },
   "dependencies": {
-    "onegrep-sdk": "workspace:*",
+    "@onegrep/sdk": "workspace:*",
     "@langchain/core": "^0.3.40",
     "@modelcontextprotocol/sdk": "^1.5.0",
     "eventsource": "^3.0.5",

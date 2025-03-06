@@ -4,8 +4,8 @@ import {
   StructuredTool
 } from '@langchain/core/tools'
 import { log } from '@repo/utils'
-import { Toolbox, ToolCallOutput, ToolCallResponse } from 'onegrep-sdk'
-import { MCPToolResource } from 'onegrep-sdk'
+import { Toolbox, ToolCallOutput, ToolCallResponse } from '@onegrep/sdk'
+import { MCPToolResource } from '@onegrep/sdk'
 import { z, ZodTypeAny } from 'zod'
 
 type ExtractZodShape<T> = T extends z.ZodObject<infer Shape> ? Shape : never

@@ -45,7 +45,7 @@ build-utils:
     pnpm turbo run build --filter=@repo/utils
 
 build-sdk:
-    pnpm turbo run build --filter=onegrep-sdk
+    pnpm turbo run build --filter=@onegrep/sdk
 
 check-types:
     pnpm turbo run check-types
@@ -54,7 +54,7 @@ dev:
     pnpm turbo run dev --filter=onegrep-gateway
 
 dev-n8n:
-    pnpm turbo run dev --filter=@onegrep-sdk/n8n-nodes-onegrep
+    pnpm turbo run dev --filter=@onegrep/sdk/n8n-nodes-onegrep
 
 gateway:
     pnpm turbo run start --filter=onegrep-gateway
@@ -82,6 +82,9 @@ commit-msg:
 
 pack:
     pnpm turbo run package
+
+pack-cli:
+    pnpm turbo run package:sea --filter=@onegrep/cli
 
 clean-dist:
     pnpm turbo run clean:dist
