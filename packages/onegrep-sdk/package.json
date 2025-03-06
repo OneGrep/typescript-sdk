@@ -51,7 +51,8 @@
     "rimraf": "^6.0.1",
     "tsup": "^8.3.6",
     "typescript": "latest",
-    "vitest": "^3.0.5"
+    "vitest": "^3.0.5",
+    "chalk": "^5.3.0"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.5.0",
@@ -62,7 +63,8 @@
     "eventsource": "^3.0.5",
     "@onegrep/json-schema-to-zod": "git+https://github.com/OneGrep/json-schema-to-zod.git#main&path:/packages/json-schema-to-zod",
     "uuid": "^11.1.0",
-    "zod": "^3.24.2"
+    "zod": "^3.24.2",
+    "chalk": "^5.3.0"
   },
   "peerDependencies": {
     "dotenv": "^16.4.7"
