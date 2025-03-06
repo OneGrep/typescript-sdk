@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeAll } from 'vitest'
-import { createLangchainToolbox, LangchainToolbox } from './langchain'
+import {
+  createLangchainToolbox,
+  LangchainToolbox
+} from '../src/extensions/langchain'
 import {
   StructuredTool,
   ToolInputParsingException
