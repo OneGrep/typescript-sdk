@@ -80,6 +80,11 @@
       "dependsOn": ["build"],
       "outputs": ["pack/**/*"]
     },
+    "package:sea": {
+      "cache": false,
+      "dependsOn": ["build"],
+      "outputs": ["bin/**/*"]
+    },
     "licenses": {
       "dependsOn": ["package"]
     },
