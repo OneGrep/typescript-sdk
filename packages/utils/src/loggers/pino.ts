@@ -9,6 +9,9 @@ export async function pinoLogger(env: Env): Promise<Logger> {
     private logger: PinoLogger
 
     constructor(logger: PinoLogger) {
+      if (!logger) {
+        throw new Error('Pino Logger instance is required')
+      }
       this.logger = logger
     }
 
@@ -73,13 +76,18 @@ export async function pinoLogger(env: Env): Promise<Logger> {
     logTransport: LogTransport,
     logFilepath?: string
   ): Promise<PinoLogger> {
-    return pino({
-      level: logLevel,
-      transport:
-        logTransport === 'stdout'
-          ? await consoleTransport()
-          : await fileTransport(logFilepath)
-    })
+    if (logTransport === 'stdout') {
+      return pino({
+        level: logLevel,
+        transport: await consoleTransport()
+      })
+    } else if (logTransport === 'file') {
+      return pino({
+        level: logLevel,
+        transport: await fileTransport(logFilepath)
+      })
+    }
+    throw new Error(`Invalid log transport: ${logTransport}`)
   }
 
   async function getLoggerFromEnv(env: Env): Promise<PinoLogger> {
