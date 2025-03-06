@@ -51,13 +51,13 @@ check-types:
     pnpm turbo run check-types
 
 dev:
-    pnpm turbo run dev --filter=onegrep-gateway
+    pnpm turbo run dev --filter=@onegrep/gateway
 
 dev-n8n:
     pnpm turbo run dev --filter=@onegrep/sdk/n8n-nodes-onegrep
 
 gateway:
-    pnpm turbo run start --filter=onegrep-gateway
+    pnpm turbo run start --filter=@onegrep/gateway
 
 test:
     pnpm turbo run test
@@ -66,7 +66,7 @@ inspect:
     just inspect-sse
 
 inspect-sse:
-    pnpm turbo run dev --filter=onegrep-gateway inspector:sse
+    pnpm turbo run dev --filter=@onegrep/gateway inspector:sse
 
 inspect-stdio:
     pnpm turbo run inspector:stdio

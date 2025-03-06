@@ -1,5 +1,5 @@
 {
-  "name": "onegrep-gateway",
+  "name": "@onegrep/gateway",
   "type": "module",
   "version": "1.0.0",
   "description": "OneGrep Gateway",
