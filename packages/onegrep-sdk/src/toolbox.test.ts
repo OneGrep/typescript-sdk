@@ -5,12 +5,12 @@ import {
   ToolNameFilter,
   Toolbox,
   getToolbox
-} from './toolbox.js'
-import { MCPToolResource } from './resource.js'
+} from './toolbox'
+import { MCPToolResource } from './resource'
 import { log } from '@repo/utils'
-import { ToolCallError, ToolCallOutput, ToolCallResponse } from './types.js'
+import { ToolCallError, ToolCallOutput, ToolCallResponse } from './types'
 import Ajv from 'ajv'
-import { jsonSchemaUtils } from './schema.js'
+import { jsonSchemaUtils } from './schema'
 
 describe('Toolbox Tests', () => {
   let toolbox: Toolbox
