@@ -458,9 +458,6 @@ importers:
       eventsource:
         specifier: ^3.0.5
         version: 3.0.5
-      json-schema-to-zod:
-        specifier: ^2.6.0
-        version: 2.6.0
       zod:
         specifier: ^3.24.2
         version: 3.24.2
@@ -474,6 +471,24 @@ importers:
       '@repo/utils':
         specifier: workspace:*
         version: link:../utils
+      '@rollup/plugin-commonjs':
+        specifier: ^28.0.2
+        version: 28.0.2(rollup@4.34.9)
+      '@rollup/plugin-json':
+        specifier: ^6.0.1
+        version: 6.1.0(rollup@4.34.9)
+      '@rollup/plugin-node-resolve':
+        specifier: ^16.0.0
+        version: 16.0.0(rollup@4.34.9)
+      '@rollup/plugin-terser':
+        specifier: ^0.4.4
+        version: 0.4.4(rollup@4.34.9)
+      '@rollup/plugin-typescript':
+        specifier: ^12.1.2
+        version: 12.1.2(rollup@4.34.9)(tslib@2.8.1)(typescript@5.8.2)
+      '@types/eslint':
+        specifier: ^8.56.0
+        version: 8.56.12
       '@types/node':
         specifier: ^22.13.4
         version: 22.13.4
@@ -486,6 +501,12 @@ importers:
       pino-pretty:
         specifier: ^13.0.0
         version: 13.0.0
+      rollup:
+        specifier: ^4.34.9
+        version: 4.34.9
+      rollup-plugin-dts:
+        specifier: ^6.1.1
+        version: 6.1.1(rollup@4.34.9)(typescript@5.8.2)
       thread-stream:
         specifier: ^1.0.0
         version: 1.0.1
@@ -6494,10 +6515,6 @@ packages:
 
   json-parse-even-better-errors@2.3.1:
     resolution: {integrity: sha512-xyFwyhro/JEof6Ghe2iz2NcXoj2sloNsWr/XsERDK/oiPCfaNhl5ONfp+jQdAZRQQ0IJWNzH9zIZF7li91kh2w==}
-
-  json-schema-to-zod@2.6.0:
-    resolution: {integrity: sha512-6sFZqOzHZeON8g2ZW5HJ114Hb/FffNCjWh8dgulJaKFkUqKCEWZAzF4+g07SQpfBZF7HXemwedtdLypZzmnVpQ==}
-    hasBin: true
 
   json-schema-traverse@0.4.1:
     resolution: {integrity: sha512-xbbCH5dCYU5T8LcEhhuh7HJ88HXuW3qsI3Y0zOZFKfZEHcpWiHU/Jxzk629Brsab/mMiHQti9wMP+845RPe3Vg==}
@@ -17611,8 +17628,6 @@ snapshots:
       dreamopt: 0.8.0
 
   json-parse-even-better-errors@2.3.1: {}
-
-  json-schema-to-zod@2.6.0: {}
 
   json-schema-traverse@0.4.1: {}
 
