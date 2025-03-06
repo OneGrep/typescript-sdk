@@ -33,7 +33,8 @@ export type ToolCallResultContent = Array<ResultContent>
 export interface ToolMetadata {
   name: string
   description: string
-  icon_url?: URL
+  iconUrl?: URL
+  integrationName: string
   inputSchema: JsonSchema
   outputSchema?: JsonSchema
   extraProperties?: ExtraProperties
@@ -69,5 +70,25 @@ export interface ToolResource {
   id: ToolId
   metadata: ToolMetadata
 
-  call_async<T>(input: ToolCallInput): Promise<ToolCallResponse<T>>
+  // TODO: This is a temporary method to set the output schema
+  setOutputSchema(outputSchema: JsonSchema): void
+
+  call<T>(input: ToolCallInput): Promise<ToolCallResponse<T>>
+}
+
+export interface ToolCache {
+  refresh(): Promise<boolean>
+  get(key: ToolId): Promise<ToolResource | undefined>
+  list(): Promise<ToolResource[]>
+}
+
+export interface ToolResourceFilter {
+  (resource: ToolResource): boolean
+}
+
+export interface BaseToolbox<T> {
+  listAll(): Promise<T[]>
+  filter(filter: ToolResourceFilter): Promise<T[]>
+  matchUnique(filter: ToolResourceFilter): Promise<T>
+  close(): Promise<void>
 }

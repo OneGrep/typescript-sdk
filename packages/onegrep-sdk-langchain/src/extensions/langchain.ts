@@ -4,8 +4,14 @@ import {
   StructuredTool
 } from '@langchain/core/tools'
 import { log } from '@repo/utils'
-import { Toolbox, ToolCallOutput, ToolCallResponse } from '@onegrep/sdk'
-import { MCPToolResource } from '@onegrep/sdk'
+import {
+  BaseToolbox,
+  Toolbox,
+  ToolCallOutput,
+  ToolCallResponse,
+  ToolResource,
+  ToolResourceFilter
+} from '@onegrep/sdk'
 import { z, ZodTypeAny } from 'zod'
 
 type ExtractZodShape<T> = T extends z.ZodObject<infer Shape> ? Shape : never
@@ -19,7 +25,7 @@ function ensureZodObject<T extends z.ZodTypeAny>(
   return z.object({ value: schema }) as any
 }
 
-const convertToStructuredTool = (resource: MCPToolResource): StructuredTool => {
+const convertToStructuredTool = (resource: ToolResource): StructuredTool => {
   // Input zod type is required for Langchain to enforce input schema
   const zodInputType: ZodTypeAny = resource.metadata.zodInputType()
 
@@ -36,11 +42,10 @@ const convertToStructuredTool = (resource: MCPToolResource): StructuredTool => {
   const toolcallFunc = async (
     input: ToolInputType
   ): Promise<ToolCallOutput<ToolOutputType>> => {
-    const response: ToolCallResponse<ToolOutputType> =
-      await resource.call_async({
-        args: input,
-        approval: undefined // TODO: approvals
-      })
+    const response: ToolCallResponse<ToolOutputType> = await resource.call({
+      args: input,
+      approval: undefined // TODO: approvals
+    })
     if (response.isError) {
       log.error(`Tool call error: ${response.message}`)
       // TODO: How does Langchain want us to handle errors?
@@ -62,16 +67,30 @@ const convertToStructuredTool = (resource: MCPToolResource): StructuredTool => {
 /**
  * A Langchain Toolbox that provides StructuredTools for all the tools in the toolbox
  */
-export class LangchainToolbox {
+export class LangchainToolbox implements BaseToolbox<StructuredTool> {
   toolbox: Toolbox
 
   constructor(toolbox: Toolbox) {
     this.toolbox = toolbox
   }
 
-  async getAllTools(): Promise<StructuredTool[]> {
-    const resources = await this.toolbox.getToolResources()
+  async listAll(): Promise<StructuredTool[]> {
+    const resources = await this.toolbox.listAll()
     return resources.map((resource) => convertToStructuredTool(resource))
+  }
+
+  async filter(filter: ToolResourceFilter): Promise<StructuredTool[]> {
+    const resources = await this.toolbox.filter(filter)
+    return resources.map((resource) => convertToStructuredTool(resource))
+  }
+
+  async matchUnique(filter: ToolResourceFilter): Promise<StructuredTool> {
+    const resource = await this.toolbox.matchUnique(filter)
+    return convertToStructuredTool(resource)
+  }
+
+  async close(): Promise<void> {
+    await this.toolbox.close()
   }
 }
 

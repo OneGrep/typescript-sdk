@@ -3,7 +3,7 @@ import ora from 'ora'
 import { Command } from 'commander'
 import { logger } from '../utils/logger'
 
-import { getToolbox, JsonSchema, MCPToolResource } from '@onegrep/sdk'
+import { getToolbox, JsonSchema, ToolResource } from '@onegrep/sdk'
 
 const spinner = ora({
   text: 'Loading...',
@@ -33,12 +33,14 @@ export async function runTools(integration: string, verbose: boolean) {
   spinner.start()
 
   const toolbox = await getToolbox()
-  const allTools = await toolbox.getToolResources()
+  const allTools = await toolbox.listAll()
   spinner.succeed(`Connected to ${chalk.bold(apiUrl)}`)
 
   logger.info(`Found ${allTools.length} tools`)
 
-  const integrations = [...new Set(allTools.map((tool) => tool.serverName()))]
+  const integrations = [
+    ...new Set(allTools.map((tool) => tool.metadata.integrationName))
+  ]
   logger.info(`Integrations: ${integrations.join(', ')}`)
 
   // Simplify the JSON schema to only include the properties and required fields
@@ -53,7 +55,7 @@ export async function runTools(integration: string, verbose: boolean) {
   }
 
   // Simplify the tool metadata to only include the name and description
-  function simplifiedToolMetadata(tool: MCPToolResource) {
+  function simplifiedToolMetadata(tool: ToolResource) {
     return {
       name: tool.metadata.name,
       description: tool.metadata.description
@@ -61,7 +63,7 @@ export async function runTools(integration: string, verbose: boolean) {
   }
 
   // Include the name, description, and input schema
-  function verboseToolMetadata(tool: MCPToolResource) {
+  function verboseToolMetadata(tool: ToolResource) {
     return {
       name: tool.metadata.name,
       description: tool.metadata.description,
@@ -70,13 +72,13 @@ export async function runTools(integration: string, verbose: boolean) {
   }
 
   // Group the tools by integration
-  const toolMetadataByIntegration: Record<string, MCPToolResource[]> =
+  const toolMetadataByIntegration: Record<string, ToolResource[]> =
     integrations.reduce(
       (acc, i) => {
-        acc[i] = allTools.filter((tool) => tool.serverName() === i)
+        acc[i] = allTools.filter((tool) => tool.metadata.integrationName === i)
         return acc
       },
-      {} as Record<string, MCPToolResource[]>
+      {} as Record<string, ToolResource[]>
     )
 
   // If an integration is provided, log the tools for that integration

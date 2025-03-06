@@ -6,9 +6,14 @@ import {
   Toolbox,
   getToolbox
 } from './toolbox'
-import { MCPToolResource } from './resource'
+import { MCPToolResource } from './mcp/resource'
 import { log } from '@repo/utils'
-import { ToolCallError, ToolCallOutput, ToolCallResponse } from './types'
+import {
+  ToolCallError,
+  ToolCallOutput,
+  ToolCallResponse,
+  ToolResource
+} from './types'
 import Ajv from 'ajv'
 import { jsonSchemaUtils } from './schema'
 
@@ -20,12 +25,12 @@ describe('Toolbox Tests', () => {
   })
 
   it('should get all tool resources', async () => {
-    const toolResources: MCPToolResource[] = await toolbox.getToolResources()
+    const toolResources: ToolResource[] = await toolbox.listAll()
     expect(toolResources.length).toBeGreaterThan(0)
   })
 
   it('should be able to get a zod schema from a tool', async () => {
-    const tools: MCPToolResource[] = await toolbox.getToolResources()
+    const tools: ToolResource[] = await toolbox.listAll()
     expect(tools.length).toBeGreaterThan(0)
     const tool = tools.find(
       (tool) =>
@@ -67,8 +72,8 @@ describe('Toolbox Tests', () => {
   })
 
   it('should be able to make a tool call', async () => {
-    const metaServerName = toolbox.metaClientConfig.name
-    const toolResources: MCPToolResource[] = await toolbox.getToolResources()
+    const metaServerName = 'meta' // ! Change to not be hard-coded, as this can change from the Meta Server
+    const toolResources: ToolResource[] = await toolbox.listAll()
     expect(toolResources.length).toBeGreaterThan(0)
     log.info(
       `Tool names: ${toolResources.map((tool) => tool.metadata.name).join(', ')}`
@@ -78,7 +83,7 @@ describe('Toolbox Tests', () => {
       ServerNameFilter(metaServerName),
       ToolNameFilter('API-health_health_get') // ! Change to not be hard-coded, as this can change from the Meta Server
     )
-    const statusNamespaceResource = await toolbox.matchUniqueToolResource(
+    const statusNamespaceResource = await toolbox.matchUnique(
       statusNamespaceFilter
     )
 
@@ -108,11 +113,10 @@ describe('Toolbox Tests', () => {
     statusNamespaceResource.setOutputSchema(outputJsonSchema)
 
     const args = {}
-    const response: ToolCallResponse<any> =
-      await statusNamespaceResource.call_async({
-        args: args,
-        approval: undefined
-      })
+    const response: ToolCallResponse<any> = await statusNamespaceResource.call({
+      args: args,
+      approval: undefined
+    })
     expect(response).toBeDefined()
     expect(response).toBeTypeOf('object')
     expect(response.isError).toBe(false)
@@ -133,7 +137,7 @@ describe('Toolbox Tests', () => {
   })
 
   it('should be able to make a tool call with invalid input', async () => {
-    const tools: MCPToolResource[] = await toolbox.getToolResources()
+    const tools: ToolResource[] = await toolbox.listAll()
     expect(tools.length).toBeGreaterThan(0)
     log.info(
       `Tool names: ${tools.map((tool) => tool.metadata.name).join(', ')}`
@@ -155,7 +159,7 @@ describe('Toolbox Tests', () => {
       invalid_key: 'baz'
     }
 
-    const response: ToolCallResponse<any> = await clientConfigTool.call_async({
+    const response: ToolCallResponse<any> = await clientConfigTool.call({
       args: args,
       approval: undefined
     })

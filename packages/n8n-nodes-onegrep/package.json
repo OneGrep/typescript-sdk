@@ -1,5 +1,5 @@
 {
-  "name": "@onegrep/sdk/n8n-nodes-onegrep",
+  "name": "@onegrep/n8n-nodes-onegrep",
   "description": "OneGrep Node for n8n",
   "version": "0.0.7",
   "private": false,

@@ -3,7 +3,8 @@ import {
   createToolbox,
   ServerNameFilter,
   ToolNameFilter,
-  createApiKeyClient
+  createApiKeyClient,
+  ToolCallResponse
 } from '@onegrep/sdk'
 import {
   INodeType,
@@ -120,23 +121,30 @@ export class Onegrep implements INodeType {
       ServerNameFilter(server),
       ToolNameFilter(tool)
     )
-    const toolResource = await toolbox.matchUniqueToolResource(resourceFilter)
+    const toolResource = await toolbox.matchUnique(resourceFilter)
 
-    const result = await toolResource.call_async_mcp({
+    const result: ToolCallResponse<any> = await toolResource.call({
       args: args || {},
       approval: undefined
     })
 
-    const json_content_list: IDataObject[] = []
-    for (const content of result.content) {
-      if (content.type === 'text') {
-        const parsedContent = JSON.parse(content.text) as IDataObject
-        json_content_list.push(parsedContent)
-      } else {
-        const error = new Error(`Unsupported content type: ${content.type}`)
-        throw new NodeOperationError(this.getNode(), error)
-      }
+    if (result.isError) {
+      throw new NodeOperationError(this.getNode(), result.message)
     }
+
+    const output = result.toZod()
+
+    const json_content_list: IDataObject[] = []
+    // for (const content of result.content) {
+    //   if (content.type === 'text') {
+    //     const parsedContent = JSON.parse(content.text) as IDataObject
+    //     json_content_list.push(parsedContent)
+    //   } else {
+    //     const error = new Error(`Unsupported content type: ${content.type}`)
+    //     throw new NodeOperationError(this.getNode(), error)
+    //   }
+    // }
+    json_content_list.push({ json: JSON.stringify(output.toZod()) })
     // TODO: handle parse as output schema?
     const data_content_list: INodeExecutionData[] = []
     for (const content of json_content_list) {

@@ -32,7 +32,7 @@
       "inputs": ["$TURBO_DEFAULT$", ".env", ".env.*local"],
       "cache": false
     },
-    "onegrep-gateway#build": {
+    "@onegrep/gateway#build": {
       "dependsOn": ["^build:types"]
     },
     "@onegrep/langchain#build": {

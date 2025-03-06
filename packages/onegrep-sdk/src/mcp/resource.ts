@@ -1,5 +1,5 @@
-import { RemoteClientConfig, RemoteToolCallArgs } from './mcp/types.js'
-import { ConnectedClientManager } from './mcp/client.js'
+import { RemoteClientConfig, RemoteToolCallArgs } from './types.js'
+import { ConnectedClientManager } from './client.js'
 import { CallToolResult, Tool } from '@modelcontextprotocol/sdk/types.js'
 import {
   ToolResource,
@@ -9,11 +9,11 @@ import {
   ToolCallInput,
   ToolCallResponse,
   ToolCallError
-} from './types.js'
-import { ToolCallOutput } from './types'
+} from '../types.js'
+import { ToolCallOutput } from '../types.js'
 import { z } from 'zod'
-import { jsonSchemaUtils } from './schema.js'
-import { parseMcpResult } from './mcp/toolcall.js'
+import { jsonSchemaUtils } from '../schema.js'
+import { parseMcpResult } from './toolcall.js'
 
 // TODO: Use this as the default output schema if no output schema is provided, but is indicated to be structured output
 const anyObjectJsonSchema = {
@@ -25,7 +25,8 @@ const anyObjectJsonSchema = {
 export class McpToolMetadata implements ToolMetadata {
   name: string
   description: string
-  icon_url?: URL
+  iconUrl?: URL
+  integrationName: string
   inputSchema: JsonSchema
   outputSchema?: JsonSchema
   extraProperties?: ExtraProperties
@@ -33,10 +34,16 @@ export class McpToolMetadata implements ToolMetadata {
   private _zodInputType: z.ZodTypeAny
   private _zodOutputType: z.ZodTypeAny
 
-  constructor(tool: Tool, inputSchema: JsonSchema, outputSchema?: JsonSchema) {
+  constructor(
+    tool: Tool,
+    integrationName: string,
+    inputSchema: JsonSchema,
+    outputSchema?: JsonSchema
+  ) {
     this.name = tool.name
     this.description = tool.description || 'Tool ' + tool.name
-    this.icon_url = undefined
+    this.iconUrl = undefined
+    this.integrationName = integrationName
     this.inputSchema = inputSchema
     this.outputSchema = outputSchema
     this.extraProperties = undefined
@@ -99,7 +106,7 @@ export class MCPToolResource implements ToolResource {
     this._outputZodType = this.metadata.zodOutputType()
   }
 
-  async call_async_mcp(toolInput: ToolCallInput): Promise<CallToolResult> {
+  async callMCP(toolInput: ToolCallInput): Promise<CallToolResult> {
     const connected_client = await this.connectedClientManager.createClient(
       this.clientConfig
     )
@@ -112,11 +119,11 @@ export class MCPToolResource implements ToolResource {
     return await connected_client.callTool(remoteToolCallArgs)
   }
 
-  async call_async(
+  async call(
     toolInput: ToolCallInput
   ): Promise<ToolCallResponse<z.infer<typeof this._outputZodType>>> {
     try {
-      const result = await this.call_async_mcp(toolInput)
+      const result = await this.callMCP(toolInput)
       return parseMcpResult<z.infer<typeof this._outputZodType>>(
         result,
         this.metadata
@@ -148,7 +155,7 @@ export const toolResourceFromTool = (
 
   // TODO: This should match the Policy ID format
   const id = `${clientConfig.name}::${tool.name}`
-  const toolMetadata = new McpToolMetadata(tool, inputSchema)
+  const toolMetadata = new McpToolMetadata(tool, clientConfig.name, inputSchema)
   return new MCPToolResource(
     id,
     toolMetadata,

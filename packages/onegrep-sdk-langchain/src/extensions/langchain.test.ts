@@ -26,17 +26,17 @@ describe('Toolbox Tests', () => {
   })
 
   it('should get all tool resources', async () => {
-    const tools: ToolResource[] = await toolbox.getToolResources()
+    const tools: ToolResource[] = await toolbox.listAll()
     expect(tools.length).toBeGreaterThan(0)
   })
 
   it('should get all structured tools', async () => {
-    const tools: StructuredTool[] = await langchainToolbox.getAllTools()
+    const tools: StructuredTool[] = await langchainToolbox.listAll()
     expect(tools.length).toBeGreaterThan(0)
   })
 
   it('should be able to make a structured tool call with valid input', async () => {
-    const tools: StructuredTool[] = await langchainToolbox.getAllTools()
+    const tools: StructuredTool[] = await langchainToolbox.listAll()
     expect(tools.length).toBeGreaterThan(0)
     log.info(`Tool names: ${tools.map((tool) => tool.name).join(', ')}`)
 
@@ -68,7 +68,7 @@ describe('Toolbox Tests', () => {
   })
 
   it('should be able to make a structured tool call with invalid input', async () => {
-    const tools: StructuredTool[] = await langchainToolbox.getAllTools()
+    const tools: StructuredTool[] = await langchainToolbox.listAll()
     expect(tools.length).toBeGreaterThan(0)
     log.info(`Tool names: ${tools.map((tool) => tool.name).join(', ')}`)
 

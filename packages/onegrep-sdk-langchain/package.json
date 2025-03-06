@@ -1,5 +1,5 @@
 {
-  "name": "@onegrep/sdk/langchain",
+  "name": "@onegrep/langchain",
   "version": "0.0.1",
   "private": false,
   "type": "module",
