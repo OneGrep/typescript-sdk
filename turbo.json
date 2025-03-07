@@ -69,7 +69,10 @@
     "licenses": {
       "dependsOn": ["package"]
     },
-    "publish": {
+    "version": {
+      "dependsOn": ["package"]
+    },
+    "publish:github": {
       "dependsOn": ["package"]
     },
     "clean": {
