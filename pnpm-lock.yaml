@@ -311,7 +311,7 @@ importers:
         version: 5.8.2
       vitest:
         specifier: ^3.0.5
-        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.4)(jiti@2.4.2)(jsdom@23.0.1(canvas@2.11.2(encoding@0.1.13)))(terser@5.39.0)(tsx@4.19.2)(yaml@2.7.0)
+        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.4)(jiti@2.4.2)(jsdom@23.0.1(canvas@2.11.2))(terser@5.39.0)(tsx@4.19.2)(yaml@2.7.0)
 
   packages/onegrep-api-client:
     dependencies:
@@ -345,7 +345,7 @@ importers:
         version: 5.8.2
       vitest:
         specifier: ^3.0.5
-        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.4)(jiti@2.4.2)(jsdom@23.0.1(canvas@2.11.2(encoding@0.1.13)))(terser@5.39.0)(tsx@4.19.2)(yaml@2.7.0)
+        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.4)(jiti@2.4.2)(jsdom@23.0.1(canvas@2.11.2))(terser@5.39.0)(tsx@4.19.2)(yaml@2.7.0)
 
   packages/onegrep-sdk:
     dependencies:
@@ -353,8 +353,8 @@ importers:
         specifier: ^1.5.0
         version: 1.5.0
       '@onegrep/json-schema-to-zod':
-        specifier: git+https://github.com/OneGrep/json-schema-to-zod.git#main&path:/packages/json-schema-to-zod
-        version: git+https://github.com/OneGrep/json-schema-to-zod.git#7082cdb838e2b9b2f4e81d9c70a5b61c1fe115c7&path:/packages/json-schema-to-zod(zod@3.24.2)
+        specifier: 1.2.1
+        version: 1.2.1(zod@3.24.2)
       '@zodios/core':
         specifier: ^10.9.6
         version: 10.9.6(axios@1.7.9)(zod@3.24.2)
@@ -442,7 +442,7 @@ importers:
         version: 5.8.2
       vitest:
         specifier: ^3.0.5
-        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.4)(jiti@2.4.2)(jsdom@23.0.1(canvas@2.11.2(encoding@0.1.13)))(terser@5.39.0)(tsx@4.19.2)(yaml@2.7.0)
+        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.4)(jiti@2.4.2)(jsdom@23.0.1(canvas@2.11.2))(terser@5.39.0)(tsx@4.19.2)(yaml@2.7.0)
 
   packages/onegrep-sdk-langchain:
     dependencies:
@@ -521,7 +521,7 @@ importers:
         version: 5.8.2
       vitest:
         specifier: ^3.0.5
-        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.4)(jiti@2.4.2)(jsdom@23.0.1(canvas@2.11.2(encoding@0.1.13)))(terser@5.39.0)(tsx@4.19.2)(yaml@2.7.0)
+        version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.4)(jiti@2.4.2)(jsdom@23.0.1(canvas@2.11.2))(terser@5.39.0)(tsx@4.19.2)(yaml@2.7.0)
 
   packages/typescript-config: {}
 
@@ -2574,9 +2574,8 @@ packages:
     resolution: {integrity: sha512-sU4Dx+RXCWAkrMw8tQFYAL6VfcHYKLPxVC9iKfgTXr4aDhcCssDwrbgpx0Di1dnNxvQlDGUhuCEInZuIY/nNfw==}
     engines: {node: '>=18.0.0'}
 
-  '@onegrep/json-schema-to-zod@git+https://github.com/OneGrep/json-schema-to-zod.git#7082cdb838e2b9b2f4e81d9c70a5b61c1fe115c7&path:/packages/json-schema-to-zod':
-    resolution: {commit: 7082cdb838e2b9b2f4e81d9c70a5b61c1fe115c7, path: /packages/json-schema-to-zod, repo: https://github.com/OneGrep/json-schema-to-zod.git, type: git}
-    version: 1.2.0
+  '@onegrep/json-schema-to-zod@1.2.1':
+    resolution: {integrity: sha512-gs4riD4Ezm9bekzyVQ33D8dLvTJtOqJbVnd6SqyadiRFtXBA/pEZvUm0NCRpURDDmzN9swqDfX8qMf/dQ4g3ww==, tarball: https://npm.pkg.github.com/download/@onegrep/json-schema-to-zod/1.2.1/74266efe5cb85d818fb2f70ad2ce33eed95f4e69}
     engines: {node: '>=20 <=22'}
     peerDependencies:
       zod: ^3.24.2
@@ -12282,7 +12281,7 @@ snapshots:
       html-to-text: 9.0.5
       ignore: 5.3.2
       ioredis: 5.3.2
-      jsdom: 23.0.1(canvas@2.11.2(encoding@0.1.13))
+      jsdom: 23.0.1(canvas@2.11.2)
       jsonwebtoken: 9.0.2
       lodash: 4.17.21
       mammoth: 1.7.2
@@ -12592,7 +12591,7 @@ snapshots:
       form-data: 4.0.0
       generate-schema: 2.6.0
       html-to-text: 9.0.5
-      jsdom: 23.0.1(canvas@2.11.2(encoding@0.1.13))
+      jsdom: 23.0.1(canvas@2.11.2)
       langchain: 0.3.11(a1b1d8f579acddeca1083aab38e85215)
       lodash: 4.17.21
       mammoth: 1.7.2
@@ -12895,7 +12894,7 @@ snapshots:
       wordwrap: 1.0.0
       wrap-ansi: 7.0.0
 
-  '@onegrep/json-schema-to-zod@git+https://github.com/OneGrep/json-schema-to-zod.git#7082cdb838e2b9b2f4e81d9c70a5b61c1fe115c7&path:/packages/json-schema-to-zod(zod@3.24.2)':
+  '@onegrep/json-schema-to-zod@1.2.1(zod@3.24.2)':
     dependencies:
       zod: 3.24.2
 
@@ -17984,7 +17983,7 @@ snapshots:
   jsbn@1.1.0:
     optional: true
 
-  jsdom@23.0.1(canvas@2.11.2(encoding@0.1.13)):
+  jsdom@23.0.1(canvas@2.11.2):
     dependencies:
       cssstyle: 3.0.0
       data-urls: 5.0.0
@@ -21790,7 +21789,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 20.17.22
-      jsdom: 23.0.1(canvas@2.11.2(encoding@0.1.13))
+      jsdom: 23.0.1(canvas@2.11.2)
     transitivePeerDependencies:
       - less
       - lightningcss
@@ -21801,7 +21800,7 @@ snapshots:
       - supports-color
       - terser
 
-  vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.4)(jiti@2.4.2)(jsdom@23.0.1(canvas@2.11.2(encoding@0.1.13)))(terser@5.39.0)(tsx@4.19.2)(yaml@2.7.0):
+  vitest@3.0.5(@types/debug@4.1.12)(@types/node@22.13.4)(jiti@2.4.2)(jsdom@23.0.1(canvas@2.11.2))(terser@5.39.0)(tsx@4.19.2)(yaml@2.7.0):
     dependencies:
       '@vitest/expect': 3.0.5
       '@vitest/mocker': 3.0.5(vite@6.1.0(@types/node@22.13.4)(jiti@2.4.2)(terser@5.39.0)(tsx@4.19.2)(yaml@2.7.0))
@@ -21826,7 +21825,7 @@ snapshots:
     optionalDependencies:
       '@types/debug': 4.1.12
       '@types/node': 22.13.4
-      jsdom: 23.0.1(canvas@2.11.2(encoding@0.1.13))
+      jsdom: 23.0.1(canvas@2.11.2)
     transitivePeerDependencies:
       - jiti
       - less
@@ -21866,7 +21865,7 @@ snapshots:
     optionalDependencies:
       '@types/debug': 4.1.12
       '@types/node': 22.13.4
-      jsdom: 23.0.1(canvas@2.11.2(encoding@0.1.13))
+      jsdom: 23.0.1(canvas@2.11.2)
     transitivePeerDependencies:
       - jiti
       - less
