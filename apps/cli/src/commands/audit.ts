@@ -26,11 +26,9 @@ async function fetchAuditLogs(options: { page?: number; pageSize?: number }) {
   logger.info(`Showing page ${page} with ${pageSize} items per page`)
   logger.info(JSON.stringify(auditLogs, null, 2))
 
-  toolbox
-    .close()
-    .catch((error) => {
-      logger.error(`Error closing toolbox: ${error}`)
-    })
+  toolbox.close().catch((error) => {
+    logger.error(`Error closing toolbox: ${error}`)
+  })
 }
 
 export const getAuditLogs = new Command()

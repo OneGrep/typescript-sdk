@@ -4,7 +4,6 @@ import { logger } from '../utils/logger'
 import { getToolbox } from '@onegrep/sdk'
 import { getSpinner } from 'utils/helpers'
 
-
 async function runHealthcheck() {
   const apiUrl = process.env.ONEGREP_API_URL
   logger.info(`Checking connectivity with: ${chalk.bold(apiUrl)}`)
@@ -15,11 +14,9 @@ async function runHealthcheck() {
   const toolbox = await getToolbox()
   spinner.succeed(`Connected to ${chalk.bold(apiUrl)}`)
 
-  toolbox
-    .close()
-    .catch((error) => {
-      logger.error(`Error closing toolbox: ${error}`)
-    })
+  toolbox.close().catch((error) => {
+    logger.error(`Error closing toolbox: ${error}`)
+  })
 }
 
 export const healthcheck = new Command()
