@@ -60,6 +60,9 @@
     "licenses": {
       "dependsOn": ["package"]
     },
+    "publish": {
+      "dependsOn": ["package"]
+    },
     "clean": {
       "cache": false,
       "dependsOn": ["^clean", "clean:dist", "clean:modules", "clean:pack"]
