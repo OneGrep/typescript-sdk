@@ -16,11 +16,17 @@ function validateEnvironment(skipValidation = false) {
   }
 
   const required_env_vars = ['ONEGREP_API_KEY', 'ONEGREP_API_URL']
-  const missing_vars = required_env_vars.filter(env_var => !process.env[env_var])
+  const missing_vars = required_env_vars.filter(
+    (env_var) => !process.env[env_var]
+  )
 
   if (missing_vars.length > 0) {
-    logger.error(`Missing required environment variables: ${missing_vars.join(', ')}`)
-    logger.info("\nYou can set environment variables in two ways:\n\t1) export ONEGREP_API_KEY=your_api_key && export ONEGREP_API_URL=https://api.onegrep.com\n\t2) Set vars in a .env file.")
+    logger.error(
+      `Missing required environment variables: ${missing_vars.join(', ')}`
+    )
+    logger.info(
+      '\nYou can set environment variables in two ways:\n\t1) export ONEGREP_API_KEY=your_api_key && export ONEGREP_API_URL=https://api.onegrep.com\n\t2) Set vars in a .env file.'
+    )
     process.exit(1)
   }
 }
@@ -28,7 +34,9 @@ function validateEnvironment(skipValidation = false) {
 function main() {
   const cli = new Command()
     .name('onegrep-cli')
-    .description('Use the OneGrep CLI to debug and manage your OneGrep Toolbox.')
+    .description(
+      'Use the OneGrep CLI to debug and manage your OneGrep Toolbox.'
+    )
     .version(version || '0.0.1')
     .hook('preAction', () => {
       validateEnvironment()
