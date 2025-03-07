@@ -29,7 +29,12 @@ paths:
       tags:
         - audit
       summary: Get Audit Logs
-      description: Gets all the audit logs visible to the user.
+      description: |-
+        Gets audit logs visible to the user with pagination and filtering.
+
+        - Page numbers start at 1 (not 0)
+        - Results are sorted by timestamp (newest first)
+        - Optional filters can be applied for policy_id, action, and date range
       operationId: get_audit_logs_api_v1_audit__get
       security:
         - APIKeyHeader: []
@@ -40,25 +45,71 @@ paths:
           required: false
           schema:
             type: integer
-            default: 0
+            minimum: 1
+            description: Page number (1-indexed)
+            default: 1
             title: Page
+          description: Page number (1-indexed)
         - name: page_size
           in: query
           required: false
           schema:
             type: integer
+            maximum: 500
+            minimum: 1
+            description: Items per page
             default: 100
             title: Page Size
+          description: Items per page
+        - name: policy_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            description: Filter by policy ID
+            title: Policy Id
+          description: Filter by policy ID
+        - name: action
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            description: Filter by action type
+            title: Action
+          description: Filter by action type
+        - name: start_date
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+                format: date-time
+              - type: 'null'
+            description: Filter logs after this date (ISO format)
+            title: Start Date
+          description: Filter logs after this date (ISO format)
+        - name: end_date
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+                format: date-time
+              - type: 'null'
+            description: Filter logs before this date (ISO format)
+            title: End Date
+          description: Filter logs before this date (ISO format)
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AuditLog'
-                title: Response Get Audit Logs Api V1 Audit  Get
+                $ref: '#/components/schemas/PaginatedResponse_AuditLog_'
         '422':
           description: Validation Error
           content:
@@ -686,6 +737,50 @@ components:
       required:
         - id
       title: Organization
+    PaginatedResponse_AuditLog_:
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/AuditLog'
+          type: array
+          title: Items
+        pagination:
+          $ref: '#/components/schemas/PaginationMetadata'
+      type: object
+      required:
+        - items
+        - pagination
+      title: PaginatedResponse[AuditLog]
+    PaginationMetadata:
+      properties:
+        page:
+          type: integer
+          title: Page
+        page_size:
+          type: integer
+          title: Page Size
+        total:
+          type: integer
+          title: Total
+        pages:
+          type: integer
+          title: Pages
+        has_next:
+          type: boolean
+          title: Has Next
+        has_prev:
+          type: boolean
+          title: Has Prev
+      type: object
+      required:
+        - page
+        - page_size
+        - total
+        - pages
+        - has_next
+        - has_prev
+      title: PaginationMetadata
+      description: Metadata for paginated results
     Policy:
       properties:
         event_name:

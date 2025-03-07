@@ -26,7 +26,7 @@
     "build:types": "tsc -p tsconfig.types.json",
     "build:cjs": "tsc -p tsconfig.cjs.json",
     "build:esm": "tsc -p tsconfig.esm.json",
-    "build": "echo 'build success'",
+    "build": "pnpm run clean:dist && pnpm run build:types && pnpm run build:cjs && pnpm run build:esm",
     "test": "vitest --config vitest.config.ts",
     "test:watch": "vitest --config vitest.config.ts --watch",
     "clean:dist": "rimraf ./dist",
@@ -40,6 +40,7 @@
     "@types/node": "^22.13.4",
     "openapi-endpoint-trimmer": "^2.0.1",
     "openapi-zod-client": "^1.18.3",
+    "rimraf": "^6.0.1",
     "typescript": "latest",
     "vitest": "^3.0.5"
   },

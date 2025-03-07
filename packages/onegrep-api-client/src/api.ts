@@ -181,6 +181,29 @@ type IntegrationUpsertAttempt = {
   config: IntegrationConfigUpsertResult
   runtime?: ((unknown | null) | Array<unknown | null>) | undefined
 }
+type PaginatedResponse_AuditLog_ = {
+  items: Array<AuditLog>
+  pagination: PaginationMetadata
+}
+type AuditLog = {
+  id?: ((number | null) | Array<number | null>) | undefined
+  policy_id: number
+  action: string
+  details?: {} | undefined
+  performed_by?: /**
+   * @default "system"
+   */
+  string | undefined
+  timestamp?: string | undefined
+}
+type PaginationMetadata = {
+  page: number
+  page_size: number
+  total: number
+  pages: number
+  has_next: boolean
+  has_prev: boolean
+}
 type Server = {
   kind?: /**
    * @default "Server"
@@ -263,7 +286,9 @@ type TraefikIngressRoute = {
   [key: string]: any
 }
 
-const AuditLog = z
+const policy_id = z.union([z.number(), z.null()]).optional()
+const action = z.union([z.string(), z.null()]).optional()
+const AuditLog: z.ZodType<AuditLog> = z
   .object({
     id: z.union([z.number(), z.null()]).optional(),
     policy_id: z.number().int(),
@@ -272,6 +297,21 @@ const AuditLog = z
     performed_by: z.string().optional().default('system'),
     timestamp: z.string().datetime({ offset: true }).optional()
   })
+  .strict()
+  .passthrough()
+const PaginationMetadata: z.ZodType<PaginationMetadata> = z
+  .object({
+    page: z.number().int(),
+    page_size: z.number().int(),
+    total: z.number().int(),
+    pages: z.number().int(),
+    has_next: z.boolean(),
+    has_prev: z.boolean()
+  })
+  .strict()
+  .passthrough()
+const PaginatedResponse_AuditLog_: z.ZodType<PaginatedResponse_AuditLog_> = z
+  .object({ items: z.array(AuditLog), pagination: PaginationMetadata })
   .strict()
   .passthrough()
 const ValidationError: z.ZodType<ValidationError> = z
@@ -572,7 +612,11 @@ const TraefikIngressRoute: z.ZodType<TraefikIngressRoute> = z
   .passthrough()
 
 export const schemas = {
+  policy_id,
+  action,
   AuditLog,
+  PaginationMetadata,
+  PaginatedResponse_AuditLog_,
   ValidationError,
   HTTPValidationError,
   RemoteClientConfig,
@@ -615,21 +659,45 @@ const endpoints = makeApi([
     method: 'get',
     path: '/api/v1/audit/',
     alias: 'get_audit_logs_api_v1_audit__get',
-    description: `Gets all the audit logs visible to the user.`,
+    description: `Gets audit logs visible to the user with pagination and filtering.
+
+- Page numbers start at 1 (not 0)
+- Results are sorted by timestamp (newest first)
+- Optional filters can be applied for policy_id, action, and date range`,
     requestFormat: 'json',
     parameters: [
       {
         name: 'page',
         type: 'Query',
-        schema: z.number().int().optional().default(0)
+        schema: z.number().int().gte(1).optional().default(1)
       },
       {
         name: 'page_size',
         type: 'Query',
-        schema: z.number().int().optional().default(100)
+        schema: z.number().int().gte(1).lte(500).optional().default(100)
+      },
+      {
+        name: 'policy_id',
+        type: 'Query',
+        schema: policy_id
+      },
+      {
+        name: 'action',
+        type: 'Query',
+        schema: action
+      },
+      {
+        name: 'start_date',
+        type: 'Query',
+        schema: action
+      },
+      {
+        name: 'end_date',
+        type: 'Query',
+        schema: action
       }
     ],
-    response: z.array(AuditLog),
+    response: PaginatedResponse_AuditLog_,
     errors: [
       {
         status: 422,
