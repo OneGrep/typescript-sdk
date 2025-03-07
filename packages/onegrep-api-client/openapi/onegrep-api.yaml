@@ -6,6 +6,10 @@ info:
 servers:
   - url: http://localhost:8000
     description: Local
+  - url: http://localhost:8080
+    description: Docker
+  - url: https://test-sandbox.onegrep.dev
+    description: Sandbox
   - url: https://api.onegrep.dev
     description: Production
 paths:
@@ -28,6 +32,7 @@ paths:
       description: Gets all the audit logs visible to the user.
       operationId: get_audit_logs_api_v1_audit__get
       security:
+        - APIKeyHeader: []
         - HTTPBearer: []
       parameters:
         - name: page
