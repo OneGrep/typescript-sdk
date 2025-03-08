@@ -4,6 +4,7 @@ import { Command } from 'commander'
 import { logger } from './utils/logger'
 
 import { version } from '../package.json'
+import { listIntegrations, runTool } from 'commands/tools'
 
 /**
  * Validates that required environment variables are set
@@ -44,6 +45,8 @@ function main() {
 
   cli.addCommand(healthcheck)
   cli.addCommand(getAuditLogs)
+  cli.addCommand(listIntegrations)
+  cli.addCommand(runTool)
 
   cli.parse()
 }
