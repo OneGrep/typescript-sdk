@@ -1,8 +1,7 @@
 import { Command } from 'commander'
-import { logger } from '../utils/logger'
+import { chalk, logger } from '../utils/logger'
 import { getSpinner, isDefined } from 'utils/helpers'
 import { getToolbox, ToolResource } from '@onegrep/sdk'
-import chalk from 'chalk'
 
 /**
  * Fetches audit logs with the specified pagination options
@@ -28,21 +27,26 @@ async function attemptToolRun(options: {
 
   // Find the tool with the given name
   const cleanedToolName = options.tool.trim()
-  const tool: ToolResource | undefined = integrationTools.find((tool) => tool.metadata.name === cleanedToolName)
+  const tool: ToolResource | undefined = integrationTools.find(
+    (tool) => tool.metadata.name === cleanedToolName
+  )
 
   if (!isDefined(tool)) {
-    throw new Error(`Tool ${options.tool} not found in integration ${options.integration}.\nAvailable tools: ${integrationTools.map((t) => t.metadata.name).join(', ')}`)
+    await toolbox.close()
+    throw new Error(
+      `Tool ${options.tool} not found in integration ${options.integration}.\nAvailable tools: ${integrationTools.map((t) => t.metadata.name).join(', ')}`
+    )
   }
 
   if (options.getSchema) {
     const schema = tool!.metadata.inputSchema
     logger.log(chalk.greenBright.bgBlackBright(JSON.stringify(schema, null, 2)))
   }
+
+  await toolbox.close()
 }
 
-async function listTools(options: {
-  integration?: string
-}) {
+async function listTools(options: { integration?: string }) {
   const toolbox = await getToolbox()
   const toolResources: Array<ToolResource> = await toolbox.listAll()
 
@@ -67,26 +71,32 @@ async function listTools(options: {
     //   - Tool 2
 
     Object.entries(toolsByIntegration).forEach(([integration, tools]) => {
-      logger.log(chalk.greenBright.bgBlackBright(`> ${integration}`))
+      logger.log(chalk.bold.blueBright(`> ${integration}`))
       tools.forEach((tool) => {
-        logger.log(chalk.greenBright.bgBlackBright(`\t- ${tool}`))
+        logger.log(chalk.blueBright(`\t- ${tool}`))
       })
-      logger.log("\n")
+      logger.log('\n')
     })
+
+    await toolbox.close()
 
     return
   }
 
   if (!toolsByIntegration[options.integration!]) {
-    throw new Error(`Integration ${options.integration} not found. Available integrations: ${Object.keys(toolsByIntegration).join(', ')}`)
+    throw new Error(
+      `Integration ${options.integration} not found. Available integrations: ${Object.keys(toolsByIntegration).join(', ')}`
+    )
   }
 
   const tools = toolsByIntegration[options.integration!]
   // Print it out in a bulleted list.
-  logger.log(chalk.greenBright.bgBlackBright(`${options.integration}`))
+  logger.log(chalk.bold.blueBright(`${options.integration}`))
   tools.forEach((tool) => {
-    logger.log(chalk.greenBright.bgBlackBright(`\t- ${tool}`))
+    logger.log(chalk.blueBright(`\t- ${tool}`))
   })
+
+  await toolbox.close()
 }
 
 export const runTool = new Command()
@@ -97,7 +107,11 @@ export const runTool = new Command()
   .option('-t, --tool <string>', 'Tool to run')
   .option('-s --get-schema', 'Get the schema for the tool', false)
   .option('-p, --params <string>', 'Parameters to pass to the tool')
-  .option('--dry-run', 'Dry run the tool. This will output the payload that would be sent to the tool', false)
+  .option(
+    '--dry-run',
+    'Dry run the tool. This will output the payload that would be sent to the tool',
+    false
+  )
   .action(async (options) => {
     await attemptToolRun(options)
   })
