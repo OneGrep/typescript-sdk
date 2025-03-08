@@ -1,7 +1,12 @@
 import { Command } from 'commander'
 import { chalk, logger } from '../utils/logger'
 import { getSpinner, isDefined } from 'utils/helpers'
-import { getToolbox, ToolResource, ToolCallInput, ToolCallError } from '@onegrep/sdk'
+import {
+  getToolbox,
+  ToolResource,
+  ToolCallInput,
+  ToolCallError
+} from '@onegrep/sdk'
 
 function validateToolRunOptions(
   options: {
@@ -34,107 +39,108 @@ async function attemptToolRun(options: {
   const toolbox = await getToolbox()
   spinner.succeed('Toolbox setup complete')
 
-  spinner = getSpinner('Finding integrations and tools...', 'yellow')
-  spinner.start()
-
-  const toolResources: Array<ToolResource> = await toolbox.listAll()
-
-  // Find the tools for the given integration
-  const integrationTools = toolResources.filter(
-    (tool) => tool.metadata.integrationName === options.integration
-  )
-
-  logger.info(
-    `Found ${integrationTools.length} tools for integration ${options.integration}`
-  )
-
-  // Find the tool with the given name
-  const cleanedToolName = options.tool.trim()
-  const tool: ToolResource | undefined = integrationTools.find(
-    (tool) => tool.metadata.name === cleanedToolName
-  )
-
-  if (!isDefined(tool)) {
-    spinner.fail(`Tool not found: ${options.tool}`)
-    await toolbox.close()
-    throw new Error(
-      `Tool ${options.tool} not found in integration ${options.integration}.\nAvailable tools: ${integrationTools.map((t) => t.metadata.name).join(', ')}`
-    )
-  }
-
-  spinner.succeed(`Tool found: ${tool!.metadata.name}`)
-
-  if (options.getSchema) {
-    logger.log(
-      chalk.bold.blueBright(`Integration: ${tool!.metadata.integrationName}`)
-    )
-    logger.log(chalk.bold.blueBright(`Tool: ${tool!.metadata.name}`))
-    logger.log(chalk.bold.greenBright('\nSchema: \n'))
-    const schema = tool!.metadata.inputSchema
-    logger.log(
-      chalk.greenBright(
-        JSON.stringify(
-          {
-            args: schema
-          },
-          null,
-          2
-        )
-      )
-    )
-
-    await toolbox.close()
-    return
-  }
-
-  // Parse any params passed in.
-  let params: Record<string, any> = { args: {} }
-  if (isDefined(options.params)) {
-    try {
-      params = JSON.parse(options.params!)
-    } catch (e) {
-      logger.error('Invalid JSON provided for --params')
-      logger.error(
-        `Expected schema:\n${JSON.stringify({ args: tool!.metadata.inputSchema }, null, 2)}`
-      )
-      process.exit(1)
-    }
-  }
-
-  // * Execute the tool either in dry run mode or not
-  if (options.dryRun) {
-    logger.info('--dry-run mode enabled. Not running tool.\n')
-    logger.log(
-      chalk.bold.blueBright(`Integration: ${tool!.metadata.integrationName}`)
-    )
-    logger.log(chalk.bold.blueBright(`Tool: ${tool!.metadata.name}`))
-    logger.log(chalk.bold.greenBright('\nParameters: \n'))
-    logger.log(chalk.greenBright(JSON.stringify(params, null, 2)))
-  } else {
-    spinner = getSpinner('Running tool...', 'yellow')
+  try {
+    spinner = getSpinner('Finding integrations and tools...', 'yellow')
     spinner.start()
 
-    const tcInput: ToolCallInput = {
-      args: params.args,
-      approval: undefined
+    const toolResources: Array<ToolResource> = await toolbox.listAll()
+
+    // Find the tools for the given integration
+    const integrationTools = toolResources.filter(
+      (tool) => tool.metadata.integrationName === options.integration
+    )
+
+    logger.info(
+      `Found ${integrationTools.length} tools for integration ${options.integration}`
+    )
+
+    // Find the tool with the given name
+    const cleanedToolName = options.tool.trim()
+    const tool: ToolResource | undefined = integrationTools.find(
+      (tool) => tool.metadata.name === cleanedToolName
+    )
+
+    if (!isDefined(tool)) {
+      spinner.fail(`Tool not found: ${options.tool}`)
+      throw new Error(
+        `Tool ${options.tool} not found in integration ${options.integration}.\nAvailable tools: ${integrationTools.map((t) => t.metadata.name).join(', ')}`
+      )
     }
 
-    console.log(chalk.bold.blueBright("Tool Call Input: \n"))
-    console.log(chalk.blueBright(JSON.stringify(tcInput, null, 2)))
+    spinner.succeed(`Tool found: ${tool!.metadata.name}`)
 
-    const result = await tool!.call(tcInput)
+    if (options.getSchema) {
+      logger.log(
+        chalk.bold.blueBright(`Integration: ${tool!.metadata.integrationName}`)
+      )
+      logger.log(chalk.bold.blueBright(`Tool: ${tool!.metadata.name}`))
+      logger.log(chalk.bold.greenBright('\nSchema: \n'))
+      const schema = tool!.metadata.inputSchema
+      logger.log(
+        chalk.greenBright(
+          JSON.stringify(
+            {
+              args: schema
+            },
+            null,
+            2
+          )
+        )
+      )
+    }
 
-    if (result.isError) {
-      spinner.fail('Tool execution failed')
-      logger.error((result as ToolCallError).message)
+    // Parse any params passed in.
+    let params: Record<string, any> = { args: {} }
+    if (isDefined(options.params)) {
+      try {
+        params = JSON.parse(options.params!)
+      } catch (e) {
+        logger.error('Invalid JSON provided for --params')
+        logger.error(
+          `Expected schema:\n${JSON.stringify({ args: tool!.metadata.inputSchema }, null, 2)}`
+        )
+        process.exit(1)
+      }
+    }
+
+    // * Execute the tool either in dry run mode or not
+    if (options.dryRun) {
+      logger.info('--dry-run mode enabled. Not running tool.\n')
+      logger.log(
+        chalk.bold.blueBright(`Integration: ${tool!.metadata.integrationName}`)
+      )
+      logger.log(chalk.bold.blueBright(`Tool: ${tool!.metadata.name}`))
+      logger.log(chalk.bold.greenBright('\nParameters: \n'))
+      logger.log(chalk.greenBright(JSON.stringify(params, null, 2)))
     } else {
-      spinner.succeed('Tool execution successful')
-      logger.info(chalk.bold.green("\nTool Call Result\n"))
-      logger.log(chalk.greenBright(JSON.stringify(result.content, null, 2)))
-    }
-  }
+      spinner = getSpinner('Running tool...', 'yellow')
+      spinner.start()
 
-  await toolbox.close()
+      const tcInput: ToolCallInput = {
+        args: params.args,
+        approval: undefined
+      }
+
+      console.log(chalk.bold.blueBright('Tool Call Input: \n'))
+      console.log(chalk.blueBright(JSON.stringify(tcInput, null, 2)))
+
+      const result = await tool!.call(tcInput)
+
+      if (result.isError) {
+        spinner.fail('Tool execution failed')
+        logger.error((result as ToolCallError).message)
+      } else {
+        spinner.succeed('Tool execution successful')
+        logger.info(chalk.bold.green('\nTool Call Result\n'))
+        logger.log(chalk.greenBright(JSON.stringify(result.content, null, 2)))
+      }
+    }
+
+  } catch (error) {
+    throw error
+  } finally {
+    await toolbox.close()
+  }
 }
 
 async function listTools(options: { integration?: string }) {

@@ -111,13 +111,15 @@ export class MCPToolResource implements ToolResource {
       this.clientConfig
     )
     const remoteToolCallArgs = this._toolCallArgs(toolInput.args)
-    log.debug(`Calling MCP tool with args: ${JSON.stringify(remoteToolCallArgs, null, 2)}`)
+    log.debug(
+      `Calling MCP tool with args: ${JSON.stringify(remoteToolCallArgs, null, 2)}`
+    )
     const validator = jsonSchemaUtils.getValidator(this.metadata.inputSchema)
     const valid = validator(toolInput.args)
     if (!valid) {
       throw new Error('Invalid tool input arguments')
     }
-    log.debug("Before mcp callTool")
+    log.debug('Before mcp callTool')
     return await connected_client.callTool(remoteToolCallArgs)
   }
 
