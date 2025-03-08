@@ -2,7 +2,7 @@ import { Chalk } from 'chalk'
 
 // ! Needed so that chalk can output ANSI codes correctly to various shells.
 export const chalk = new Chalk({
-  level: 1,
+  level: 1
 })
 
 /**

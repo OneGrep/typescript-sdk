@@ -10,12 +10,7 @@ import { listIntegrations, runTool } from 'commands/tools'
  * Validates that required environment variables are set
  * @param skipValidation Whether to skip environment validation
  */
-function validateEnvironment(skipValidation = false) {
-  if (skipValidation) {
-    logger.warn('Skipping environment variable validation')
-    return
-  }
-
+function validateEnvironment(command: Command) {
   const required_env_vars = ['ONEGREP_API_KEY', 'ONEGREP_API_URL']
   const missing_vars = required_env_vars.filter(
     (env_var) => !process.env[env_var]
@@ -28,6 +23,7 @@ function validateEnvironment(skipValidation = false) {
     logger.info(
       '\nYou can set environment variables in two ways:\n\t1) export ONEGREP_API_KEY=your_api_key && export ONEGREP_API_URL=https://api.onegrep.com\n\t2) Set vars in a .env file.'
     )
+    command.help()
     process.exit(1)
   }
 }
@@ -39,8 +35,8 @@ function main() {
       'Use the OneGrep CLI to debug and manage your OneGrep Toolbox.'
     )
     .version(version || '0.0.1')
-    .hook('preAction', () => {
-      validateEnvironment()
+    .hook('preAction', (command) => {
+      validateEnvironment(command)
     })
 
   cli.addCommand(healthcheck)
