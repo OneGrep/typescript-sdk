@@ -135,7 +135,6 @@ async function attemptToolRun(options: {
         logger.log(chalk.greenBright(JSON.stringify(result.content, null, 2)))
       }
     }
-
   } catch (error) {
     throw error
   } finally {
