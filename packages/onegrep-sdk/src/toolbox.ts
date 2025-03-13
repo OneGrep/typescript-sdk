@@ -70,6 +70,7 @@ export async function createToolbox(apiClient: OneGrepApiClient) {
   const connectedClientManager = new ConnectedClientManager()
   const toolCache = new MCPToolCache(apiClient, connectedClientManager)
   const ok = await toolCache.refresh()
+
   if (!ok) {
     throw new Error('Toolcache initialization failed')
   }

@@ -5,7 +5,9 @@
   "license": "MIT",
   "type": "module",
   "main": "dist/index.js",
-  "bin": "dist/index.js",
+  "bin": {
+    "onegrep-cli": "dist/index.js"
+  },
   "types": "dist/index.d.ts",
   "exports": "./dist/index.js",
   "files": [

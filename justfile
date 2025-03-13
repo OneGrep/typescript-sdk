@@ -119,4 +119,8 @@ clean-modules:
 clean:
     pnpm turbo run clean
 
+link-cli-local:
+    cd apps/cli && pnpm run build && pnpm link --global
 
+unlink-cli-local:
+    pnpm unlink --global @onegrep/cli

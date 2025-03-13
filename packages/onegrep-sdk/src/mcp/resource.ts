@@ -1,4 +1,4 @@
-import { RemoteClientConfig, RemoteToolCallArgs } from './types.js'
+import { Policy, RemoteClientConfig, RemoteToolCallArgs } from './types.js'
 import { ConnectedClientManager } from './client.js'
 import { CallToolResult, Tool } from '@modelcontextprotocol/sdk/types.js'
 import {
@@ -14,6 +14,7 @@ import { z } from 'zod'
 import { jsonSchemaUtils } from '../schema.js'
 import { parseMcpResult } from './toolcall.js'
 import { log } from '@repo/utils'
+
 
 // TODO: Use this as the default output schema if no output schema is provided, but is indicated to be structured output
 // const anyObjectJsonSchema = {
@@ -68,6 +69,7 @@ export class MCPToolResource implements ToolResource {
   metadata: ToolMetadata
   clientConfig: RemoteClientConfig
   connectedClientManager: ConnectedClientManager
+  policy?: Policy
 
   private _outputZodType: z.ZodTypeAny
 
@@ -75,13 +77,15 @@ export class MCPToolResource implements ToolResource {
     id: string,
     metadata: ToolMetadata,
     clientConfig: RemoteClientConfig,
-    connectedClientManager: ConnectedClientManager
+    connectedClientManager: ConnectedClientManager,
+    policy?: Policy
   ) {
     this.id = id
     this.metadata = metadata
     this.clientConfig = clientConfig
     this.connectedClientManager = connectedClientManager
     this._outputZodType = metadata.zodOutputType()
+    this.policy = policy
   }
 
   _toolCallArgs(args: Record<string, any>): RemoteToolCallArgs {
@@ -152,7 +156,7 @@ export const toolResourceFromTool = (
   tool: Tool,
   clientConfig: RemoteClientConfig,
   connectedClientManager: ConnectedClientManager
-) => {
+): MCPToolResource => {
   // TODO: Why is this hacky re-parsing of the input schema necessary? Breaks if you try to pass it directly.
   const inputSchemaString = JSON.stringify(tool.inputSchema)
   const inputSchema = JSON.parse(inputSchemaString) as JsonSchema

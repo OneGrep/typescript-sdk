@@ -12,6 +12,13 @@ import { listIntegrations, runTool } from 'commands/tools'
  */
 function validateEnvironment(command: Command) {
   const required_env_vars = ['ONEGREP_API_KEY', 'ONEGREP_API_URL']
+
+  if (command.opts().debug) {
+    logger.debug('Debug mode enabled')
+    logger.debug(`ONEGREP_API_URL: ${process.env.ONEGREP_API_URL}`)
+    logger.debug(`ONEGREP_API_KEY: ${process.env.ONEGREP_API_KEY?.slice(0, 3)}...`)
+  }
+
   const missing_vars = required_env_vars.filter(
     (env_var) => !process.env[env_var]
   )
@@ -21,7 +28,7 @@ function validateEnvironment(command: Command) {
       `Missing required environment variables: ${missing_vars.join(', ')}`
     )
     logger.info(
-      '\nYou can set environment variables in two ways:\n\t1) export ONEGREP_API_KEY=your_api_key && export ONEGREP_API_URL=https://api.onegrep.com\n\t2) Set vars in a .env file.'
+      '\nYou can set environment variables in two ways:\n\t1) export ONEGREP_API_KEY=your_api_key && export ONEGREP_API_URL=https://{your_subdomain}.onegrep.dev\n\t2) Set vars in a .env file.\n\n'
     )
     command.help()
     process.exit(1)
@@ -35,6 +42,7 @@ function main() {
       'Use the OneGrep CLI to debug and manage your OneGrep Toolbox.'
     )
     .version(version || '0.0.1')
+    .option('--debug', 'Enable debug mode', false)
     .hook('preAction', (command) => {
       validateEnvironment(command)
     })
