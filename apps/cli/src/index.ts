@@ -16,7 +16,9 @@ function validateEnvironment(command: Command) {
   if (command.opts().debug) {
     logger.debug('Debug mode enabled')
     logger.debug(`ONEGREP_API_URL: ${process.env.ONEGREP_API_URL}`)
-    logger.debug(`ONEGREP_API_KEY: ${process.env.ONEGREP_API_KEY?.slice(0, 3)}...`)
+    logger.debug(
+      `ONEGREP_API_KEY: ${process.env.ONEGREP_API_KEY?.slice(0, 3)}...`
+    )
   }
 
   const missing_vars = required_env_vars.filter(

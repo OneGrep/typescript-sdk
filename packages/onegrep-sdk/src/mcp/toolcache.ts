@@ -5,7 +5,7 @@ import { MCPToolResource, toolResourceFromTool } from './resource.js'
 import { log } from '@repo/utils'
 import { RemoteClientConfig } from './types.js'
 import { Tool } from '@modelcontextprotocol/sdk/types.js'
-import { getUnixTime } from 'date-fns';
+import { getUnixTime } from 'date-fns'
 
 class IntegrationRefreshAttempt {
   constructor(
@@ -13,7 +13,7 @@ class IntegrationRefreshAttempt {
     public readonly integrationName: string,
     public readonly error?: any,
     public readonly refreshTs: number = getUnixTime(Date.now())
-  ) { }
+  ) {}
 }
 
 export class MCPToolCache implements ToolCache {
@@ -55,22 +55,27 @@ export class MCPToolCache implements ToolCache {
   ): Promise<IntegrationRefreshAttempt> {
     try {
       /** We want to update our tool cache for the tools we just retrieved via our integration client. */
-      const resources: Array<MCPToolResource> = await this.getToolResourcesForIntegration(clientConfig)
+      const resources: Array<MCPToolResource> =
+        await this.getToolResourcesForIntegration(clientConfig)
       const newToolResourceIds = new Set(resources.map((tool) => tool.id))
 
       // ? Purely for logging purposes. Has no functional impact.
-      const previouslyCachedToolIds = this.toolIdsByIntegration.get(clientConfig.name) ?? new Set<ToolId>()
-      const staleToolIds = previouslyCachedToolIds.difference(newToolResourceIds)
+      const previouslyCachedToolIds =
+        this.toolIdsByIntegration.get(clientConfig.name) ?? new Set<ToolId>()
+      const staleToolIds =
+        previouslyCachedToolIds.difference(newToolResourceIds)
       log.debug(`Removing ${staleToolIds.size} tools from ${clientConfig.name}`)
 
       // Update our tool cache for this integration
-      log.debug(`Adding ${newToolResourceIds.size} tools to ${clientConfig.name}`)
+      log.debug(
+        `Adding ${newToolResourceIds.size} tools to ${clientConfig.name}`
+      )
       this.toolIdsByIntegration.set(clientConfig.name, newToolResourceIds)
 
       // Remove old tools for this integration only. Avoids race conditions when this method is called in parallel for multiple integrations.
       if (previouslyCachedToolIds.size > 0) {
         for (const toolId of previouslyCachedToolIds) {
-          this.toolIdToResource.delete(toolId);
+          this.toolIdToResource.delete(toolId)
         }
       }
 
@@ -81,7 +86,10 @@ export class MCPToolCache implements ToolCache {
 
       return new IntegrationRefreshAttempt(true, clientConfig.name)
     } catch (e) {
-      log.error(`Error refreshing tools for integration ${clientConfig.name}`, e)
+      log.error(
+        `Error refreshing tools for integration ${clientConfig.name}`,
+        e
+      )
       return new IntegrationRefreshAttempt(false, clientConfig.name, e)
     }
   }
@@ -97,16 +105,18 @@ export class MCPToolCache implements ToolCache {
 
   private async refreshClientConfigs(): Promise<void> {
     /** Refreshes the client configs in the toolcache. */
-    const metaClientConfig = await this.apiClient.get_meta_client_api_v1_clients_meta_get()
+    const metaClientConfig =
+      await this.apiClient.get_meta_client_api_v1_clients_meta_get()
     // log.debug(`Meta client config: ${JSON.stringify(metaClientConfig)}`)
 
-    const hostClientConfigs = await this.apiClient.get_hosts_clients_api_v1_clients_hosts_get()
-    log.debug(`Host client configs: ${JSON.stringify(hostClientConfigs, null, 2)}`)
+    const hostClientConfigs =
+      await this.apiClient.get_hosts_clients_api_v1_clients_hosts_get()
+    log.debug(
+      `Host client configs: ${JSON.stringify(hostClientConfigs, null, 2)}`
+    )
 
     this.allConfigs = [metaClientConfig, ...hostClientConfigs]
-    log.info(
-      `${this.allConfigs.length} integrations configs refreshed`
-    )
+    log.info(`${this.allConfigs.length} integrations configs refreshed`)
   }
 
   async refresh(): Promise<boolean> {
@@ -115,29 +125,39 @@ export class MCPToolCache implements ToolCache {
 
       // Check if we have any configs to process
       if (this.allConfigs.length === 0) {
-        log.warn('No integration configs found. Check your API connection and credentials.')
-        return false;
+        log.warn(
+          'No integration configs found. Check your API connection and credentials.'
+        )
+        return false
       }
 
       log.debug(`Processing ${this.allConfigs.length} integration configs`)
       const refreshResults = await this.refreshAllIntegrations() //this.allConfigs);
-      const successfulResults = refreshResults.filter((result) => result.success)
+      const successfulResults = refreshResults.filter(
+        (result) => result.success
+      )
       const failedResults = refreshResults.filter((result) => !result.success)
 
       // Log a simplified version of the results instead of the full objects
-      log.debug(`Refresh results:\n\tSuccess: ${successfulResults.length}\n\tFailed: ${failedResults.length}`)
-      
+      log.debug(
+        `Refresh results:\n\tSuccess: ${successfulResults.length}\n\tFailed: ${failedResults.length}`
+      )
+
       // Log just the names and success status, not the entire objects
-      refreshResults.forEach(result => {
+      refreshResults.forEach((result) => {
         if (result.success) {
-          log.debug(`✅ Integration refresh succeeded: ${result.integrationName}`);
+          log.debug(
+            `✅ Integration refresh succeeded: ${result.integrationName}`
+          )
         } else {
-          log.error(`❌ Integration refresh failed: ${result.integrationName}`);
+          log.error(`❌ Integration refresh failed: ${result.integrationName}`)
         }
-      });
+      })
 
       if (successfulResults.length > 0) {
-        log.info(`Successfully refreshed ${successfulResults.length} integrations`)
+        log.info(
+          `Successfully refreshed ${successfulResults.length} integrations`
+        )
         return true
       }
 
@@ -145,8 +165,8 @@ export class MCPToolCache implements ToolCache {
       log.error('All integration refreshes failed. Check logs for details.')
       return false
     } catch (error) {
-      log.error('Error during refresh', error);
-      return false;
+      log.error('Error during refresh', error)
+      return false
     }
   }
 
@@ -194,9 +214,8 @@ export class MCPToolCache implements ToolCache {
   //   }
   // }
 
-
   // // ! OLD pipeline method
-  // async refresh() { 
+  // async refresh() {
   //   const pipeline = [
   //     this.refreshIntegrations.bind(this),
   //     this.refreshTools.bind(this)

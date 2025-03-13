@@ -1,4 +1,5 @@
 # OneGrep CLI
+
 Use the OneGrep CLI to check connectivity, check the state of your integrations, and to test your tools.
 
 ## Setup
@@ -9,10 +10,11 @@ Use the OneGrep CLI to check connectivity, check the state of your integrations,
 
 ```
 ONEGREP_API_KEY: abc123...
-ONEGREP_API_URL: mydomain.onegrep.dev 
+ONEGREP_API_URL: mydomain.onegrep.dev
 ```
 
 3. Run the CLI from the `apps/cli` directory:
+
 ```bash
 pnpm exec onegrep-cli healthcheck
 ```

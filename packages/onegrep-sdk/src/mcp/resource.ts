@@ -15,7 +15,6 @@ import { jsonSchemaUtils } from '../schema.js'
 import { parseMcpResult } from './toolcall.js'
 import { log } from '@repo/utils'
 
-
 // TODO: Use this as the default output schema if no output schema is provided, but is indicated to be structured output
 // const anyObjectJsonSchema = {
 //   type: 'object',
