@@ -131,7 +131,6 @@ export class MCPToolCache implements ToolCache {
         return false
       }
 
-      log.debug(`Processing ${this.allConfigs.length} integration configs`)
       const refreshResults = await this.refreshAllIntegrations() //this.allConfigs);
       const successfulResults = refreshResults.filter(
         (result) => result.success
@@ -169,77 +168,6 @@ export class MCPToolCache implements ToolCache {
       return false
     }
   }
-
-  // async refreshIntegrations(): Promise<boolean> {
-  //   try {
-  //     // TODO: Actually healthcheck
-  //     // const isOk = this.apiClient.healthcheck()
-  //     // if (!isOk) {
-  //     //     this.logger.error('API Healthcheck failed: cannot initialize toolcache')
-  //     //     return false
-  //     // }
-
-  //     log.debug('API Healthcheck passed')
-
-  //     // TODO: Merge meta and host client configs
-  //     const metaClientConfig =
-  //       await this.apiClient.get_meta_client_api_v1_clients_meta_get()
-  //     log.debug(`Meta client config: ${JSON.stringify(metaClientConfig)}`)
-
-  //     const hostClientConfigs =
-  //       await this.apiClient.get_hosts_clients_api_v1_clients_hosts_get()
-  //     log.debug(`Host client configs: ${JSON.stringify(hostClientConfigs)}`)
-
-  //     this.allConfigs = [metaClientConfig, ...hostClientConfigs]
-
-  //     log.info(
-  //       `${this.allConfigs.length} integrations configs refreshed`
-  //     )
-
-  //     return true
-  //   } catch (e) {
-  //     log.error('Error refreshing integrations', e)
-  //     return false
-  //   }
-  // }
-
-  // async refreshTools(): Promise<boolean> {
-  //   try {
-  //     await this.refreshAllIntegrations()//this.allConfigs)
-  //     log.info(`Tools refreshed, currently ${this.toolIdToResource.size} total tools`)
-  //     return true
-  //   } catch (e) {
-  //     log.error('Error refreshing tools', e)
-  //     return false
-  //   }
-  // }
-
-  // // ! OLD pipeline method
-  // async refresh() {
-  //   const pipeline = [
-  //     this.refreshIntegrations.bind(this),
-  //     this.refreshTools.bind(this)
-  //   ]
-
-  //   for (const step of pipeline) {
-  //     const stepName = step.name
-  //     log.debug(`Starting toolcache refresh step: ${stepName}`)
-
-  //     try {
-  //       if (!(await step())) {
-  //         log.error(`Failed at step: ${stepName}, aborting toolcache refresh`)
-  //         return false
-  //       }
-  //       log.debug(`Successfully completed step: ${stepName}`)
-  //     } catch (e) {
-  //       log.error(`Exception in ${stepName}`, e)
-  //       return false
-  //     }
-  //   }
-
-  //   log.info('Toolcache refresh completed successfully')
-  //   return true
-  // }
 
   async get(key: ToolId): Promise<ToolResource | undefined> {
     return this.toolIdToResource.get(key)

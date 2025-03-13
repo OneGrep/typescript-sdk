@@ -62,6 +62,12 @@ dev-n8n:
 gateway:
     pnpm turbo run start --filter=@onegrep/gateway
 
+test-sdk:
+    pnpm turbo run test --filter=@onegrep/sdk
+
+test-langchain:
+    pnpm turbo run test --filter=@onegrep/langchain
+
 test:
     pnpm turbo run test
 
