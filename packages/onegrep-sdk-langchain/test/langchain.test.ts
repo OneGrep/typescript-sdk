@@ -7,11 +7,7 @@ import {
   StructuredTool,
   ToolInputParsingException
 } from '@langchain/core/tools'
-import {
-  Toolbox,
-  ToolCallOutput,
-  ToolResource
-} from '@onegrep/sdk'
+import { Toolbox, ToolCallOutput, ToolResource } from '@onegrep/sdk'
 import { createToolbox } from '@onegrep/sdk'
 import { clientFromConfig } from '@onegrep/sdk'
 import { log } from '@repo/utils'

@@ -233,10 +233,7 @@ export const listIntegrations = new Command()
   .name('list')
   .aliases(['lt'])
   .description('List all tools from an available integration')
-  .option(
-    '-i, --integration <string>',
-    'Integration to list tools from'
-  )
+  .option('-i, --integration <string>', 'Integration to list tools from')
   .action(async (options) => {
     await listTools(options)
   })

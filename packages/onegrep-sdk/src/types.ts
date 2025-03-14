@@ -1,3 +1,4 @@
+import { Policy } from 'mcp/types'
 import { z } from 'zod'
 
 export type ToolId = string
@@ -38,6 +39,7 @@ export interface ToolMetadata {
   inputSchema: JsonSchema
   outputSchema?: JsonSchema
   extraProperties?: ExtraProperties
+  policy?: Policy
 
   zodInputType: () => z.ZodTypeAny
   zodOutputType: () => z.ZodTypeAny
