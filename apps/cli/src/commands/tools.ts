@@ -87,6 +87,8 @@ async function attemptToolRun(options: {
           )
         )
       )
+
+      return
     }
 
     // Parse any params passed in.
@@ -231,7 +233,7 @@ export const listIntegrations = new Command()
   .name('list')
   .aliases(['lt'])
   .description('List all tools from an available integration')
-  .requiredOption(
+  .option(
     '-i, --integration <string>',
     'Integration to list tools from'
   )

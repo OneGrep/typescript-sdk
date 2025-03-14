@@ -10,7 +10,6 @@ import {
 import {
   Toolbox,
   ToolCallOutput,
-  ToolCallResponse,
   ToolResource
 } from '@onegrep/sdk'
 import { createToolbox } from '@onegrep/sdk'
@@ -54,17 +53,15 @@ describe('Toolbox Tests', () => {
     expect(tools.length).toBeGreaterThan(0)
     log.info(`Tool names: ${tools.map((tool) => tool.name).join(', ')}`)
 
-    const clientConfigTool = tools.find(
-      (tool) =>
-        tool.name === toolName
-    )
+    const clientConfigTool = tools.find((tool) => tool.name === toolName)
     if (!clientConfigTool) {
       throw new Error(`${toolName} tool not found`)
     }
 
     log.info(`Structured tool: ${JSON.stringify(clientConfigTool)}`)
 
-    const response: ToolCallOutput<any> = await clientConfigTool.invoke(toolArgs)
+    const response: ToolCallOutput<any> =
+      await clientConfigTool.invoke(toolArgs)
     expect(response).toBeDefined()
     expect(response).toBeTypeOf('object')
     expect(response.content.length).toBeGreaterThan(0)
@@ -80,10 +77,7 @@ describe('Toolbox Tests', () => {
     expect(tools.length).toBeGreaterThan(0)
     log.info(`Tool names: ${tools.map((tool) => tool.name).join(', ')}`)
 
-    const clientConfigTool = tools.find(
-      (tool) =>
-        tool.name === toolName
-    )
+    const clientConfigTool = tools.find((tool) => tool.name === toolName)
     if (!clientConfigTool) {
       throw new Error(`${toolName} tool not found`)
     }
