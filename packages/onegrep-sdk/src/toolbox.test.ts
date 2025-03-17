@@ -37,10 +37,7 @@ describe('Toolbox Tests', () => {
   it('should be able to get a zod schema from a tool', async () => {
     const tools: ToolResource[] = await toolbox.listAll()
     expect(tools.length).toBeGreaterThan(0)
-    const tool = tools.find(
-      (tool) =>
-        tool.metadata.name === toolName
-    )
+    const tool = tools.find((tool) => tool.metadata.name === toolName)
     expect(tool).toBeDefined()
     if (!tool) {
       throw new Error('Tool not found')
@@ -151,14 +148,11 @@ describe('Toolbox Tests', () => {
     // )
 
     const clientConfigTool = tools.find(
-      (tool) =>
-        tool.metadata.name === toolName
+      (tool) => tool.metadata.name === toolName
     )
 
     if (!clientConfigTool) {
-      throw new Error(
-        `"${toolName}" tool not found`
-      )
+      throw new Error(`"${toolName}" tool not found`)
     }
 
     const args = {
