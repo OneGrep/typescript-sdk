@@ -4,7 +4,8 @@ import { Command } from 'commander'
 import { logger } from './utils/logger'
 
 import { version } from '../package.json'
-import { listIntegrations, runTool } from 'commands/tools'
+import { toolsCommand } from 'commands/tools'
+import { clearTerminal } from 'utils/helpers'
 
 /**
  * Validates that required environment variables are set
@@ -38,6 +39,8 @@ function validateEnvironment(command: Command) {
 }
 
 function main() {
+  clearTerminal()
+
   const cli = new Command()
     .name('onegrep-cli')
     .description(
@@ -51,8 +54,7 @@ function main() {
 
   cli.addCommand(healthcheck)
   cli.addCommand(getAuditLogs)
-  cli.addCommand(listIntegrations)
-  cli.addCommand(runTool)
+  cli.addCommand(toolsCommand)
 
   cli.parse()
 }
