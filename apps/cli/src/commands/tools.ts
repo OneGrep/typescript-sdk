@@ -1,6 +1,6 @@
 import { Command } from 'commander'
 import { chalk, logger } from '../utils/logger'
-import { getSpinner, isDefined } from 'utils/helpers'
+import { getSpinner, isDefined } from '../utils/helpers'
 import {
   getToolbox,
   ToolResource,
@@ -16,103 +16,46 @@ import { highlight } from 'cli-highlight'
  * Generate and display an example of how to use the selected tool
  */
 async function showToolUsageExample(tool: ToolResource) {
-  logger.log('\n' + chalk.bold.blueBright('SDK Usage Example:'));
+  logger.log('\n' + chalk.bold.blueBright('SDK Usage Example:'))
 
   // Create example parameters
-  let exampleArgsCode = '    // Add appropriate parameters here based on tool schema';
+  let exampleArgsCode =
+    '    // Add appropriate parameters here based on tool schema'
 
-  try {
-    // Try to get the Zod schema from the tool (as seen in toolbox.test.ts)
-    const zodInputType = tool.metadata.zodInputType?.();
+  const schema = tool.metadata.inputSchema
 
-    if (zodInputType) {
-      // Generate example values based on Zod schema
-      const exampleArgs: Record<string, any> = {};
+  if (schema && typeof schema === 'object') {
+    if ('properties' in schema && typeof schema.properties === 'object') {
+      const properties = schema.properties as Record<string, any>
 
-      // Get schema shape if available
-      const schemaShape = zodInputType._def?.shape;
+      // Create example object with parameter values
+      const exampleArgs: Record<string, any> = {}
+      for (const propName of Object.keys(properties)) {
+        const propSchema = properties[propName]
+        const propType = propSchema.type || 'string'
 
-      if (schemaShape) {
-        // For each field in the Zod schema, create an example value
-        Object.entries(schemaShape).forEach(([key, def]: [string, any]) => {
-          const typeName = def?._def?.typeName;
-
-          // Set example value based on Zod type
-          if (typeName === 'ZodString') {
-            exampleArgs[key] = `"example_${key}"`;
-          } else if (typeName === 'ZodNumber') {
-            exampleArgs[key] = 42;
-          } else if (typeName === 'ZodBoolean') {
-            exampleArgs[key] = true;
-          } else if (typeName === 'ZodObject') {
-            exampleArgs[key] = '{ key: "value" }';
-          } else if (typeName === 'ZodArray') {
-            exampleArgs[key] = '["item1", "item2"]';
-          } else {
-            // Default to string for unknown types
-            exampleArgs[key] = `"example_${key}"`;
-          }
-        });
-      } else {
-        // Fallback to regular JSON Schema if Zod shape is not available
-        fallbackToJsonSchema();
+        // Set example value based on type
+        if (propType === 'string') {
+          exampleArgs[propName] = `"example_${propName}"`
+        } else if (propType === 'number' || propType === 'integer') {
+          exampleArgs[propName] = 42
+        } else if (propType === 'boolean') {
+          exampleArgs[propName] = true
+        } else if (propType === 'object') {
+          exampleArgs[propName] = '{ key: "value" }'
+        } else if (propType === 'array') {
+          exampleArgs[propName] = '["item1", "item2"]'
+        }
       }
 
-      // Convert example args to formatted code string
       if (Object.keys(exampleArgs).length > 0) {
+        // Convert example args to formatted code string
         exampleArgsCode = JSON.stringify(exampleArgs, null, 4)
-          .replace(/"([^"]+)":/g, '$1:')  // Convert "key": to key:
-          .replace(/"/g, '\'')            // Convert double quotes to single quotes
+          .replace(/"([^"]+)":/g, '$1:') // Convert "key": to key:
+          .replace(/"/g, "'") // Convert double quotes to single quotes
           .split('\n')
-          .map(line => '    ' + line)     // Indent all lines
-          .join('\n');
-      }
-    } else {
-      // Fallback to regular JSON Schema if Zod schema is not available
-      fallbackToJsonSchema();
-    }
-  } catch (error) {
-    // Fallback to regular JSON Schema if any error occurs
-    fallbackToJsonSchema();
-  }
-
-  // Fallback function to use JSON Schema when Zod is not available
-  function fallbackToJsonSchema() {
-    const schema = tool.metadata.inputSchema;
-
-    if (schema && typeof schema === 'object') {
-      if ('properties' in schema && typeof schema.properties === 'object') {
-        const properties = schema.properties as Record<string, any>;
-
-        // Create example object with parameter values
-        const exampleArgs: Record<string, any> = {};
-        for (const propName of Object.keys(properties)) {
-          const propSchema = properties[propName];
-          const propType = propSchema.type || 'string';
-
-          // Set example value based on type
-          if (propType === 'string') {
-            exampleArgs[propName] = `"example_${propName}"`;
-          } else if (propType === 'number' || propType === 'integer') {
-            exampleArgs[propName] = 42;
-          } else if (propType === 'boolean') {
-            exampleArgs[propName] = true;
-          } else if (propType === 'object') {
-            exampleArgs[propName] = '{ key: "value" }';
-          } else if (propType === 'array') {
-            exampleArgs[propName] = '["item1", "item2"]';
-          }
-        }
-
-        if (Object.keys(exampleArgs).length > 0) {
-          // Convert example args to formatted code string
-          exampleArgsCode = JSON.stringify(exampleArgs, null, 4)
-            .replace(/"([^"]+)":/g, '$1:')  // Convert "key": to key:
-            .replace(/"/g, '\'')            // Convert double quotes to single quotes
-            .split('\n')
-            .map(line => '    ' + line)     // Indent all lines
-            .join('\n');
-        }
+          .map((line) => '    ' + line) // Indent all lines
+          .join('\n')
       }
     }
   }
@@ -132,21 +75,7 @@ const tool = tools.find(
 );
 
 if (tool) {
-  try {
-    // Get the Zod schema for input validation (optional but recommended)
-    const zodSchema = tool.metadata.zodInputType?.();
-    if (zodSchema) {
-      // You can validate your input against the schema
-      const validationResult = zodSchema.safeParse({
-        // Your parameters here
-      });
-      
-      if (!validationResult.success) {
-        console.error("Input validation failed:", validationResult.error);
-        return;
-      }
-    }
-    
+  try {    
     // Call the tool with your parameters
     const result = await tool.call({
       args: ${exampleArgsCode},
@@ -162,7 +91,7 @@ if (tool) {
   } catch (error) {
     console.error("Error:", error);
   }
-}`;
+}`
 
   // Syntax highlight the code example
   const highlightedCode = highlight(usageExample, {
@@ -174,9 +103,9 @@ if (tool) {
       number: chalk.yellowBright,
       literal: chalk.magentaBright,
       comment: chalk.gray,
-      function: chalk.yellow,
+      function: chalk.yellow
     }
-  });
+  })
 
   // Create a table for the code example
   const codeTable = new Table({
@@ -186,10 +115,10 @@ if (tool) {
     },
     wordWrap: true,
     colWidths: [90]
-  });
+  })
 
-  codeTable.push([highlightedCode]);
-  logger.log(codeTable.toString());
+  codeTable.push([highlightedCode])
+  logger.log(codeTable.toString())
 }
 
 async function coerceParameterValue(value: any, type: string) {
@@ -206,7 +135,7 @@ async function coerceParameterValue(value: any, type: string) {
     }
 
     if (type === 'boolean') {
-      return (value === 'true' || value === true)
+      return value === 'true' || value === true
     }
 
     return value
@@ -216,7 +145,9 @@ async function coerceParameterValue(value: any, type: string) {
   }
 }
 
-async function collectParameters(tool: ToolResource): Promise<Record<string, any>> {
+async function collectParameters(
+  tool: ToolResource
+): Promise<Record<string, any>> {
   const params: Record<string, any> = { args: {}, approval: undefined }
   const schema: JsonSchema = tool.metadata.inputSchema
 
@@ -225,56 +156,54 @@ async function collectParameters(tool: ToolResource): Promise<Record<string, any
   }
 
   // Now collect the paramters from the user.
-  const properties = schema.properties as Record<string, any>;
-  const required = Array.isArray(schema.required) ? schema.required : [];
+  const properties = schema.properties as Record<string, any>
+  const required = Array.isArray(schema.required) ? schema.required : []
 
   // Iterating through it expecting a JSON Schema object
   // For each property in the schema, prompt the user
   for (const propName of Object.keys(properties)) {
-    const propSchema = properties[propName];
-    const propDescription = propSchema.description || '';
-    const propDefault = propSchema.default;
-    const isRequired = required.includes(propName);
-    const propType = propSchema.type || 'string';
+    const propSchema = properties[propName]
+    const propDescription = propSchema.description || ''
+    const propDefault = propSchema.default
+    const isRequired = required.includes(propName)
+    const propType = propSchema.type || 'string'
 
     logger.debug(`Parameter schema: ${JSON.stringify(propSchema, null, 2)}`)
 
     // Handle required vs optional parameters differently
     if (isRequired) {
       // For required parameters, always prompt
-      const promptMessage = `Enter value for ${propName}${chalk.yellow(' (Required)')}${propDescription ? ` (${propDescription})` : ''}:`;
+      const promptMessage = `Enter value for ${propName}${chalk.yellow(' (Required)')}${propDescription ? ` (${propDescription})` : ''}:`
 
       const paramValue = await input({
         message: promptMessage,
         default: propDefault as string
-      });
+      })
 
       const coercedValue = await coerceParameterValue(paramValue, propType)
 
-      params.args[propName] = coercedValue;
+      params.args[propName] = coercedValue
     } else {
       // For optional parameters, ask if they want to provide a value
       const userProvidingParam = await confirm({
         message: `Do you want to provide a value for optional parameter ${propName}${propDescription ? ` (${propDescription})` : ''}?`,
         default: false
-      });
+      })
 
       if (userProvidingParam) {
-        const promptMessage = `Enter value for ${propName}${propDescription ? ` (${propDescription})` : ''}:`;
+        const promptMessage = `Enter value for ${propName}${propDescription ? ` (${propDescription})` : ''}:`
 
         const paramValue = await input({
           message: promptMessage,
           default: propDefault as string
-        });
+        })
 
         const coercedValue = await coerceParameterValue(paramValue, propType)
 
-        params.args[propName] = coercedValue;
+        params.args[propName] = coercedValue
       }
     }
   }
-
-
 
   return params
 }
@@ -308,7 +237,6 @@ async function runSelectedTool(tool: ToolResource) {
   }
 }
 
-
 async function displayToolProperties(selectedTool: ToolResource) {
   logger.info(`Selected tool: ${chalk.bold.green(selectedTool.metadata.name)}`)
 
@@ -322,20 +250,23 @@ async function displayToolProperties(selectedTool: ToolResource) {
     },
     wordWrap: true,
     colWidths: [15, 75]
-  });
+  })
 
   // Add name and description to the table
   detailsTable.push(
     [chalk.blueBright('Name:'), selectedTool.metadata.name],
     [chalk.blueBright('Integration:'), selectedTool.metadata.integrationName]
-  );
+  )
 
   // Add description if available
   if (selectedTool.metadata.description) {
-    detailsTable.push([chalk.blueBright('Description:'), selectedTool.metadata.description]);
+    detailsTable.push([
+      chalk.blueBright('Description:'),
+      selectedTool.metadata.description
+    ])
   }
 
-  logger.log(detailsTable.toString());
+  logger.log(detailsTable.toString())
 
   // 4. Display parameter details
   const schema = selectedTool.metadata.inputSchema
@@ -344,11 +275,11 @@ async function displayToolProperties(selectedTool: ToolResource) {
   if (schema && typeof schema === 'object') {
     // Check if we have a properties object (common in JSON Schema)
     if ('properties' in schema && typeof schema.properties === 'object') {
-      const properties = schema.properties as Record<string, any>;
-      const required = Array.isArray(schema.required) ? schema.required : [];
+      const properties = schema.properties as Record<string, any>
+      const required = Array.isArray(schema.required) ? schema.required : []
 
       if (Object.keys(properties).length === 0) {
-        logger.info('No parameters required for this tool.');
+        logger.info('No parameters required for this tool.')
       } else {
         // Create a nice table for parameters
         const table = new Table({
@@ -360,31 +291,31 @@ async function displayToolProperties(selectedTool: ToolResource) {
           ],
           style: {
             head: [], // Disable colors in header
-            border: [], // Disable colors for borders
+            border: [] // Disable colors for borders
           },
           wordWrap: true,
           wrapOnWordBoundary: true,
           colWidths: [20, 15, 10, 45]
-        });
+        })
 
         // Add rows for each parameter
         for (const propName of Object.keys(properties)) {
-          const propSchema = properties[propName];
-          const isRequired = required.includes(propName);
-          const propType = propSchema.type || 'string';
-          const propDescription = propSchema.description || '(No description)';
+          const propSchema = properties[propName]
+          const isRequired = required.includes(propName)
+          const propType = propSchema.type || 'string'
+          const propDescription = propSchema.description || '(No description)'
 
           table.push([
             chalk.bold(propName),
             chalk.gray(propType),
             isRequired ? chalk.yellow('Yes') : chalk.gray('No'),
             propDescription
-          ]);
+          ])
         }
 
         // Display the table
-        logger.log('\n' + chalk.bold.blueBright('Parameter Details:'));
-        logger.log(table.toString());
+        logger.log('\n' + chalk.bold.blueBright('Parameter Details:'))
+        logger.log(table.toString())
       }
     } else {
       // For simple object schemas without properties
@@ -397,35 +328,31 @@ async function displayToolProperties(selectedTool: ToolResource) {
         ],
         style: {
           head: [], // Disable colors in header
-          border: [], // Disable colors for borders
+          border: [] // Disable colors for borders
         },
         wordWrap: true,
         wrapOnWordBoundary: true,
         colWidths: [20, 15, 55]
-      });
+      })
 
       for (const param of Object.keys(schema)) {
-        const paramSchema = schema[param as keyof typeof schema];
+        const paramSchema = schema[param as keyof typeof schema]
 
-        if (!paramSchema || typeof paramSchema !== 'object') continue;
+        if (!paramSchema || typeof paramSchema !== 'object') continue
 
-        const paramObject = paramSchema as any;
-        const paramDescription = paramObject.description || '(No description)';
-        const paramType = paramObject.type || 'string';
+        const paramObject = paramSchema as any
+        const paramDescription = paramObject.description || '(No description)'
+        const paramType = paramObject.type || 'string'
 
-        table.push([
-          chalk.bold(param),
-          chalk.gray(paramType),
-          paramDescription
-        ]);
+        table.push([chalk.bold(param), chalk.gray(paramType), paramDescription])
       }
 
       // Display the table
-      logger.log('\n' + chalk.bold.blueBright('Parameter Details:'));
-      logger.log(table.toString());
+      logger.log('\n' + chalk.bold.blueBright('Parameter Details:'))
+      logger.log(table.toString())
     }
   } else {
-    logger.info('No parameters required for this tool.');
+    logger.info('No parameters required for this tool.')
   }
 }
 
@@ -444,7 +371,9 @@ async function runToolsExperience() {
     spinner = getSpinner('Discovering available tools...', 'yellow')
     spinner.start()
     const toolResources: Array<ToolResource> = await toolbox.listAll()
-    spinner.succeed(`Found ${toolResources.length} tools across various integrations`)
+    spinner.succeed(
+      `Found ${toolResources.length} tools across various integrations`
+    )
 
     // Organize tools by integration - do this only once
     const toolsByIntegration: Record<string, ToolResource[]> = {}
@@ -472,7 +401,7 @@ async function runToolsExperience() {
     }
 
     // Main tool exploration loop
-    let continueExploring = true;
+    let continueExploring = true
     while (continueExploring) {
       let selectedIntegration: string
       let selectedTool: ToolResource
@@ -480,9 +409,9 @@ async function runToolsExperience() {
       // 1. Select an integration (now with descriptions and tool counts)
       selectedIntegration = await select({
         message: 'Select an integration:',
-        choices: integrations.map(integration => {
-          const toolCount = toolsByIntegration[integration].length;
-          const description = integrationDescriptions[integration];
+        choices: integrations.map((integration) => {
+          const toolCount = toolsByIntegration[integration].length
+          const description = integrationDescriptions[integration]
 
           return {
             name: `${integration} ${chalk.gray(`(${toolCount} tools)`)}${description ? chalk.dim(` - ${description}`) : ''
@@ -492,19 +421,22 @@ async function runToolsExperience() {
         })
       })
 
-      logger.info(`Selected integration: ${chalk.bold.green(selectedIntegration)} with ${toolsByIntegration[selectedIntegration].length
-        } tools available`)
+      logger.info(
+        `Selected integration: ${chalk.bold.green(selectedIntegration)} with ${toolsByIntegration[selectedIntegration].length
+        } tools available`
+      )
 
       // 2. Select a tool from the chosen integration
       const toolsForIntegration = toolsByIntegration[selectedIntegration]
 
       const selectedToolName = await select({
         message: 'Select a tool:',
-        choices: toolsForIntegration.map(tool => {
+        choices: toolsForIntegration.map((tool) => {
           // Format the tool name and description nicely
-          const name = chalk.bold(tool.metadata.name);
-          const description = tool.metadata.description ?
-            chalk.dim(` - ${tool.metadata.description}`) : '';
+          const name = chalk.bold(tool.metadata.name)
+          const description = tool.metadata.description
+            ? chalk.dim(` - ${tool.metadata.description}`)
+            : ''
 
           return {
             name: `${name}${description}`,
@@ -513,7 +445,9 @@ async function runToolsExperience() {
         })
       })
 
-      selectedTool = toolsForIntegration.find(tool => tool.metadata.name === selectedToolName)!
+      selectedTool = toolsForIntegration.find(
+        (tool) => tool.metadata.name === selectedToolName
+      )!
       await displayToolProperties(selectedTool)
 
       // 5. Let user choose what to do next
@@ -525,50 +459,50 @@ async function runToolsExperience() {
           { name: 'Select another tool', value: 'another' },
           { name: 'Exit', value: 'exit' }
         ]
-      });
+      })
 
       if (nextAction === 'exit') {
-        logger.info('Exiting tool search');
-        continueExploring = false;
-        continue; // Break out of the current iteration and check continueExploring
+        logger.info('Exiting tool search')
+        continueExploring = false
+        continue // Break out of the current iteration and check continueExploring
       }
 
       if (nextAction === 'another') {
         // Just continue to the next iteration of the loop
-        continue;
+        continue
       }
 
       if (nextAction === 'example') {
-        await showToolUsageExample(selectedTool);
+        await showToolUsageExample(selectedTool)
 
         // After showing example, ask if they want to run the tool
         const shouldRun = await confirm({
           message: 'Would you like to run this tool now?'
-        });
+        })
 
         if (!shouldRun) {
           // Ask if they want to explore another tool
           const exploreAnother = await confirm({
             message: 'Would you like to explore another tool?'
-          });
+          })
 
-          continueExploring = exploreAnother;
-          continue;
+          continueExploring = exploreAnother
+          continue
         }
 
         // Run the tool if they want to after seeing the example
-        await runSelectedTool(selectedTool);
+        await runSelectedTool(selectedTool)
       } else if (nextAction === 'run') {
         // Run the tool directly
-        await runSelectedTool(selectedTool);
+        await runSelectedTool(selectedTool)
       }
 
       // After running a tool, ask if they want to explore more tools
       const runAnother = await confirm({
         message: 'Would you like to explore another tool?'
-      });
+      })
 
-      continueExploring = runAnother;
+      continueExploring = runAnother
     }
   } catch (error) {
     logger.error(`Error in tool search: ${error}`)

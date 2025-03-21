@@ -35,6 +35,9 @@ build-api-client:
 build-sdk:
     pnpm turbo run build --force --filter=@onegrep/sdk
 
+build-cli:
+    pnpm turbo run build --force --filter=@onegrep/cli
+
 rebuild:
     pnpm turbo run build --force
 
