@@ -1,11 +1,9 @@
-import { Policy } from 'mcp/types'
+import { schemas } from '@repo/onegrep-api-client'
 import { z } from 'zod'
 
 export type ToolId = string
 
 export type JsonSchema = Record<string, any> | boolean
-
-export type ExtraProperties = Record<string, any>
 
 export type ToolCallArgs = Record<string, any>
 
@@ -31,6 +29,9 @@ export interface BinaryResultContent extends ResultContent {
 
 export type ToolCallResultContent = Array<ResultContent>
 
+export type Policy = z.infer<typeof schemas.Policy>
+export type ToolCustomProperties = z.infer<typeof schemas.ToolCustomProperties>
+
 export interface ToolMetadata {
   name: string
   description: string
@@ -38,14 +39,14 @@ export interface ToolMetadata {
   integrationName: string
   inputSchema: JsonSchema
   outputSchema?: JsonSchema
-  extraProperties?: ExtraProperties
-  policy?: Policy
+  // ? Maybe rename this to match customProperties from the API?
+  extraProperties?: ToolCustomProperties
 
   zodInputType: () => z.ZodTypeAny
   zodOutputType: () => z.ZodTypeAny
 }
 
-export interface ToolCallApproval {}
+export interface ToolCallApproval { }
 
 export interface ToolCallInput {
   args: ToolCallArgs
@@ -71,6 +72,7 @@ export type ToolCallResponse<T> = ToolCallOutput<T> | ToolCallError
 export interface ToolResource {
   id: ToolId
   metadata: ToolMetadata
+  policy?: Policy
 
   // TODO: This is a temporary method to set the output schema
   setOutputSchema(outputSchema: JsonSchema): void

@@ -1,14 +1,15 @@
-import { Policy, RemoteClientConfig, RemoteToolCallArgs } from './types.js'
+import { RemoteClientConfig, RemoteToolCallArgs } from './types.js'
 import { ConnectedClientManager } from './client.js'
 import { CallToolResult, Tool } from '@modelcontextprotocol/sdk/types.js'
 import {
   ToolResource,
-  ExtraProperties,
   JsonSchema,
   ToolMetadata,
   ToolCallInput,
   ToolCallResponse,
-  ToolCallError
+  ToolCallError,
+  Policy,
+  ToolCustomProperties
 } from '../types.js'
 import { z } from 'zod'
 import { jsonSchemaUtils } from '../schema.js'
@@ -29,7 +30,8 @@ export class McpToolMetadata implements ToolMetadata {
   integrationName: string
   inputSchema: JsonSchema
   outputSchema?: JsonSchema
-  extraProperties?: ExtraProperties
+  extraProperties?: ToolCustomProperties
+  policy?: Policy
 
   private _zodInputType: z.ZodTypeAny
   private _zodOutputType: z.ZodTypeAny
@@ -77,7 +79,7 @@ export class MCPToolResource implements ToolResource {
     metadata: ToolMetadata,
     clientConfig: RemoteClientConfig,
     connectedClientManager: ConnectedClientManager,
-    policy?: Policy
+    policy?: Policy,
   ) {
     this.id = id
     this.metadata = metadata

@@ -27,5 +27,3 @@ export type RemoteToolCallError = z.infer<typeof RemoteToolCallError>
 export interface AsyncToolCall {
   (): Promise<CallToolResult>
 }
-
-export type Policy = z.infer<typeof schemas.Policy>
