@@ -29,22 +29,9 @@ export interface BinaryResultContent extends ResultContent {
 
 export type ToolCallResultContent = Array<ResultContent>
 
-export type Policy = z.infer<typeof schemas.Policy>
+export type BasePolicy = z.infer<typeof schemas.BasePolicy>
 export type ToolCustomProperties = z.infer<typeof schemas.ToolCustomProperties>
-
-export interface ToolMetadata {
-  name: string
-  description: string
-  iconUrl?: URL
-  integrationName: string
-  inputSchema: JsonSchema
-  outputSchema?: JsonSchema
-  // ? Maybe rename this to match customProperties from the API?
-  extraProperties?: ToolCustomProperties
-
-  zodInputType: () => z.ZodTypeAny
-  zodOutputType: () => z.ZodTypeAny
-}
+export type ToolDetails = z.infer<typeof schemas.ToolDetails>
 
 export interface ToolCallApproval { }
 
@@ -69,10 +56,33 @@ export interface ToolCallOutput<T> {
 
 export type ToolCallResponse<T> = ToolCallOutput<T> | ToolCallError
 
+/**
+ * This is the metadata that is used to describe a tool.
+ */
+export interface ToolMetadata {
+  name: string
+  description: string
+  integrationName: string
+
+  // Cosmetic properties
+  extraProperties?: ToolCustomProperties
+  iconUrl?: URL
+
+  // Schema properties
+  inputSchema: JsonSchema
+  outputSchema?: JsonSchema
+
+  zodInputType: () => z.ZodTypeAny
+  zodOutputType: () => z.ZodTypeAny
+}
+
+/**
+ * The core resource object that is used to describe and interact with a tool.
+ */
 export interface ToolResource {
   id: ToolId
   metadata: ToolMetadata
-  policy?: Policy
+  policy: BasePolicy
 
   // TODO: This is a temporary method to set the output schema
   setOutputSchema(outputSchema: JsonSchema): void

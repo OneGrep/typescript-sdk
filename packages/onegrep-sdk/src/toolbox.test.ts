@@ -1,37 +1,40 @@
 import { describe, it, expect, beforeAll } from 'vitest'
 import {
-  AndFilter,
-  ServerNameFilter,
-  ToolNameFilter,
+  // AndFilter,
+  // ServerNameFilter,
+  // ToolNameFilter,
   Toolbox,
   getToolbox
 } from './toolbox'
 import { log } from '@repo/utils'
 import {
   ToolCallError,
-  ToolCallOutput,
+  // ToolCallOutput,
   ToolCallResponse,
   ToolResource
 } from './types'
-import Ajv from 'ajv'
-import { jsonSchemaUtils } from './schema'
+// import Ajv from 'ajv'
+// import { jsonSchemaUtils } from './schema'
 
 describe('Toolbox Tests', () => {
   let toolbox: Toolbox
 
   // ! Tool args that work with the test-sandbox.onegrep.dev `meta` server which is a running mock_mcp server (reference impl in onegrep-api repo)
   const toolName = 'echo'
-  const toolArgs = {
-    text: 'Hello, world!'
-  }
+  // const toolArgs = {
+  //   text: 'Hello, world!'
+  // }
 
   beforeAll(async () => {
+    log.info('Getting toolbox')
     toolbox = await getToolbox()
+    log.info('Toolbox fetched')
   })
 
   it('should get all tool resources', async () => {
     const toolResources: ToolResource[] = await toolbox.listAll()
     expect(toolResources.length).toBeGreaterThan(0)
+    log.info(`fetched tool resources: ${JSON.stringify(toolResources)}`)
   })
 
   it('should be able to get a zod schema from a tool', async () => {

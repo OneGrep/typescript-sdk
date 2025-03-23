@@ -1,10 +1,10 @@
 import { OneGrepApiClient } from '../client.js'
 import { ConnectedClientManager } from './client.js'
-import { ToolCache, ToolId, ToolResource } from '../types.js'
-import { MCPToolResource, toolResourceFromTool } from './resource.js'
+import { ToolCache, ToolDetails, ToolId, ToolResource } from '../types.js'
+import { MCPToolResource, toolResourceFromMcpTool } from './resource.js'
 import { log } from '@repo/utils'
 import { RemoteClientConfig } from './types.js'
-import { Tool } from '@modelcontextprotocol/sdk/types.js'
+import { Tool as MCPTool, Tool } from '@modelcontextprotocol/sdk/types.js'
 import { getUnixTime } from 'date-fns'
 
 class IntegrationRefreshAttempt {
@@ -13,7 +13,7 @@ class IntegrationRefreshAttempt {
     public readonly integrationName: string,
     public readonly error?: any,
     public readonly refreshTs: number = getUnixTime(Date.now())
-  ) {}
+  ) { }
 }
 
 export class MCPToolCache implements ToolCache {
@@ -31,23 +31,72 @@ export class MCPToolCache implements ToolCache {
     this.connectedClientManager = connectedClientManager
   }
 
+  /** A helper function that fetches all the tool details for all the tools for an integration and then converts it into a Map of tool name to tool details. */
+  private async getToolDetailsByToolName(integrationName: string): Promise<Map<string, ToolDetails>> {
+    const toolDetails: ToolDetails[] = await this.apiClient.get_integration_tools_api_v1_integrations__integration_name__tools_get({
+      params: {
+        integration_name: integrationName
+      }
+    })
+
+    const toolDetailsMap = new Map<string, ToolDetails>()
+
+    toolDetails.forEach((toolDetails) => {
+      toolDetailsMap.set(toolDetails.tool_name, toolDetails)
+    })
+
+    return toolDetailsMap
+  }
+
+  /**
+   * Returns a list of MCPToolResource(s) for a given client config that can be used to interact with tools for
+   * an integration. Ex. the clientConfig for the "Github".
+   * 
+   * The returned list of resources will be each of the resources for the tools under the integration.
+   * 
+   * Ex. in the case of "Github", each resource will be a tool that wraps tools such as create_repository, get_repository, etc.
+   */
   private async getToolResourcesForIntegration(
-    clientConfig: RemoteClientConfig
+    integrationClientConfig: RemoteClientConfig
   ): Promise<MCPToolResource[]> {
-    /** Given an integration, it will return all the ToolResources for that integration. */
+    // ? This will be updated in the future and likely removed altogether in favor of a better runtime discovery mechanism.
+    const mcpConnectedClient =
+      await this.connectedClientManager.getClient(integrationClientConfig)
 
-    const resourceClient =
-      await this.connectedClientManager.getClient(clientConfig)
-
-    if (!resourceClient) {
-      log.error(`No connected client found for ${clientConfig.name}`)
+    if (!mcpConnectedClient) {
+      log.error(`No connected client found for ${integrationClientConfig.name}`)
       return []
     }
 
-    const tools: Tool[] = await resourceClient.listTools()
-    return tools.map((tool) =>
-      toolResourceFromTool(tool, clientConfig, this.connectedClientManager)
-    )
+    const integrationName = integrationClientConfig.name
+
+    // We will make 2 parallel requests to fetch all our tools and the tool details for all tools for this integration.
+    // Then we'll combing the resuls to formulate the ToolResource(s).
+    const promises: Array<Promise<any>> = [
+      mcpConnectedClient.listTools(),
+      this.getToolDetailsByToolName(integrationName)
+    ]
+
+    const [mcpTools, toolDetailsMap] = await Promise.all(promises) as [Tool[], Map<string, ToolDetails>]
+
+    // Group tools and tool details by tool name
+    const toolDataMap = new Map<string, { tool: MCPTool, details: ToolDetails }>()
+    mcpTools.forEach((tool) => {
+      toolDataMap.set(tool.name, { tool, details: toolDetailsMap.get(tool.name)! })
+    })
+
+    // Now we can create the tool resources for this integration.
+    const resources: Array<MCPToolResource> = []
+    toolDataMap.forEach((toolData) => {
+      if (toolData.details === undefined) {
+        // ! Failsafe to ensure that any new tools that are discoverable BUT do not have guardrails are not rendered.
+        log.warn(`Tool details not found for tool ${toolData.tool.name}. Will not render this tool.`)
+      } else {
+        resources.push(toolResourceFromMcpTool(toolData.tool, toolData.details, integrationClientConfig, this.connectedClientManager))
+      }
+    })
+
+    return resources
   }
 
   private async refreshToolsForIntegration(
@@ -131,7 +180,7 @@ export class MCPToolCache implements ToolCache {
         return false
       }
 
-      const refreshResults = await this.refreshAllIntegrations() //this.allConfigs);
+      const refreshResults = await this.refreshAllIntegrations()
       const successfulResults = refreshResults.filter(
         (result) => result.success
       )

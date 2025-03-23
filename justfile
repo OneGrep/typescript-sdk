@@ -69,7 +69,7 @@ test-sdk:
     pnpm turbo run test --filter=@onegrep/sdk
 
 test-langchain:
-    pnpm turbo run test --filter=@onegrep/langchain
+    pnpm turbo run test --filter=@onegrep/langchain -- -v
 
 test:
     pnpm turbo run test
