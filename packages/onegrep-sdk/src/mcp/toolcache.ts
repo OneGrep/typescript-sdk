@@ -13,7 +13,7 @@ class IntegrationRefreshAttempt {
     public readonly integrationName: string,
     public readonly error?: any,
     public readonly refreshTs: number = getUnixTime(Date.now())
-  ) { }
+  ) {}
 }
 
 export class MCPToolCache implements ToolCache {
@@ -32,12 +32,17 @@ export class MCPToolCache implements ToolCache {
   }
 
   /** A helper function that fetches all the tool details for all the tools for an integration and then converts it into a Map of tool name to tool details. */
-  private async getToolDetailsByToolName(integrationName: string): Promise<Map<string, ToolDetails>> {
-    const toolDetails: ToolDetails[] = await this.apiClient.get_integration_tools_api_v1_integrations__integration_name__tools_get({
-      params: {
-        integration_name: integrationName
-      }
-    })
+  private async getToolDetailsByToolName(
+    integrationName: string
+  ): Promise<Map<string, ToolDetails>> {
+    const toolDetails: ToolDetails[] =
+      await this.apiClient.get_integration_tools_api_v1_integrations__integration_name__tools_get(
+        {
+          params: {
+            integration_name: integrationName
+          }
+        }
+      )
 
     const toolDetailsMap = new Map<string, ToolDetails>()
 
@@ -51,17 +56,18 @@ export class MCPToolCache implements ToolCache {
   /**
    * Returns a list of MCPToolResource(s) for a given client config that can be used to interact with tools for
    * an integration. Ex. the clientConfig for the "Github".
-   * 
+   *
    * The returned list of resources will be each of the resources for the tools under the integration.
-   * 
+   *
    * Ex. in the case of "Github", each resource will be a tool that wraps tools such as create_repository, get_repository, etc.
    */
   private async getToolResourcesForIntegration(
     integrationClientConfig: RemoteClientConfig
   ): Promise<MCPToolResource[]> {
     // ? This will be updated in the future and likely removed altogether in favor of a better runtime discovery mechanism.
-    const mcpConnectedClient =
-      await this.connectedClientManager.getClient(integrationClientConfig)
+    const mcpConnectedClient = await this.connectedClientManager.getClient(
+      integrationClientConfig
+    )
 
     if (!mcpConnectedClient) {
       log.error(`No connected client found for ${integrationClientConfig.name}`)
@@ -77,12 +83,21 @@ export class MCPToolCache implements ToolCache {
       this.getToolDetailsByToolName(integrationName)
     ]
 
-    const [mcpTools, toolDetailsMap] = await Promise.all(promises) as [Tool[], Map<string, ToolDetails>]
+    const [mcpTools, toolDetailsMap] = (await Promise.all(promises)) as [
+      Tool[],
+      Map<string, ToolDetails>
+    ]
 
     // Group tools and tool details by tool name
-    const toolDataMap = new Map<string, { tool: MCPTool, details: ToolDetails }>()
+    const toolDataMap = new Map<
+      string,
+      { tool: MCPTool; details: ToolDetails }
+    >()
     mcpTools.forEach((tool) => {
-      toolDataMap.set(tool.name, { tool, details: toolDetailsMap.get(tool.name)! })
+      toolDataMap.set(tool.name, {
+        tool,
+        details: toolDetailsMap.get(tool.name)!
+      })
     })
 
     // Now we can create the tool resources for this integration.
@@ -90,9 +105,18 @@ export class MCPToolCache implements ToolCache {
     toolDataMap.forEach((toolData) => {
       if (toolData.details === undefined) {
         // ! Failsafe to ensure that any new tools that are discoverable BUT do not have guardrails are not rendered.
-        log.warn(`Tool details not found for tool ${toolData.tool.name}. Will not render this tool.`)
+        log.warn(
+          `Tool details not found for tool ${toolData.tool.name}. Will not render this tool.`
+        )
       } else {
-        resources.push(toolResourceFromMcpTool(toolData.tool, toolData.details, integrationClientConfig, this.connectedClientManager))
+        resources.push(
+          toolResourceFromMcpTool(
+            toolData.tool,
+            toolData.details,
+            integrationClientConfig,
+            this.connectedClientManager
+          )
+        )
       }
     })
 

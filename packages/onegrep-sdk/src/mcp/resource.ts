@@ -1,6 +1,9 @@
 import { RemoteClientConfig, RemoteToolCallArgs } from './types.js'
 import { ConnectedClientManager } from './client.js'
-import { CallToolResult, Tool as MCPTool } from '@modelcontextprotocol/sdk/types.js'
+import {
+  CallToolResult,
+  Tool as MCPTool
+} from '@modelcontextprotocol/sdk/types.js'
 import {
   ToolResource,
   JsonSchema,
@@ -46,13 +49,15 @@ export class McpToolMetadata implements ToolMetadata {
     integrationName: string,
     toolDetails: ToolDetails,
     inputSchema: JsonSchema,
-    outputSchema?: JsonSchema,
+    outputSchema?: JsonSchema
   ) {
     this.name = tool.name
     this.description = tool.description || 'Tool ' + tool.name
     this.iconUrl = undefined
     this.integrationName = integrationName
-    this.extraProperties = toolDetails.custom_properties as ToolCustomProperties | undefined
+    this.extraProperties = toolDetails.custom_properties as
+      | ToolCustomProperties
+      | undefined
     this.inputSchema = inputSchema
     this.outputSchema = outputSchema
 
@@ -91,7 +96,7 @@ export class MCPToolResource implements ToolResource {
     metadata: ToolMetadata,
     toolDetails: ToolDetails,
     clientConfig: RemoteClientConfig,
-    connectedClientManager: ConnectedClientManager,
+    connectedClientManager: ConnectedClientManager
   ) {
     this.id = id
     this.metadata = metadata
@@ -173,7 +178,7 @@ export const toolResourceFromMcpTool = (
   tool: MCPTool,
   toolDetails: ToolDetails,
   clientConfig: RemoteClientConfig,
-  connectedClientManager: ConnectedClientManager,
+  connectedClientManager: ConnectedClientManager
 ): MCPToolResource => {
   // TODO: Why is this hacky re-parsing of the input schema necessary? Breaks if you try to pass it directly.
   const inputSchemaString = JSON.stringify(tool.inputSchema)
@@ -181,7 +186,12 @@ export const toolResourceFromMcpTool = (
 
   // TODO: This should match the Policy ID format
   const id = `${clientConfig.name}::${tool.name}`
-  const toolMetadata = new McpToolMetadata(tool, clientConfig.name, toolDetails, inputSchema)
+  const toolMetadata = new McpToolMetadata(
+    tool,
+    clientConfig.name,
+    toolDetails,
+    inputSchema
+  )
 
   return new MCPToolResource(
     id,

@@ -33,7 +33,7 @@ export type BasePolicy = z.infer<typeof schemas.BasePolicy>
 export type ToolCustomProperties = z.infer<typeof schemas.ToolCustomProperties>
 export type ToolDetails = z.infer<typeof schemas.ToolDetails>
 
-export interface ToolCallApproval { }
+export interface ToolCallApproval {}
 
 export interface ToolCallInput {
   args: ToolCallArgs
