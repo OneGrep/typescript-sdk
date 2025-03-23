@@ -375,19 +375,23 @@ async function displayToolProperties(selectedTool: ToolResource) {
 }
 
 async function setCustomProperties(toolbox: Toolbox, tool: ToolResource) {
-  logger.info(`Setting custom properties for tool: ${chalk.bold.green(tool.metadata.name)}`)
+  logger.info(
+    `Setting custom properties for tool: ${chalk.bold.green(tool.metadata.name)}`
+  )
 
   // Collect custom properties
   const newTags: Record<string, any> = {}
   let addingProps = true
 
   logger.log('\n' + chalk.bold.blueBright('Add custom properties:'))
-  logger.log(chalk.dim('Enter properties as key-value pairs. Empty key to finish.'))
+  logger.log(
+    chalk.dim('Enter properties as key-value pairs. Empty key to finish.')
+  )
 
   while (addingProps) {
     // Get property key
     const propKey = await input({
-      message: 'Enter property key (or empty to finish):',
+      message: 'Enter property key (or empty to finish):'
     })
 
     // Break the loop if empty key
@@ -398,13 +402,15 @@ async function setCustomProperties(toolbox: Toolbox, tool: ToolResource) {
 
     // Get property value
     const propValue = await input({
-      message: `Enter value for ${chalk.cyan(propKey)}:`,
+      message: `Enter value for ${chalk.cyan(propKey)}:`
     })
 
     // Add to custom properties
     newTags[propKey] = propValue
 
-    logger.info(`Added property: ${chalk.cyan(propKey)} = ${chalk.yellow(propValue)}`)
+    logger.info(
+      `Added property: ${chalk.cyan(propKey)} = ${chalk.yellow(propValue)}`
+    )
   }
 
   // If no properties were added
@@ -417,10 +423,7 @@ async function setCustomProperties(toolbox: Toolbox, tool: ToolResource) {
   logger.log('\n' + chalk.bold.blueBright('Custom properties to be added:'))
 
   const propsTable = new Table({
-    head: [
-      chalk.blueBright('Key'),
-      chalk.blueBright('Value')
-    ],
+    head: [chalk.blueBright('Key'), chalk.blueBright('Value')],
     style: {
       head: [],
       border: []
@@ -432,7 +435,9 @@ async function setCustomProperties(toolbox: Toolbox, tool: ToolResource) {
   for (const [key, value] of Object.entries(newTags)) {
     propsTable.push([
       chalk.cyan(key),
-      chalk.yellow(typeof value === 'object' ? JSON.stringify(value) : value.toString())
+      chalk.yellow(
+        typeof value === 'object' ? JSON.stringify(value) : value.toString()
+      )
     ])
   }
 
@@ -461,16 +466,19 @@ async function setCustomProperties(toolbox: Toolbox, tool: ToolResource) {
         }
       )
 
-      logger.info(chalk.green('✓ Custom properties successfully added to the tool.'))
+      logger.info(
+        chalk.green('✓ Custom properties successfully added to the tool.')
+      )
 
       const spinner = getSpinner('Refreshing integration...', 'yellow')
       spinner.start()
       await toolbox.refreshIntegration(tool.metadata.integrationName)
       spinner.succeed('Integration refreshed successfully')
 
-      const refreshedTool = await toolbox.filter(ToolNameFilter(tool.metadata.name))
+      const refreshedTool = await toolbox.filter(
+        ToolNameFilter(tool.metadata.name)
+      )
       await displayToolProperties(refreshedTool[0])
-
     } catch (error) {
       logger.error(`Failed to update custom properties: ${error}`)
     }
@@ -537,15 +545,17 @@ async function runToolsExperience() {
           const description = integrationDescriptions[integration]
 
           return {
-            name: `${integration} ${chalk.gray(`(${toolCount} tools)`)}${description ? chalk.dim(` - ${description}`) : ''
-              }`,
+            name: `${integration} ${chalk.gray(`(${toolCount} tools)`)}${
+              description ? chalk.dim(` - ${description}`) : ''
+            }`,
             value: integration
           }
         })
       })
 
       logger.info(
-        `Selected integration: ${chalk.bold.green(selectedIntegration)} with ${toolsByIntegration[selectedIntegration].length
+        `Selected integration: ${chalk.bold.green(selectedIntegration)} with ${
+          toolsByIntegration[selectedIntegration].length
         } tools available`
       )
 

@@ -13,7 +13,7 @@ class IntegrationRefreshAttempt {
     public readonly integrationName: string,
     public readonly error?: any,
     public readonly refreshTs: number = getUnixTime(Date.now())
-  ) { }
+  ) {}
 }
 
 export class MCPToolCache implements ToolCache {
@@ -208,7 +208,9 @@ export class MCPToolCache implements ToolCache {
       return false
     }
 
-    const refreshAttempt = await this.refreshToolsForIntegration(integrationClientConfig)
+    const refreshAttempt = await this.refreshToolsForIntegration(
+      integrationClientConfig
+    )
 
     if (!refreshAttempt.success) {
       log.error(`Failed to refresh integration ${integrationName}`)
