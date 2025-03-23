@@ -60,6 +60,14 @@ export class Toolbox implements BaseToolbox<ToolResource> {
     return filteredToolResources[0] as ToolResource
   }
 
+  async refresh(): Promise<boolean> {
+    return this.toolCache.refresh()
+  }
+
+  async refreshIntegration(integrationName: string): Promise<boolean> {
+    return this.toolCache.refreshIntegration(integrationName)
+  }
+
   async close(): Promise<void> {
     await this.connectedClientManager.close()
   }

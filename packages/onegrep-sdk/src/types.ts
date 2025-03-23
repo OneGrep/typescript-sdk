@@ -92,6 +92,7 @@ export interface ToolResource {
 
 export interface ToolCache {
   refresh(): Promise<boolean>
+  refreshIntegration(integrationName: string): Promise<boolean>
   get(key: ToolId): Promise<ToolResource | undefined>
   list(): Promise<ToolResource[]>
 }

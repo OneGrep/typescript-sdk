@@ -13,7 +13,7 @@ class IntegrationRefreshAttempt {
     public readonly integrationName: string,
     public readonly error?: any,
     public readonly refreshTs: number = getUnixTime(Date.now())
-  ) {}
+  ) { }
 }
 
 export class MCPToolCache implements ToolCache {
@@ -190,6 +190,32 @@ export class MCPToolCache implements ToolCache {
 
     this.allConfigs = [metaClientConfig, ...hostClientConfigs]
     log.info(`${this.allConfigs.length} integrations configs refreshed`)
+  }
+
+  /**
+   * Refreshes a single integration.
+   *
+   * @param integrationName - The name of the integration to refresh.
+   * @returns True if the integration was refreshed successfully, false otherwise.
+   */
+  async refreshIntegration(integrationName: string): Promise<boolean> {
+    const integrationClientConfig = this.allConfigs.find(
+      (config) => config.name === integrationName
+    )
+
+    if (!integrationClientConfig) {
+      log.error(`Integration config not found for ${integrationName}`)
+      return false
+    }
+
+    const refreshAttempt = await this.refreshToolsForIntegration(integrationClientConfig)
+
+    if (!refreshAttempt.success) {
+      log.error(`Failed to refresh integration ${integrationName}`)
+      return false
+    }
+
+    return true
   }
 
   async refresh(): Promise<boolean> {

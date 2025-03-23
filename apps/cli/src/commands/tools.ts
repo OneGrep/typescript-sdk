@@ -1,12 +1,14 @@
 import { Command } from 'commander'
 import { chalk, logger } from '../utils/logger'
-import { getSpinner, isDefined } from '../utils/helpers'
+import { clearTerminal, getSpinner, isDefined } from '../utils/helpers'
 import {
   getToolbox,
   ToolResource,
   ToolCallInput,
   ToolCallError,
-  JsonSchema
+  JsonSchema,
+  Toolbox,
+  ToolNameFilter
 } from '@onegrep/sdk'
 import { select, input, confirm } from '@inquirer/prompts'
 import Table from 'cli-table3'
@@ -372,6 +374,111 @@ async function displayToolProperties(selectedTool: ToolResource) {
   }
 }
 
+async function setCustomProperties(toolbox: Toolbox, tool: ToolResource) {
+  logger.info(`Setting custom properties for tool: ${chalk.bold.green(tool.metadata.name)}`)
+
+  // Collect custom properties
+  const newTags: Record<string, any> = {}
+  let addingProps = true
+
+  logger.log('\n' + chalk.bold.blueBright('Add custom properties:'))
+  logger.log(chalk.dim('Enter properties as key-value pairs. Empty key to finish.'))
+
+  while (addingProps) {
+    // Get property key
+    const propKey = await input({
+      message: 'Enter property key (or empty to finish):',
+    })
+
+    // Break the loop if empty key
+    if (!propKey.trim()) {
+      addingProps = false
+      continue
+    }
+
+    // Get property value
+    const propValue = await input({
+      message: `Enter value for ${chalk.cyan(propKey)}:`,
+    })
+
+    // Add to custom properties
+    newTags[propKey] = propValue
+
+    logger.info(`Added property: ${chalk.cyan(propKey)} = ${chalk.yellow(propValue)}`)
+  }
+
+  // If no properties were added
+  if (Object.keys(newTags).length === 0) {
+    logger.info('No custom properties added.')
+    return
+  }
+
+  // Show summary table of properties to be added
+  logger.log('\n' + chalk.bold.blueBright('Custom properties to be added:'))
+
+  const propsTable = new Table({
+    head: [
+      chalk.blueBright('Key'),
+      chalk.blueBright('Value')
+    ],
+    style: {
+      head: [],
+      border: []
+    },
+    wordWrap: true,
+    colWidths: [30, 60]
+  })
+
+  for (const [key, value] of Object.entries(newTags)) {
+    propsTable.push([
+      chalk.cyan(key),
+      chalk.yellow(typeof value === 'object' ? JSON.stringify(value) : value.toString())
+    ])
+  }
+
+  logger.log(propsTable.toString())
+
+  // Confirm with user
+  const confirmAdd = await confirm({
+    message: 'Do you want to add these custom properties to the tool?',
+    default: true
+  })
+
+  if (confirmAdd) {
+    try {
+      // Call the API with the correct structure
+      await toolbox.apiClient.upsert_tool_custom_tags_api_v1_integrations__integration_name__tools__tool_name__custom_tags_post(
+        {
+          integration_name: tool.metadata.integrationName,
+          tool_name: tool.metadata.name,
+          tags: newTags
+        },
+        {
+          params: {
+            integration_name: tool.metadata.integrationName,
+            tool_name: tool.metadata.name
+          }
+        }
+      )
+
+      logger.info(chalk.green('✓ Custom properties successfully added to the tool.'))
+
+      const spinner = getSpinner('Refreshing integration...', 'yellow')
+      spinner.start()
+      await toolbox.refreshIntegration(tool.metadata.integrationName)
+      spinner.succeed('Integration refreshed successfully')
+
+      const refreshedTool = await toolbox.filter(ToolNameFilter(tool.metadata.name))
+      await displayToolProperties(refreshedTool[0])
+
+    } catch (error) {
+      logger.error(`Failed to update custom properties: ${error}`)
+    }
+  } else {
+    logger.info('Custom properties update cancelled.')
+  }
+}
+
 /**
  * Interactive experience for exploring and running tools
  */
@@ -379,7 +486,7 @@ async function runToolsExperience() {
   // Initialize spinner and toolbox - do this only once
   let spinner = getSpinner('Setting up toolbox...', 'yellow')
   spinner.start()
-  const toolbox = await getToolbox()
+  const toolbox: Toolbox = await getToolbox()
   spinner.succeed('Toolbox setup complete')
 
   try {
@@ -473,6 +580,7 @@ async function runToolsExperience() {
           { name: 'See an example of tool usage', value: 'example' },
           { name: 'Run this tool now', value: 'run' },
           { name: 'Select another tool', value: 'another' },
+          { name: 'Set custom properties', value: 'set-custom-properties' },
           { name: 'Exit', value: 'exit' }
         ]
       })
@@ -484,6 +592,7 @@ async function runToolsExperience() {
       }
 
       if (nextAction === 'another') {
+        clearTerminal()
         // Just continue to the next iteration of the loop
         continue
       }
@@ -511,6 +620,8 @@ async function runToolsExperience() {
       } else if (nextAction === 'run') {
         // Run the tool directly
         await runSelectedTool(selectedTool)
+      } else if (nextAction === 'set-custom-properties') {
+        await setCustomProperties(toolbox, selectedTool)
       }
 
       // After running a tool, ask if they want to explore more tools
