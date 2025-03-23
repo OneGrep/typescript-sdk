@@ -240,7 +240,7 @@ async function runSelectedTool(tool: ToolResource) {
 async function displayToolProperties(selectedTool: ToolResource) {
   logger.info(`Selected tool: ${chalk.bold.green(selectedTool.metadata.name)}`)
 
-  // 3. Show tool information in a more organized way using a table
+  // Show tool information in a more organized way using a table
   logger.log('\n' + chalk.bold.blueBright('Tool Details:'))
 
   const detailsTable = new Table({
@@ -263,6 +263,22 @@ async function displayToolProperties(selectedTool: ToolResource) {
     detailsTable.push([
       chalk.blueBright('Description:'),
       selectedTool.metadata.description
+    ])
+  }
+
+  // Add policy details if available
+  if (selectedTool.policy) {
+    detailsTable.push([
+      chalk.blueBright('Policy:'),
+      JSON.stringify(selectedTool.policy, null, 2)
+    ])
+  }
+
+  // Add extraProperties if available
+  if (selectedTool.metadata.extraProperties) {
+    detailsTable.push([
+      chalk.blueBright('Extra Props:'),
+      JSON.stringify(selectedTool.metadata.extraProperties, null, 2)
     ])
   }
 
@@ -414,17 +430,15 @@ async function runToolsExperience() {
           const description = integrationDescriptions[integration]
 
           return {
-            name: `${integration} ${chalk.gray(`(${toolCount} tools)`)}${
-              description ? chalk.dim(` - ${description}`) : ''
-            }`,
+            name: `${integration} ${chalk.gray(`(${toolCount} tools)`)}${description ? chalk.dim(` - ${description}`) : ''
+              }`,
             value: integration
           }
         })
       })
 
       logger.info(
-        `Selected integration: ${chalk.bold.green(selectedIntegration)} with ${
-          toolsByIntegration[selectedIntegration].length
+        `Selected integration: ${chalk.bold.green(selectedIntegration)} with ${toolsByIntegration[selectedIntegration].length
         } tools available`
       )
 
