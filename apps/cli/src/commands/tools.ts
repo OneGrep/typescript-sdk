@@ -489,9 +489,9 @@ async function setCustomProperties(toolbox: Toolbox, tool: ToolResource) {
 
 /** Helper function to refresh all the helper data structures in case of changes. */
 async function get_refreshed_toolset(toolbox: Toolbox): Promise<{
-  tools: ToolResource[],
-  toolsByIntegration: Record<string, ToolResource[]>,
-  integrations: string[],
+  tools: ToolResource[]
+  toolsByIntegration: Record<string, ToolResource[]>
+  integrations: string[]
   integrationDescriptions: Record<string, string>
 }> {
   let spinner = getSpinner('Refreshing toolset...', 'yellow')
@@ -527,64 +527,23 @@ async function get_refreshed_toolset(toolbox: Toolbox): Promise<{
 }
 
 /**
- * Interactive experience for exploring and running tools
+ * Explore tools from a specific integration
  */
-async function runToolsExperience() {
-  // Initialize spinner and toolbox - do this only once
-  let spinner = getSpinner('Setting up toolbox...', 'yellow')
-  spinner.start()
-  const toolbox: Toolbox = await getToolbox()
-  spinner.succeed('Toolbox setup complete')
+async function exploreIntegrationTools(
+  toolbox: Toolbox,
+  toolsForIntegration: ToolResource[]
+): Promise<{
+  exitCompletely: boolean
+}> {
+  let exitCompletely = false;
+  let continueExploringTools = true;
 
-  try {
-    // Get all tools - do this only once
-    spinner = getSpinner('Discovering available tools...', 'yellow')
-    spinner.start()
-    const toolResources: Array<ToolResource> = await toolbox.listAll()
-    spinner.succeed(
-      `Found ${toolResources.length} tools across various integrations`
-    )
-
-    // Main tool exploration loop
-    let continueExploring = true
-    while (continueExploring) {
-      let { tools, toolsByIntegration, integrations, integrationDescriptions } = await get_refreshed_toolset(toolbox)
-
-      // If no integrations found
-      if (tools.length === 0) {
-        logger.error('No integrations or tools found in your toolbox.')
-        return
-      }
-
-      let selectedIntegration: string
-      let selectedTool: ToolResource
-
-      // 1. Select an integration (now with descriptions and tool counts)
-      selectedIntegration = await select({
-        message: 'Select an integration:',
-        choices: integrations.map((integration) => {
-          const toolCount = toolsByIntegration[integration].length
-          const description = integrationDescriptions[integration]
-
-          return {
-            name: `${integration} ${chalk.gray(`(${toolCount} tools)`)}${description ? chalk.dim(` - ${description}`) : ''
-              }`,
-            value: integration
-          }
-        })
-      })
-
-      logger.info(
-        `Selected integration: ${chalk.bold.green(selectedIntegration)} with ${toolsByIntegration[selectedIntegration].length
-        } tools available`
-      )
-
-      // 2. Select a tool from the chosen integration
-      const toolsForIntegration = toolsByIntegration[selectedIntegration]
-
-      const selectedToolName = await select({
-        message: 'Select a tool:',
-        choices: toolsForIntegration.map((tool) => {
+  while (continueExploringTools && !exitCompletely) {
+    // Select a tool to explore
+    const selectedToolName = await select({
+      message: 'Select a tool to explore:',
+      choices: [
+        ...toolsForIntegration.map((tool) => {
           // Format the tool name and description nicely
           const name = chalk.bold(tool.metadata.name)
           const description = tool.metadata.description
@@ -595,79 +554,184 @@ async function runToolsExperience() {
             name: `${name}${description}`,
             value: tool.metadata.name
           }
-        })
-      })
+        }),
+        { name: 'Return to integration options', value: 'back-to-integration' },
+        { name: 'Exit', value: 'exit' }
+      ]
+    })
 
-      selectedTool = toolsForIntegration.find(
-        (tool) => tool.metadata.name === selectedToolName
-      )!
-      await displayToolProperties(selectedTool)
+    if (selectedToolName === 'exit') {
+      logger.info('Exiting tool explorer')
+      exitCompletely = true;
+      break;
+    }
 
-      // 5. Let user choose what to do next
-      const nextAction = await select({
-        message: 'What would you like to do?',
+    if (selectedToolName === 'back-to-integration') {
+      break;
+    }
+
+    const selectedTool = toolsForIntegration.find(
+      (tool) => tool.metadata.name === selectedToolName
+    )!
+
+    // Tool exploration loop
+    let continueWithCurrentTool = true;
+
+    while (continueWithCurrentTool && !exitCompletely) {
+      clearTerminal();
+      await displayToolProperties(selectedTool);
+
+      // Let user choose what to do with this specific tool
+      const toolAction = await select({
+        message: 'What would you like to do with this tool?',
         choices: [
           { name: 'See an example of tool usage', value: 'example' },
           { name: 'Run this tool now', value: 'run' },
-          { name: 'Select another tool', value: 'another' },
           { name: 'Set custom properties', value: 'set-custom-properties' },
+          { name: 'Select a different tool', value: 'different-tool' },
+          { name: 'Return to integration options', value: 'back-to-integration' },
           { name: 'Exit', value: 'exit' }
         ]
-      })
+      });
 
-      if (nextAction === 'exit') {
-        logger.info('Exiting tool search')
-        continueExploring = false
-        continue // Break out of the current iteration and check continueExploring
+      if (toolAction === 'exit') {
+        logger.info('Exiting tool explorer');
+        exitCompletely = true;
+        break;
       }
 
-      if (nextAction === 'another') {
-        clearTerminal()
-        // Just continue to the next iteration of the loop
-        continue
+      if (toolAction === 'back-to-integration') {
+        continueWithCurrentTool = false;
+        break;
       }
 
-      if (nextAction === 'example') {
-        await showToolUsageExample(selectedTool)
+      if (toolAction === 'different-tool') {
+        continueWithCurrentTool = false;
+        continue; // Go back to tool selection
+      }
+
+      if (toolAction === 'example') {
+        await showToolUsageExample(selectedTool);
 
         // After showing example, ask if they want to run the tool
         const shouldRun = await confirm({
           message: 'Would you like to run this tool now?'
-        })
+        });
 
-        if (!shouldRun) {
-          // Ask if they want to explore another tool
-          const exploreAnother = await confirm({
-            message: 'Would you like to explore another tool?'
-          })
-
-          continueExploring = exploreAnother
-          continue
+        if (shouldRun) {
+          await runSelectedTool(selectedTool);
         }
-
-        // Run the tool if they want to after seeing the example
-        await runSelectedTool(selectedTool)
-      } else if (nextAction === 'run') {
-        // Run the tool directly
-        await runSelectedTool(selectedTool)
-      } else if (nextAction === 'set-custom-properties') {
-        await setCustomProperties(toolbox, selectedTool)
+      } else if (toolAction === 'run') {
+        await runSelectedTool(selectedTool);
+      } else if (toolAction === 'set-custom-properties') {
+        await setCustomProperties(toolbox, selectedTool);
       }
 
-      // After running a tool, ask if they want to explore more tools
-      const runAnother = await confirm({
-        message: 'Would you like to explore another tool?'
+      // If we're still exploring this tool, ask to continue
+      if (continueWithCurrentTool && !exitCompletely) {
+        const keepExploringTool = await confirm({
+          message: 'Continue working with this tool?',
+          default: true
+        });
+
+        if (!keepExploringTool) {
+          continueWithCurrentTool = false;
+        }
+      }
+    } // End current tool loop
+  } // End tool selection loop
+
+  return { exitCompletely };
+}
+
+/**
+ * Interactive experience for exploring and running tools
+ */
+async function runToolsExperience() {
+  // Initialize spinner and toolbox - do this only once
+  let spinner = getSpinner('Setting up toolbox...', 'yellow')
+  spinner.start()
+  const toolbox: Toolbox = await getToolbox()
+  spinner.succeed('Toolbox setup complete')
+
+  try {
+    // Main integration exploration loop
+    let continueExploringIntegrations = true;
+
+    while (continueExploringIntegrations) {
+      clearTerminal();
+
+      // Refresh toolset at the beginning of each integration exploration
+      let { tools, toolsByIntegration, integrations, integrationDescriptions } =
+        await get_refreshed_toolset(toolbox);
+
+      // If no integrations found
+      if (tools.length === 0) {
+        logger.error('No integrations or tools found in your toolbox.');
+        return;
+      }
+
+      // 1. Select an integration
+      const selectedIntegration = await select({
+        message: 'Select an integration:',
+        choices: [
+          ...integrations.map((integration) => {
+            const toolCount = toolsByIntegration[integration].length;
+            const description = integrationDescriptions[integration];
+
+            return {
+              name: `${integration} ${chalk.gray(`(${toolCount} tools)`)}${description ? chalk.dim(` - ${description}`) : ''
+                }`,
+              value: integration
+            };
+          }),
+          { name: 'Exit', value: 'exit' }
+        ]
+      });
+
+      if (selectedIntegration === 'exit') {
+        logger.info('Exiting tool explorer');
+        break;
+      }
+
+      logger.info(
+        `Selected integration: ${chalk.bold.green(selectedIntegration)} with ${toolsByIntegration[selectedIntegration].length
+        } tools available`
+      );
+
+      const toolExplorationSelection = await select({
+        message: 'Select an option:',
+        choices: [
+          { name: 'Explore a single tool', value: 'explore-tools' },
+          { name: 'Modify multiple tools', value: 'modify-tools' }
+        ]
       })
 
-      continueExploring = runAnother
-      if (continueExploring) {
-        clearTerminal()
+      if (toolExplorationSelection === 'explore-tools') {
+        const toolsForIntegration = toolsByIntegration[selectedIntegration];
+
+        // Call the extracted function for exploring tools within an integration
+        const { exitCompletely } = await exploreIntegrationTools(
+          toolbox,
+          toolsForIntegration,
+        );
+
+        if (exitCompletely) {
+          break;
+        }
       }
-    }
+
+      if (toolExplorationSelection === 'modify-tools') {
+        logger.error('Not implemented yet')
+      }
+
+      // If not switching integrations, we'll show the integration menu again
+      continueExploringIntegrations = true;
+    } // End integration exploration loop
   } catch (error) {
-    logger.error(`Error in tool search: ${error}`)
+    logger.error(`Error in tool search: ${error}`);
   } finally {
-    await toolbox.close()
+    await toolbox.close();
   }
 }
 
