@@ -384,13 +384,13 @@ async function collectCustomTags(): Promise<{
   let addingProps = true
 
   logger.log('\n' + chalk.bold.blueBright('Add custom properties:'))
-  logger.log(
-    chalk.dim('Enter tags as key-value pairs. Empty key to finish.')
-  )
+  logger.log(chalk.dim('Enter tags as key-value pairs. Empty key to finish.'))
 
   while (addingProps) {
     // Get property key
-    console.info(chalk.dim('↓ Press Enter with empty input to finish adding tags ↓'));
+    console.info(
+      chalk.dim('↓ Press Enter with empty input to finish adding tags ↓')
+    )
     const propKey = await input({
       message: 'Enter a tag name (Ex. description, owner, etc.):'
     })
@@ -767,8 +767,9 @@ async function runToolsExperience() {
             const description = integrationDescriptions[integration]
 
             return {
-              name: `${integration} ${chalk.gray(`(${toolCount} tools)`)}${description ? chalk.dim(` - ${description}`) : ''
-                }`,
+              name: `${integration} ${chalk.gray(`(${toolCount} tools)`)}${
+                description ? chalk.dim(` - ${description}`) : ''
+              }`,
               value: integration
             }
           }),
@@ -782,7 +783,8 @@ async function runToolsExperience() {
       }
 
       logger.info(
-        `Selected integration: ${chalk.bold.green(selectedIntegration)} with ${toolsByIntegration[selectedIntegration].length
+        `Selected integration: ${chalk.bold.green(selectedIntegration)} with ${
+          toolsByIntegration[selectedIntegration].length
         } tools available`
       )
 
