@@ -535,8 +535,8 @@ async function exploreIntegrationTools(
 ): Promise<{
   exitCompletely: boolean
 }> {
-  let exitCompletely = false;
-  let continueExploringTools = true;
+  let exitCompletely = false
+  let continueExploringTools = true
 
   while (continueExploringTools && !exitCompletely) {
     // Select a tool to explore
@@ -562,12 +562,12 @@ async function exploreIntegrationTools(
 
     if (selectedToolName === 'exit') {
       logger.info('Exiting tool explorer')
-      exitCompletely = true;
-      break;
+      exitCompletely = true
+      break
     }
 
     if (selectedToolName === 'back-to-integration') {
-      break;
+      break
     }
 
     const selectedTool = toolsForIntegration.find(
@@ -575,11 +575,11 @@ async function exploreIntegrationTools(
     )!
 
     // Tool exploration loop
-    let continueWithCurrentTool = true;
+    let continueWithCurrentTool = true
 
     while (continueWithCurrentTool && !exitCompletely) {
-      clearTerminal();
-      await displayToolProperties(selectedTool);
+      clearTerminal()
+      await displayToolProperties(selectedTool)
 
       // Let user choose what to do with this specific tool
       const toolAction = await select({
@@ -589,42 +589,45 @@ async function exploreIntegrationTools(
           { name: 'Run this tool now', value: 'run' },
           { name: 'Set custom properties', value: 'set-custom-properties' },
           { name: 'Select a different tool', value: 'different-tool' },
-          { name: 'Return to integration options', value: 'back-to-integration' },
+          {
+            name: 'Return to integration options',
+            value: 'back-to-integration'
+          },
           { name: 'Exit', value: 'exit' }
         ]
-      });
+      })
 
       if (toolAction === 'exit') {
-        logger.info('Exiting tool explorer');
-        exitCompletely = true;
-        break;
+        logger.info('Exiting tool explorer')
+        exitCompletely = true
+        break
       }
 
       if (toolAction === 'back-to-integration') {
-        continueWithCurrentTool = false;
-        break;
+        continueWithCurrentTool = false
+        break
       }
 
       if (toolAction === 'different-tool') {
-        continueWithCurrentTool = false;
-        continue; // Go back to tool selection
+        continueWithCurrentTool = false
+        continue // Go back to tool selection
       }
 
       if (toolAction === 'example') {
-        await showToolUsageExample(selectedTool);
+        await showToolUsageExample(selectedTool)
 
         // After showing example, ask if they want to run the tool
         const shouldRun = await confirm({
           message: 'Would you like to run this tool now?'
-        });
+        })
 
         if (shouldRun) {
-          await runSelectedTool(selectedTool);
+          await runSelectedTool(selectedTool)
         }
       } else if (toolAction === 'run') {
-        await runSelectedTool(selectedTool);
+        await runSelectedTool(selectedTool)
       } else if (toolAction === 'set-custom-properties') {
-        await setCustomProperties(toolbox, selectedTool);
+        await setCustomProperties(toolbox, selectedTool)
       }
 
       // If we're still exploring this tool, ask to continue
@@ -632,16 +635,16 @@ async function exploreIntegrationTools(
         const keepExploringTool = await confirm({
           message: 'Continue working with this tool?',
           default: true
-        });
+        })
 
         if (!keepExploringTool) {
-          continueWithCurrentTool = false;
+          continueWithCurrentTool = false
         }
       }
     } // End current tool loop
   } // End tool selection loop
 
-  return { exitCompletely };
+  return { exitCompletely }
 }
 
 /**
@@ -656,19 +659,19 @@ async function runToolsExperience() {
 
   try {
     // Main integration exploration loop
-    let continueExploringIntegrations = true;
+    let continueExploringIntegrations = true
 
     while (continueExploringIntegrations) {
-      clearTerminal();
+      clearTerminal()
 
       // Refresh toolset at the beginning of each integration exploration
       let { tools, toolsByIntegration, integrations, integrationDescriptions } =
-        await get_refreshed_toolset(toolbox);
+        await get_refreshed_toolset(toolbox)
 
       // If no integrations found
       if (tools.length === 0) {
-        logger.error('No integrations or tools found in your toolbox.');
-        return;
+        logger.error('No integrations or tools found in your toolbox.')
+        return
       }
 
       // 1. Select an integration
@@ -676,28 +679,30 @@ async function runToolsExperience() {
         message: 'Select an integration:',
         choices: [
           ...integrations.map((integration) => {
-            const toolCount = toolsByIntegration[integration].length;
-            const description = integrationDescriptions[integration];
+            const toolCount = toolsByIntegration[integration].length
+            const description = integrationDescriptions[integration]
 
             return {
-              name: `${integration} ${chalk.gray(`(${toolCount} tools)`)}${description ? chalk.dim(` - ${description}`) : ''
-                }`,
+              name: `${integration} ${chalk.gray(`(${toolCount} tools)`)}${
+                description ? chalk.dim(` - ${description}`) : ''
+              }`,
               value: integration
-            };
+            }
           }),
           { name: 'Exit', value: 'exit' }
         ]
-      });
+      })
 
       if (selectedIntegration === 'exit') {
-        logger.info('Exiting tool explorer');
-        break;
+        logger.info('Exiting tool explorer')
+        break
       }
 
       logger.info(
-        `Selected integration: ${chalk.bold.green(selectedIntegration)} with ${toolsByIntegration[selectedIntegration].length
+        `Selected integration: ${chalk.bold.green(selectedIntegration)} with ${
+          toolsByIntegration[selectedIntegration].length
         } tools available`
-      );
+      )
 
       const toolExplorationSelection = await select({
         message: 'Select an option:',
@@ -708,16 +713,16 @@ async function runToolsExperience() {
       })
 
       if (toolExplorationSelection === 'explore-tools') {
-        const toolsForIntegration = toolsByIntegration[selectedIntegration];
+        const toolsForIntegration = toolsByIntegration[selectedIntegration]
 
         // Call the extracted function for exploring tools within an integration
         const { exitCompletely } = await exploreIntegrationTools(
           toolbox,
-          toolsForIntegration,
-        );
+          toolsForIntegration
+        )
 
         if (exitCompletely) {
-          break;
+          break
         }
       }
 
@@ -726,12 +731,12 @@ async function runToolsExperience() {
       }
 
       // If not switching integrations, we'll show the integration menu again
-      continueExploringIntegrations = true;
+      continueExploringIntegrations = true
     } // End integration exploration loop
   } catch (error) {
-    logger.error(`Error in tool search: ${error}`);
+    logger.error(`Error in tool search: ${error}`)
   } finally {
-    await toolbox.close();
+    await toolbox.close()
   }
 }
 
