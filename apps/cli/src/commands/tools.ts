@@ -711,7 +711,7 @@ async function modifyMultipleTools(
         message: 'Select tools to modify (space to select, enter to confirm):',
         choices: [
           { name: chalk.bold.blueBright('Select All'), value: allOption },
-          ...tools.map(tool => ({
+          ...tools.map((tool) => ({
             name: `${tool.metadata.name}${tool.metadata.description ? chalk.dim(` - ${tool.metadata.description}`) : ''}`,
             value: tool.metadata.name
           }))
@@ -725,7 +725,7 @@ async function modifyMultipleTools(
       // Handle "Select All" option
       let toolsToModify: string[]
       if (selectedToolNames.includes(allOption)) {
-        toolsToModify = tools.map(tool => tool.metadata.name)
+        toolsToModify = tools.map((tool) => tool.metadata.name)
         logger.info(`Selected all ${toolsToModify.length} tools`)
       } else {
         toolsToModify = selectedToolNames
@@ -794,8 +794,9 @@ async function runToolsExperience() {
             const description = integrationDescriptions[integration]
 
             return {
-              name: `${integration} ${chalk.gray(`(${toolCount} tools)`)}${description ? chalk.dim(` - ${description}`) : ''
-                }`,
+              name: `${integration} ${chalk.gray(`(${toolCount} tools)`)}${
+                description ? chalk.dim(` - ${description}`) : ''
+              }`,
               value: integration
             }
           }),
@@ -809,7 +810,8 @@ async function runToolsExperience() {
       }
 
       logger.info(
-        `Selected integration: ${chalk.bold.green(selectedIntegration)} with ${toolsByIntegration[selectedIntegration].length
+        `Selected integration: ${chalk.bold.green(selectedIntegration)} with ${
+          toolsByIntegration[selectedIntegration].length
         } tools available`
       )
 
