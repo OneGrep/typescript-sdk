@@ -385,13 +385,14 @@ async function collectCustomTags(): Promise<{
 
   logger.log('\n' + chalk.bold.blueBright('Add custom properties:'))
   logger.log(
-    chalk.dim('Enter properties as key-value pairs. Empty key to finish.')
+    chalk.dim('Enter tags as key-value pairs. Empty key to finish.')
   )
 
   while (addingProps) {
     // Get property key
+    console.info(chalk.dim('↓ Press Enter with empty input to finish adding tags ↓'));
     const propKey = await input({
-      message: 'Enter property key (Ex. description, owner, etc.):'
+      message: 'Enter a tag name (Ex. description, owner, etc.):'
     })
 
     // Break the loop if empty key
@@ -421,7 +422,7 @@ async function collectCustomTags(): Promise<{
     newTags[propKey] = coercedValue
 
     logger.info(
-      `Added property: ${chalk.cyan(propKey)} = ${chalk.yellow(propValue)}`
+      `Added tag: ${chalk.cyan(propKey)} = ${chalk.yellow(propValue)}`
     )
   }
 
@@ -432,7 +433,7 @@ async function collectCustomTags(): Promise<{
   }
 
   // Show summary table of properties to be added
-  logger.log('\n' + chalk.bold.blueBright('Custom properties to be added:'))
+  logger.log('\n' + chalk.bold.blueBright('Custom tags to be added:'))
 
   const propsTable = new Table({
     head: [chalk.blueBright('Key'), chalk.blueBright('Value')],
@@ -457,7 +458,7 @@ async function collectCustomTags(): Promise<{
 
   // Confirm with user
   const confirmAdd = await confirm({
-    message: 'Do you want to add these custom properties to the tool?',
+    message: 'Looks good?',
     default: true
   })
 
@@ -470,7 +471,7 @@ async function collectCustomTags(): Promise<{
 
 async function setCustomProperties(toolbox: Toolbox, tool: ToolResource) {
   logger.info(
-    `Setting custom properties for tool: ${chalk.bold.green(tool.metadata.name)}`
+    `Setting custom tags for tool: ${chalk.bold.green(tool.metadata.name)}`
   )
 
   const { tags, confirmAdd } = await collectCustomTags()
@@ -492,9 +493,7 @@ async function setCustomProperties(toolbox: Toolbox, tool: ToolResource) {
         }
       )
 
-      logger.info(
-        chalk.green('✓ Custom tags successfully added to the tool.')
-      )
+      logger.info(chalk.green('✓ Custom tags successfully added to the tool.'))
 
       const spinner = getSpinner('Refreshing integration...', 'yellow')
       spinner.start()
@@ -673,17 +672,23 @@ async function exploreIntegrationTools(
   return { exitCompletely }
 }
 
-
 /**
  * Interactive loop to modify properties of multiple tools at the same time.
  */
-async function modifyMultipleTools(toolbox: Toolbox, integrationName: string, tools: ToolResource[]): Promise<boolean> {
+async function modifyMultipleTools(
+  toolbox: Toolbox,
+  integrationName: string,
+  tools: ToolResource[]
+): Promise<boolean> {
   while (true) {
     const selectedOption = await select({
       message: 'Select an option:',
       choices: [
-        { name: "Set custom properties on all tools", value: 'set-custom-properties' },
-        { name: "Return to integration options", value: 'back-to-integration' },
+        {
+          name: 'Set custom tags on all tools',
+          value: 'set-custom-tags'
+        },
+        { name: 'Return to integration options', value: 'back-to-integration' },
         { name: 'Exit', value: 'exit' }
       ]
     })
@@ -696,22 +701,34 @@ async function modifyMultipleTools(toolbox: Toolbox, integrationName: string, to
       return false
     }
 
-    if (selectedOption === 'set-custom-properties') {
-      logger.warn(`Setting custom properties on ${tools.length} tools at once. Proceed with caution.`)
+    if (selectedOption === 'set-custom-tags') {
+      logger.warn(
+        `Setting custom tags on ${tools.length} tools at once. Proceed with caution.`
+      )
       const { tags, confirmAdd } = await collectCustomTags()
 
       if (confirmAdd) {
-        let spinner = getSpinner(`Setting ${Object.keys(tags).length} custom properties on ${tools.length} tools...`, 'yellow')
+        let spinner = getSpinner(
+          `Setting ${Object.keys(tags).length} custom properties on ${tools.length} tools...`,
+          'yellow'
+        )
         spinner.start()
-        
-        
 
-        spinner.succeed('Custom properties updated on all tools')
+        await toolbox.apiClient.upsert_multiple_tool_custom_tags_api_v1_integrations__integration_name__tools_custom_tags_post(
+          {
+            tool_names: tools.map((tool) => tool.metadata.name),
+            tags: tags
+          },
+          {
+            params: { integration_name: integrationName }
+          }
+        )
+
+        await toolbox.refreshIntegration(integrationName)
+        spinner.succeed('Custom tags updated on all tools')
       }
     }
   }
-
-  return false
 }
 
 /**
@@ -792,7 +809,11 @@ async function runToolsExperience() {
       }
 
       if (toolExplorationSelection === 'modify-tools') {
-        const exitCompletely = await modifyMultipleTools(toolbox, selectedIntegration, tools)
+        const exitCompletely = await modifyMultipleTools(
+          toolbox,
+          selectedIntegration,
+          toolsByIntegration[selectedIntegration]!
+        )
 
         if (exitCompletely) {
           break
