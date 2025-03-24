@@ -123,8 +123,9 @@ if (tool) {
   logger.log(codeTable.toString())
 }
 
-async function coerceParameterValue(value: any, type: string) {
+async function coerceValueToType(value: any, type: string) {
   logger.debug(`Coercing parameter value: ${value} to type: ${type}`)
+  type = type.toLowerCase().trim()
 
   try {
     if (type === 'string') {
@@ -182,7 +183,7 @@ async function collectParameters(
         default: propDefault as string
       })
 
-      const coercedValue = await coerceParameterValue(paramValue, propType)
+      const coercedValue = await coerceValueToType(paramValue, propType)
 
       params.args[propName] = coercedValue
     } else {
@@ -200,7 +201,7 @@ async function collectParameters(
           default: propDefault as string
         })
 
-        const coercedValue = await coerceParameterValue(paramValue, propType)
+        const coercedValue = await coerceValueToType(paramValue, propType)
 
         params.args[propName] = coercedValue
       }
@@ -374,11 +375,10 @@ async function displayToolProperties(selectedTool: ToolResource) {
   }
 }
 
-async function setCustomProperties(toolbox: Toolbox, tool: ToolResource) {
-  logger.info(
-    `Setting custom properties for tool: ${chalk.bold.green(tool.metadata.name)}`
-  )
-
+async function collectCustomTags(): Promise<{
+  tags: Record<string, any>
+  confirmAdd: boolean
+}> {
   // Collect custom properties
   const newTags: Record<string, any> = {}
   let addingProps = true
@@ -391,7 +391,7 @@ async function setCustomProperties(toolbox: Toolbox, tool: ToolResource) {
   while (addingProps) {
     // Get property key
     const propKey = await input({
-      message: 'Enter property key (or empty to finish):'
+      message: 'Enter property key (Ex. description, owner, etc.):'
     })
 
     // Break the loop if empty key
@@ -405,8 +405,20 @@ async function setCustomProperties(toolbox: Toolbox, tool: ToolResource) {
       message: `Enter value for ${chalk.cyan(propKey)}:`
     })
 
+    const propType = await select({
+      message: `Select type for ${chalk.cyan(propKey)}:`,
+      choices: [
+        { name: 'String', value: 'string' },
+        { name: 'Number', value: 'number' },
+        { name: 'Boolean', value: 'boolean' }
+      ],
+      default: 'string'
+    })
+
+    const coercedValue = await coerceValueToType(propValue, propType)
+
     // Add to custom properties
-    newTags[propKey] = propValue
+    newTags[propKey] = coercedValue
 
     logger.info(
       `Added property: ${chalk.cyan(propKey)} = ${chalk.yellow(propValue)}`
@@ -416,7 +428,7 @@ async function setCustomProperties(toolbox: Toolbox, tool: ToolResource) {
   // If no properties were added
   if (Object.keys(newTags).length === 0) {
     logger.info('No custom properties added.')
-    return
+    return { tags: {}, confirmAdd: false }
   }
 
   // Show summary table of properties to be added
@@ -450,13 +462,27 @@ async function setCustomProperties(toolbox: Toolbox, tool: ToolResource) {
   })
 
   if (confirmAdd) {
+    return { tags: newTags, confirmAdd: true }
+  }
+
+  return { tags: {}, confirmAdd: false }
+}
+
+async function setCustomProperties(toolbox: Toolbox, tool: ToolResource) {
+  logger.info(
+    `Setting custom properties for tool: ${chalk.bold.green(tool.metadata.name)}`
+  )
+
+  const { tags, confirmAdd } = await collectCustomTags()
+
+  if (confirmAdd) {
     try {
       // Call the API with the correct structure
       await toolbox.apiClient.upsert_tool_custom_tags_api_v1_integrations__integration_name__tools__tool_name__custom_tags_post(
         {
           integration_name: tool.metadata.integrationName,
           tool_name: tool.metadata.name,
-          tags: newTags
+          tags: tags
         },
         {
           params: {
@@ -467,7 +493,7 @@ async function setCustomProperties(toolbox: Toolbox, tool: ToolResource) {
       )
 
       logger.info(
-        chalk.green('✓ Custom properties successfully added to the tool.')
+        chalk.green('✓ Custom tags successfully added to the tool.')
       )
 
       const spinner = getSpinner('Refreshing integration...', 'yellow')
@@ -480,10 +506,10 @@ async function setCustomProperties(toolbox: Toolbox, tool: ToolResource) {
       )
       await displayToolProperties(refreshedTool[0])
     } catch (error) {
-      logger.error(`Failed to update custom properties: ${error}`)
+      logger.error(`Failed to update custom tags: ${error}`)
     }
   } else {
-    logger.info('Custom properties update cancelled.')
+    logger.info('Custom tags update cancelled.')
   }
 }
 
@@ -647,6 +673,47 @@ async function exploreIntegrationTools(
   return { exitCompletely }
 }
 
+
+/**
+ * Interactive loop to modify properties of multiple tools at the same time.
+ */
+async function modifyMultipleTools(toolbox: Toolbox, integrationName: string, tools: ToolResource[]): Promise<boolean> {
+  while (true) {
+    const selectedOption = await select({
+      message: 'Select an option:',
+      choices: [
+        { name: "Set custom properties on all tools", value: 'set-custom-properties' },
+        { name: "Return to integration options", value: 'back-to-integration' },
+        { name: 'Exit', value: 'exit' }
+      ]
+    })
+
+    if (selectedOption === 'exit') {
+      return true
+    }
+
+    if (selectedOption === 'back-to-integration') {
+      return false
+    }
+
+    if (selectedOption === 'set-custom-properties') {
+      logger.warn(`Setting custom properties on ${tools.length} tools at once. Proceed with caution.`)
+      const { tags, confirmAdd } = await collectCustomTags()
+
+      if (confirmAdd) {
+        let spinner = getSpinner(`Setting ${Object.keys(tags).length} custom properties on ${tools.length} tools...`, 'yellow')
+        spinner.start()
+        
+        
+
+        spinner.succeed('Custom properties updated on all tools')
+      }
+    }
+  }
+
+  return false
+}
+
 /**
  * Interactive experience for exploring and running tools
  */
@@ -683,9 +750,8 @@ async function runToolsExperience() {
             const description = integrationDescriptions[integration]
 
             return {
-              name: `${integration} ${chalk.gray(`(${toolCount} tools)`)}${
-                description ? chalk.dim(` - ${description}`) : ''
-              }`,
+              name: `${integration} ${chalk.gray(`(${toolCount} tools)`)}${description ? chalk.dim(` - ${description}`) : ''
+                }`,
               value: integration
             }
           }),
@@ -699,8 +765,7 @@ async function runToolsExperience() {
       }
 
       logger.info(
-        `Selected integration: ${chalk.bold.green(selectedIntegration)} with ${
-          toolsByIntegration[selectedIntegration].length
+        `Selected integration: ${chalk.bold.green(selectedIntegration)} with ${toolsByIntegration[selectedIntegration].length
         } tools available`
       )
 
@@ -727,7 +792,11 @@ async function runToolsExperience() {
       }
 
       if (toolExplorationSelection === 'modify-tools') {
-        logger.error('Not implemented yet')
+        const exitCompletely = await modifyMultipleTools(toolbox, selectedIntegration, tools)
+
+        if (exitCompletely) {
+          break
+        }
       }
 
       // If not switching integrations, we'll show the integration menu again
