@@ -487,6 +487,45 @@ async function setCustomProperties(toolbox: Toolbox, tool: ToolResource) {
   }
 }
 
+/** Helper function to refresh all the helper data structures in case of changes. */
+async function get_refreshed_toolset(toolbox: Toolbox): Promise<{
+  tools: ToolResource[],
+  toolsByIntegration: Record<string, ToolResource[]>,
+  integrations: string[],
+  integrationDescriptions: Record<string, string>
+}> {
+  let spinner = getSpinner('Refreshing toolset...', 'yellow')
+  spinner.start()
+
+  const toolResources: Array<ToolResource> = await toolbox.listAll()
+  const toolsByIntegration: Record<string, ToolResource[]> = {}
+  const integrations: string[] = []
+  const integrationDescriptions: Record<string, string> = {} // Store integration descriptions
+
+  toolResources.forEach((tool) => {
+    const integrationName = tool.metadata.integrationName
+    // Access description safely - it might be stored in a custom property or we can extract it elsewhere
+    const integrationDescription = ''
+
+    if (!toolsByIntegration[integrationName]) {
+      toolsByIntegration[integrationName] = []
+      integrations.push(integrationName)
+      integrationDescriptions[integrationName] = integrationDescription
+    }
+
+    toolsByIntegration[integrationName].push(tool)
+  })
+
+  spinner.succeed('Toolset refreshed successfully')
+
+  return {
+    tools: toolResources,
+    toolsByIntegration: toolsByIntegration,
+    integrations: integrations,
+    integrationDescriptions: integrationDescriptions
+  }
+}
+
 /**
  * Interactive experience for exploring and running tools
  */
@@ -506,34 +545,17 @@ async function runToolsExperience() {
       `Found ${toolResources.length} tools across various integrations`
     )
 
-    // Organize tools by integration - do this only once
-    const toolsByIntegration: Record<string, ToolResource[]> = {}
-    const integrations: string[] = []
-    const integrationDescriptions: Record<string, string> = {} // Store integration descriptions
-
-    toolResources.forEach((tool) => {
-      const integrationName = tool.metadata.integrationName
-      // Access description safely - it might be stored in a custom property or we can extract it elsewhere
-      const integrationDescription = ''
-
-      if (!toolsByIntegration[integrationName]) {
-        toolsByIntegration[integrationName] = []
-        integrations.push(integrationName)
-        integrationDescriptions[integrationName] = integrationDescription
-      }
-
-      toolsByIntegration[integrationName].push(tool)
-    })
-
-    // If no integrations found
-    if (integrations.length === 0) {
-      logger.error('No integrations or tools found in your toolbox.')
-      return
-    }
-
     // Main tool exploration loop
     let continueExploring = true
     while (continueExploring) {
+      let { tools, toolsByIntegration, integrations, integrationDescriptions } = await get_refreshed_toolset(toolbox)
+
+      // If no integrations found
+      if (tools.length === 0) {
+        logger.error('No integrations or tools found in your toolbox.')
+        return
+      }
+
       let selectedIntegration: string
       let selectedTool: ToolResource
 
@@ -545,17 +567,15 @@ async function runToolsExperience() {
           const description = integrationDescriptions[integration]
 
           return {
-            name: `${integration} ${chalk.gray(`(${toolCount} tools)`)}${
-              description ? chalk.dim(` - ${description}`) : ''
-            }`,
+            name: `${integration} ${chalk.gray(`(${toolCount} tools)`)}${description ? chalk.dim(` - ${description}`) : ''
+              }`,
             value: integration
           }
         })
       })
 
       logger.info(
-        `Selected integration: ${chalk.bold.green(selectedIntegration)} with ${
-          toolsByIntegration[selectedIntegration].length
+        `Selected integration: ${chalk.bold.green(selectedIntegration)} with ${toolsByIntegration[selectedIntegration].length
         } tools available`
       )
 
@@ -640,6 +660,9 @@ async function runToolsExperience() {
       })
 
       continueExploring = runAnother
+      if (continueExploring) {
+        clearTerminal()
+      }
     }
   } catch (error) {
     logger.error(`Error in tool search: ${error}`)
