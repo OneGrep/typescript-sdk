@@ -10,7 +10,7 @@ import {
   Toolbox,
   ToolNameFilter
 } from '@onegrep/sdk'
-import { select, input, confirm } from '@inquirer/prompts'
+import { select, input, confirm, checkbox } from '@inquirer/prompts'
 import Table from 'cli-table3'
 import { highlight } from 'cli-highlight'
 
@@ -685,7 +685,7 @@ async function modifyMultipleTools(
       message: 'Select an option:',
       choices: [
         {
-          name: 'Set custom tags on all tools',
+          name: 'Set custom tags on multiple tools',
           value: 'set-custom-tags'
         },
         { name: 'Return to integration options', value: 'back-to-integration' },
@@ -705,18 +705,45 @@ async function modifyMultipleTools(
       logger.warn(
         `Setting custom tags on ${tools.length} tools at once. Proceed with caution.`
       )
+
+      const allOption = 'SELECT_ALL_TOOLS'
+      const selectedToolNames = await checkbox({
+        message: 'Select tools to modify (space to select, enter to confirm):',
+        choices: [
+          { name: chalk.bold.blueBright('Select All'), value: allOption },
+          ...tools.map(tool => ({
+            name: `${tool.metadata.name}${tool.metadata.description ? chalk.dim(` - ${tool.metadata.description}`) : ''}`,
+            value: tool.metadata.name
+          }))
+        ],
+        validate: (selected) => {
+          if (selected.length === 0) return 'Please select at least one tool'
+          return true
+        }
+      })
+
+      // Handle "Select All" option
+      let toolsToModify: string[]
+      if (selectedToolNames.includes(allOption)) {
+        toolsToModify = tools.map(tool => tool.metadata.name)
+        logger.info(`Selected all ${toolsToModify.length} tools`)
+      } else {
+        toolsToModify = selectedToolNames
+        logger.info(`Selected ${toolsToModify.length} tools for modification`)
+      }
+
       const { tags, confirmAdd } = await collectCustomTags()
 
       if (confirmAdd) {
         let spinner = getSpinner(
-          `Setting ${Object.keys(tags).length} custom properties on ${tools.length} tools...`,
+          `Setting ${Object.keys(tags).length} custom properties on ${toolsToModify.length} tools...`,
           'yellow'
         )
         spinner.start()
 
         await toolbox.apiClient.upsert_multiple_tool_custom_tags_api_v1_integrations__integration_name__tools_custom_tags_post(
           {
-            tool_names: tools.map((tool) => tool.metadata.name),
+            tool_names: toolsToModify,
             tags: tags
           },
           {
@@ -767,9 +794,8 @@ async function runToolsExperience() {
             const description = integrationDescriptions[integration]
 
             return {
-              name: `${integration} ${chalk.gray(`(${toolCount} tools)`)}${
-                description ? chalk.dim(` - ${description}`) : ''
-              }`,
+              name: `${integration} ${chalk.gray(`(${toolCount} tools)`)}${description ? chalk.dim(` - ${description}`) : ''
+                }`,
               value: integration
             }
           }),
@@ -783,8 +809,7 @@ async function runToolsExperience() {
       }
 
       logger.info(
-        `Selected integration: ${chalk.bold.green(selectedIntegration)} with ${
-          toolsByIntegration[selectedIntegration].length
+        `Selected integration: ${chalk.bold.green(selectedIntegration)} with ${toolsByIntegration[selectedIntegration].length
         } tools available`
       )
 
