@@ -6,6 +6,7 @@ import { logger } from './utils/logger'
 import { version } from '../package.json'
 import { toolsCommand } from 'commands/tools'
 import { clearTerminal } from 'utils/helpers'
+import { ConfigProvider } from 'providers/config/provider'
 
 /**
  * Validates that required configuration is available
@@ -41,6 +42,8 @@ function validateConfiguration(command: Command) {
 
 function main() {
   clearTerminal()
+  const configProvider = new ConfigProvider()
+  logger.info(`Config: ${configProvider.getConfig().modelDumpJSON()}`)
 
   const cli = new Command()
     .name('onegrep-cli')
