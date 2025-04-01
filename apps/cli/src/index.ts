@@ -40,9 +40,11 @@ function validateConfiguration(command: Command) {
   }
 }
 
-function main() {
+async function main() {
   clearTerminal()
   const configProvider = new ConfigProvider()
+  await configProvider.init()
+
   logger.info(`Config: ${configProvider.getConfig().modelDumpJSON()}`)
 
   const cli = new Command()
@@ -63,4 +65,8 @@ function main() {
   cli.parse()
 }
 
-main()
+// Instead of await main() - we do this because we are outputting a CJS module which does not support top-level awaits.
+void main().catch((err) => {
+  logger.error(`Error running CLI: ${err}`)
+  process.exit(1)
+})

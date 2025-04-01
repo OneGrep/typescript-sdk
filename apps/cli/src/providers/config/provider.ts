@@ -32,9 +32,11 @@ export class ConfigProvider {
 
     // Initialize with empty config
     this.config = new Config()
+  }
 
-    // Load configuration (from env and/or persisted config)
-    this.loadConfig()
+  // We cannot make a constructor async so we initialize separately.
+  async init(): Promise<void> {
+    await this.loadConfig()
   }
 
   /**
@@ -75,7 +77,7 @@ export class ConfigProvider {
   /**
    * Loads configuration from environment variables and persisted config
    */
-  private loadConfig(): void {
+  private async loadConfig(): Promise<void> {
     let persistedConfig: string | undefined
 
     // First try to load from persisted config
@@ -100,6 +102,9 @@ export class ConfigProvider {
           error
         )
       }
+    } else {
+      // Stub out our config with empty values.
+      await this.persistConfig()
     }
   }
 
