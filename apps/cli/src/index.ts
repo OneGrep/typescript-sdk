@@ -7,7 +7,7 @@ import { version } from '../package.json'
 import { toolsCommand } from 'commands/tools'
 import { clearTerminal } from 'utils/helpers'
 import { ConfigProvider } from 'providers/config/provider'
-import AuthClient from 'providers/auth/authClient'
+import AuthzProvider from 'providers/auth/provider'
 import { createAccountCommand } from 'commands/account'
 
 function validateConfiguration() {
@@ -71,7 +71,7 @@ async function main() {
   await configProvider.init()
 
   // Create auth client
-  const authClient = new AuthClient({
+  const authProvider = new AuthzProvider({
     configProvider
   })
 
@@ -91,7 +91,7 @@ async function main() {
   cli.addCommand(healthcheck)
   cli.addCommand(getAuditLogs)
   cli.addCommand(toolsCommand)
-  cli.addCommand(createAccountCommand(authClient))
+  cli.addCommand(createAccountCommand(authProvider))
 
   cli.parse()
 }
