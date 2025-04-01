@@ -1,20 +1,17 @@
 import * as client from 'openid-client'
+import * as open from 'open';  // Static import at the top
 import * as http from 'http'
 import { URL } from 'url'
 import { ConfigProvider } from 'providers/config/provider'
 
 export class AuthClient {
-  private readonly oauth2ProviderUrl: string
-  private readonly clientId = 'cli-client' // Replace with your actual client ID
-  private readonly redirectPort = 8000 // Port for the local callback server
+  private readonly redirectPort = 3080 // Port for the local callback server
   private readonly configProvider: ConfigProvider
 
-  constructor(config: {
-    oauth2ProviderUrl: string
+  constructor(params: {
     configProvider: ConfigProvider
   }) {
-    this.oauth2ProviderUrl = config.oauth2ProviderUrl
-    this.configProvider = config.configProvider
+    this.configProvider = params.configProvider
   }
 
   /** Runs the OAuth2 flow to authenticate the user and returns an API key that can be used
@@ -22,7 +19,7 @@ export class AuthClient {
    */
   async getAPIKey(): Promise<string> {
     // Check if we already have an API key from environment variables
-    const existingApiKey = this.configProvider.getApiKey()
+    const existingApiKey = this.configProvider.getConfig().apiKey
     if (existingApiKey) {
       return existingApiKey
     }
@@ -48,7 +45,7 @@ export class AuthClient {
    */
   async refreshAuthenticationState(): Promise<string> {
     // Check if we already have a valid access token
-    const existingToken = this.configProvider.getAccessToken()
+    const existingToken = this.configProvider.getConfig().accessToken
     if (existingToken) {
       // TODO: Check if token is expired
       // For now, we'll just return it
@@ -62,30 +59,26 @@ export class AuthClient {
       // Discover OpenID configuration
       console.log('Discovering OAuth provider...')
       const config = await client.discovery(
-        new URL(this.oauth2ProviderUrl),
-        this.clientId,
-        '' // Client secret is not needed for PKCE flow
+        new URL(this.configProvider.getConfig().oauth2DiscoveryEndpoint),
+        this.configProvider.getConfig().oauth2ClientId
       )
 
       // Generate PKCE parameters
       const code_verifier = client.randomPKCECodeVerifier()
       const code_challenge =
         await client.calculatePKCECodeChallenge(code_verifier)
-      let state: string | undefined
+
+      // Always generate a state parameter for CSRF protection
+      const state = client.randomState()
 
       // Build the redirect URL with appropriate parameters
-      const redirect_uri = `http://localhost:${this.redirectPort}`
+      const redirect_uri = `http://localhost:${this.redirectPort}/oauth/openid/callback`
       const parameters: Record<string, string> = {
         redirect_uri,
         scope: 'openid profile email',
         code_challenge,
-        code_challenge_method: 'S256'
-      }
-
-      // Add state parameter if needed
-      if (!config.serverMetadata().supportsPKCE()) {
-        state = client.randomState()
-        parameters.state = state
+        code_challenge_method: 'S256',
+        state // Always include state parameter
       }
 
       // Build the authorization URL
@@ -96,7 +89,6 @@ export class AuthClient {
       console.log(redirectTo.href)
 
       try {
-        const open = await import('open')
         await open.default(redirectTo.href)
         console.log('Browser opened automatically.')
       } catch (error) {
@@ -113,10 +105,11 @@ export class AuthClient {
       console.log('Exchanging code for tokens...')
       const tokens = await client.authorizationCodeGrant(config, callbackUrl, {
         pkceCodeVerifier: code_verifier,
-        expectedState: state
+        expectedState: state // Always verify the state parameter
       })
 
-      console.log('Authentication successful!')
+      // TODO: Remove this from the log.
+      console.log('Authentication successful!', tokens)
 
       // Store the access token in the config
       const updatedConfig = this.configProvider.getConfig()
@@ -160,7 +153,7 @@ export class AuthClient {
           // Parse the callback URL
           const callbackUrl = new URL(req.url, `http://${req.headers.host}`)
 
-          // Check for errors
+          // Parse the URL params and check for errors.
           if (callbackUrl.searchParams.has('error')) {
             const error = callbackUrl.searchParams.get('error')
             const errorDescription =
@@ -184,7 +177,7 @@ export class AuthClient {
               new Error(`Authentication error: ${error} - ${errorDescription}`)
             )
           } else if (callbackUrl.searchParams.has('code')) {
-            // Auth was successful, resolve the promise
+            // Auth was successful, resolve the promise - ?code=...
             clearTimeout(timeoutId)
             resolve(callbackUrl)
 

@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv'
 import * as fs from 'fs'
 import * as path from 'path'
 import * as os from 'os'
-import { Config, Identity } from './models'
+import { Config } from './models'
 import { isDefined } from 'utils/helpers'
 
 /** Responsible for providing the runtime configuration for the CLI that is comprised of
@@ -19,7 +19,7 @@ export class ConfigProvider {
   private readonly userCfgPath: string
 
   // List of configuration keys that should not be persisted to disk
-  private readonly nonPersistentKeys: Array<keyof Config> = ['apiKey']
+  private readonly keyBlacklist: Array<keyof Config> = ['apiKey']
 
   constructor() {
     // Load environment variables from .env file
@@ -44,34 +44,6 @@ export class ConfigProvider {
    */
   getConfig(): Config {
     return this.config
-  }
-
-  /**
-   * Gets the API key from the configuration
-   */
-  getApiKey(): string | undefined {
-    return this.config.apiKey
-  }
-
-  /**
-   * Gets the access token from the configuration
-   */
-  getAccessToken(): string | undefined {
-    return this.config.accessToken
-  }
-
-  /**
-   * Gets the user identity from the configuration
-   */
-  getIdentity(): Identity | undefined {
-    return this.config.identity
-  }
-
-  /**
-   * Gets the user email from the configuration
-   */
-  getUserEmail(): string | undefined {
-    return this.config.identity?.email
   }
 
   /**
@@ -116,7 +88,7 @@ export class ConfigProvider {
 
     // We get a typed object from model dump but we need to cast it as a Record type in order to remove the non-persistent keys.
     const cfgObj = { ...cfgDump } as Record<string, unknown>
-    for (const key of this.nonPersistentKeys) {
+    for (const key of this.keyBlacklist) {
       delete cfgObj[key]
     }
 

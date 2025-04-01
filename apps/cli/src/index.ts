@@ -7,14 +7,12 @@ import { version } from '../package.json'
 import { toolsCommand } from 'commands/tools'
 import { clearTerminal } from 'utils/helpers'
 import { ConfigProvider } from 'providers/config/provider'
+import AuthClient from 'providers/auth/authClient'
+import { createAccountCommand } from 'commands/account'
 
-/**
- * Validates that required configuration is available
- * @param command The Command instance
- */
-function validateConfiguration(command: Command) {
+function validateConfiguration() {
   logger.info(`Validating configuration...`)
-  const requiredEnvVars = ['ONEGREP_API_KEY', 'ONEGREP_API_URL']
+  const requiredEnvVars = ['ONEGREP_API_URL']
 
   let isMissingEnvVars = false
   for (const envVar of requiredEnvVars) {
@@ -33,17 +31,49 @@ function validateConfiguration(command: Command) {
 
     process.exit(1)
   }
-
-  if (command.opts().debug) {
-    logger.info(`API URL: ${process.env.ONEGREP_API_URL}`)
-    logger.info(`API Key: ${process.env.ONEGREP_API_KEY?.slice(0, 3)}...`)
-  }
 }
+
+// /**
+//  * Validates that required configuration is available
+//  * @param command The Command instance
+//  */
+// function validateConfiguration(command: Command) {
+//   logger.info(`Validating configuration...`)
+//   const requiredEnvVars = ['ONEGREP_API_KEY', 'ONEGREP_API_URL']
+
+//   let isMissingEnvVars = false
+//   for (const envVar of requiredEnvVars) {
+//     if (!process.env[envVar]) {
+//       logger.error(`Missing required environment variable: ${envVar}`)
+//       isMissingEnvVars = true
+//     }
+//   }
+
+//   if (isMissingEnvVars) {
+//     console.info(
+//       `Please set the required environment variables (${requiredEnvVars.join(
+//         ', '
+//       )}) in your .env file or export them in your shell`
+//     )
+
+//     process.exit(1)
+//   }
+
+//   if (command.opts().debug) {
+//     logger.info(`API URL: ${process.env.ONEGREP_API_URL}`)
+//     logger.info(`API Key: ${process.env.ONEGREP_API_KEY?.slice(0, 3)}...`)
+//   }
+// }
 
 async function main() {
   clearTerminal()
   const configProvider = new ConfigProvider()
   await configProvider.init()
+
+  // Create auth client
+  const authClient = new AuthClient({
+    configProvider
+  })
 
   logger.info(`Config: ${configProvider.getConfig().modelDumpJSON()}`)
 
@@ -54,13 +84,14 @@ async function main() {
     )
     .version(version || '0.0.1')
     .option('--debug', 'Enable debug mode', false)
-    .hook('preAction', (command) => {
-      validateConfiguration(command)
+    .hook('preAction', () => {
+      validateConfiguration()
     })
 
   cli.addCommand(healthcheck)
   cli.addCommand(getAuditLogs)
   cli.addCommand(toolsCommand)
+  cli.addCommand(createAccountCommand(authClient))
 
   cli.parse()
 }
