@@ -5,7 +5,6 @@ import * as os from 'os'
 import { Config, Identity } from './models'
 import { isDefined } from 'utils/helpers'
 
-
 /** Responsible for providing the runtime configuration for the CLI that is comprised of
  * any locally cached data that is needed in order to interact with the user's resources.
  *
@@ -28,7 +27,7 @@ export class ConfigProvider {
 
     // Set up paths for config storage
     // TODO: update - os.homedir()
-    this.userCfgDir = path.join("/Users/achintyaashok/Downloads", '.onegrep')
+    this.userCfgDir = path.join('/Users/achintyaashok/Downloads', '.onegrep')
     this.userCfgPath = path.join(this.userCfgDir, 'config.json')
 
     // Initialize with empty config
@@ -85,7 +84,10 @@ export class ConfigProvider {
       try {
         this.config = Config.modelValidateJSON(persistedConfig!)
       } catch (error) {
-        console.error('Failed to validate config. Not updating with persisted config.', error)
+        console.error(
+          'Failed to validate config. Not updating with persisted config.',
+          error
+        )
       }
     }
 
@@ -93,7 +95,10 @@ export class ConfigProvider {
       try {
         this.config = Config.modelValidateJSON(persistedConfig!)
       } catch (error) {
-        console.error('Failed to validate config. Not updating with persisted config.', error)
+        console.error(
+          'Failed to validate config. Not updating with persisted config.',
+          error
+        )
       }
     }
   }
@@ -105,9 +110,9 @@ export class ConfigProvider {
     const cfgDump = this.config.modelDump()
 
     // We get a typed object from model dump but we need to cast it as a Record type in order to remove the non-persistent keys.
-    const cfgObj = { ...cfgDump } as Record<string, unknown>;
+    const cfgObj = { ...cfgDump } as Record<string, unknown>
     for (const key of this.nonPersistentKeys) {
-      delete cfgObj[key];
+      delete cfgObj[key]
     }
 
     return cfgObj
@@ -136,7 +141,6 @@ export class ConfigProvider {
       console.error('Failed to persist configuration:', error)
     }
   }
-
 
   /**
    * Overrides the configuration and persists relevant parts to disk

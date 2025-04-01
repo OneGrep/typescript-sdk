@@ -3,7 +3,6 @@ import * as http from 'http'
 import { URL } from 'url'
 import { ConfigProvider } from 'providers/config/provider'
 
-
 export class AuthClient {
   private readonly oauth2ProviderUrl: string
   private readonly clientId = 'cli-client' // Replace with your actual client ID
