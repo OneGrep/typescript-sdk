@@ -19,8 +19,10 @@ export class AuthzProvider {
    */
   private updateEnvVars(): void {
     // Update process.env directly
-    process.env.ONEGREP_ACCESS_TOKEN = this.configProvider.getConfig().auth?.accessToken
-    process.env.ONEGREP_API_KEY = this.configProvider.getConfig().identity?.apiKey
+    process.env.ONEGREP_ACCESS_TOKEN =
+      this.configProvider.getConfig().auth?.accessToken
+    process.env.ONEGREP_API_KEY =
+      this.configProvider.getConfig().identity?.apiKey
   }
 
   isAuthenticated(): boolean {
@@ -101,10 +103,14 @@ export class AuthzProvider {
 
       // Exchange the authorization code for tokens
       console.log('Exchanging code for tokens...')
-      const tokens = await client.authorizationCodeGrant(oidcConfig, callbackUrl, {
-        pkceCodeVerifier: code_verifier,
-        expectedState: state // Always verify the state parameter
-      })
+      const tokens = await client.authorizationCodeGrant(
+        oidcConfig,
+        callbackUrl,
+        {
+          pkceCodeVerifier: code_verifier,
+          expectedState: state // Always verify the state parameter
+        }
+      )
 
       // TODO: Remove this from the log.
       console.log('Authentication successful!', tokens)

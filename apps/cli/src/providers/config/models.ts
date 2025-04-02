@@ -12,15 +12,18 @@ const _AUTHZ_DEFAULTS = {
 export const IdentitySchema = z.object({
   userId: z.string(),
   email: z.string().optional(),
-  apiKey: z.string().optional().transform((v) => {
-    if (isDefined(v)) return v
+  apiKey: z
+    .string()
+    .optional()
+    .transform((v) => {
+      if (isDefined(v)) return v
 
-    if (isDefined(process.env.ONEGREP_API_KEY)) {
-      return process.env.ONEGREP_API_KEY
-    }
+      if (isDefined(process.env.ONEGREP_API_KEY)) {
+        return process.env.ONEGREP_API_KEY
+      }
 
-    return undefined
-  }),
+      return undefined
+    })
   // profileId, etc.
 })
 
@@ -46,7 +49,11 @@ export class Identity extends SerializableModel<
       throw new Error(`Failed to validate identity: ${validated.error}`)
     }
 
-    return new Identity(validated.data.userId, validated.data.email, validated.data.apiKey)
+    return new Identity(
+      validated.data.userId,
+      validated.data.email,
+      validated.data.apiKey
+    )
   }
 }
 
@@ -83,25 +90,23 @@ export const OAuth2Schema = z.object({
     .transform((v) => {
       return isDefined(v) ? v : process.env.ONEGREP_ACCESS_TOKEN
     }),
-  expiresIn: z
-    .number()
-    .optional(),
-  idToken: z
-    .string()
-    .optional()
+  expiresIn: z.number().optional(),
+  idToken: z.string().optional()
 })
 
 /**
  * Configuration for OAuth2 authentication.
- * 
+ *
  * Design Decision: We intentionally do not store refresh tokens.
  * This is a security-focused decision to minimize attack vectors from long-lived tokens.
  * When access tokens expire, users will need to re-authenticate.
- * 
+ *
  * This may change in the future when we implement secure refresh token storage
  * using the system keychain.
  */
-export class OAuth2Config extends SerializableModel<z.infer<typeof OAuth2Schema>> {
+export class OAuth2Config extends SerializableModel<
+  z.infer<typeof OAuth2Schema>
+> {
   constructor(
     public discoveryEndpoint: string = _AUTHZ_DEFAULTS.openIdDiscoveryEndpoint,
     public clientId: string = _AUTHZ_DEFAULTS.clientId,
@@ -150,13 +155,13 @@ export class OAuth2Config extends SerializableModel<z.infer<typeof OAuth2Schema>
     const tokenIssuedAt = now - this.expiresIn! // Approximate time token was issued
     const expiryTime = tokenIssuedAt + this.expiresIn!
 
-    return now >= (expiryTime - bufferSeconds)
+    return now >= expiryTime - bufferSeconds
   }
 
   /**
    * Updates the token information with new values. Forces the caller to provide
    * all the necessary information in order to avoid partial incorrect updates.
-   * 
+   *
    * @param params Token response from the authorization server
    */
   updateState(params: {
@@ -200,7 +205,9 @@ export class Config extends SerializableModel<z.infer<typeof ConfigSchema>> {
     }
 
     return new Config(
-      validated.data.auth ? OAuth2Config.modelValidate(validated.data.auth) : undefined,
+      validated.data.auth
+        ? OAuth2Config.modelValidate(validated.data.auth)
+        : undefined,
       validated.data.identity
         ? Identity.modelValidate(validated.data.identity)
         : undefined
