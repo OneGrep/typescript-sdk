@@ -3,6 +3,8 @@ import * as open from 'open' // Static import at the top
 import * as http from 'http'
 import { URL } from 'url'
 import { ConfigProvider } from 'providers/config/provider'
+import { OAuth2Config } from 'providers/config/models'
+import { isDefined } from 'utils/helpers'
 
 export class AuthzProvider {
   private readonly redirectPort = 3080 // Port for the local callback server
@@ -12,42 +14,40 @@ export class AuthzProvider {
     this.configProvider = params.configProvider
   }
 
-  /** Runs the OAuth2 flow to authenticate the user and returns an API key that can be used
-   * with the API to interact with the user's resources.
+  /**
+   * Updates environment variables with new token values
    */
-  async getAPIKey(): Promise<string> {
-    // Check if we already have an API key from environment variables
-    const existingApiKey = this.configProvider.getConfig().apiKey
-    if (existingApiKey) {
-      return existingApiKey
+  private updateEnvVars(): void {
+    // Update process.env directly
+    process.env.ONEGREP_ACCESS_TOKEN = this.configProvider.getConfig().auth?.accessToken
+    process.env.ONEGREP_API_KEY = this.configProvider.getConfig().identity?.apiKey
+  }
+
+  isAuthenticated(): boolean {
+    // If we already have an api key, no need to go through an auth flow.
+    if (isDefined(this.configProvider.getConfig().identity?.apiKey)) {
+      return true
     }
 
-    // Otherwise, we'll need to go through the auth flow to get an access token
-    // and then exchange it for an API key
-    const accessToken = await this.refreshAuthenticationState()
+    // Check the authentication state of our OAuth2 config.
+    const oauth2Config = this.configProvider.getConfig().auth
+    if (!oauth2Config) {
+      return false
+    }
 
-    // TODO: Exchange the access token for an API key by calling your backend
-    // This is just a placeholder; you'll need to implement the actual API call
-    const apiKey = await this.exchangeAccessTokenForApiKey(accessToken)
-    const updatedConfig = this.configProvider.getConfig()
-    updatedConfig.apiKey = apiKey
-
-    // Update the config with the new API key
-    await this.configProvider.updateConfig(updatedConfig)
-
-    return apiKey
+    return !oauth2Config!.isTokenExpired()
   }
 
   /** Refreshes the underlying JWT provided by the provider and caches it for a short time
    * in order to get the API KEY to interact with the user's resources.
    */
-  async refreshAuthenticationState(): Promise<string> {
-    // Check if we already have a valid access token
-    const existingToken = this.configProvider.getConfig().accessToken
-    if (existingToken) {
-      // TODO: Check if token is expired
-      // For now, we'll just return it
-      return existingToken
+  async refreshAuthenticationState(): Promise<void> {
+    const config = this.configProvider.getConfig()
+    const oauth2Config = config.auth || new OAuth2Config()
+
+    // Check if we already have a valid access token and an API key.
+    if (this.isAuthenticated()) {
+      return
     }
 
     // Set up a local server to receive the callback
@@ -56,9 +56,9 @@ export class AuthzProvider {
     try {
       // Discover OpenID configuration
       console.log('Discovering OAuth provider...')
-      const config = await client.discovery(
-        new URL(this.configProvider.getConfig().oauth2DiscoveryEndpoint),
-        this.configProvider.getConfig().oauth2ClientId
+      const oidcConfig = await client.discovery(
+        new URL(oauth2Config.discoveryEndpoint),
+        oauth2Config.clientId
       )
 
       // Generate PKCE parameters
@@ -80,7 +80,7 @@ export class AuthzProvider {
       }
 
       // Build the authorization URL
-      const redirectTo = client.buildAuthorizationUrl(config, parameters)
+      const redirectTo = client.buildAuthorizationUrl(oidcConfig, parameters)
 
       // Open the browser for the user to authenticate
       console.log('Please open this URL in your browser to authenticate:')
@@ -101,7 +101,7 @@ export class AuthzProvider {
 
       // Exchange the authorization code for tokens
       console.log('Exchanging code for tokens...')
-      const tokens = await client.authorizationCodeGrant(config, callbackUrl, {
+      const tokens = await client.authorizationCodeGrant(oidcConfig, callbackUrl, {
         pkceCodeVerifier: code_verifier,
         expectedState: state // Always verify the state parameter
       })
@@ -109,13 +109,23 @@ export class AuthzProvider {
       // TODO: Remove this from the log.
       console.log('Authentication successful!', tokens)
 
-      // Store the access token in the config
+      // Store token information in the config
       const updatedConfig = this.configProvider.getConfig()
-      updatedConfig.accessToken = tokens.access_token
-      await this.configProvider.updateConfig(updatedConfig)
 
-      // Return the access token
-      return tokens.access_token
+      if (!updatedConfig.auth) {
+        updatedConfig.auth = new OAuth2Config()
+      }
+
+      updatedConfig.auth.updateState({
+        access_token: tokens.access_token,
+        expires_in: tokens.expires_in,
+        id_token: tokens.id_token
+      })
+
+      await this.configProvider.updateConfig(updatedConfig)
+      await this.exchangeAccessTokenForApiKey()
+
+      this.updateEnvVars()
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error)
@@ -236,29 +246,13 @@ export class AuthzProvider {
   }
 
   /**
-   * Exchanges an access token for an API key by calling the backend service
+   * Exchanges an access token for an API key by calling the backend service then updates the
+   * local config with the API Key for usage across boundaries.
    */
-  private async exchangeAccessTokenForApiKey(
-    accessToken: string
-  ): Promise<string> {
+  private async exchangeAccessTokenForApiKey(): Promise<void> {
     // TODO: Implement the actual API call to exchange the access token for an API key
     // This is a placeholder implementation
     console.log('Exchanging access token for API key...')
-
-    // Make a request to your backend with the access token
-    // Example:
-    // const response = await fetch('https://api.yourdomain.com/exchange-token', {
-    //     method: 'POST',
-    //     headers: {
-    //         'Authorization': `Bearer ${accessToken}`,
-    //         'Content-Type': 'application/json'
-    //     }
-    // });
-    // const data = await response.json();
-    // return data.apiKey;
-
-    // For now, just returning a mock API key
-    return `api_${accessToken.substring(0, 8)}`
   }
 }
 
