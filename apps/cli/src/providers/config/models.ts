@@ -8,10 +8,19 @@ const _AUTHZ_DEFAULTS = {
   clientId: '65382374d2a3a54262161587a24efd04'
 }
 
-// Schema for the OneGrep Identity that is being used to interact with resources.
 export const IdentitySchema = z.object({
-  userId: z.string().optional(),
-  email: z.string().optional(),
+  apiUrl: z
+    .string()
+    .optional()
+    .transform((v) => {
+      if (isDefined(v)) return v
+
+      if (isDefined(process.env.ONEGREP_API_URL)) {
+        return process.env.ONEGREP_API_URL
+      }
+
+      return undefined
+    }),
   apiKey: z
     .string()
     .optional()
@@ -23,17 +32,25 @@ export const IdentitySchema = z.object({
       }
 
       return undefined
-    })
+    }),
+  userId: z.string().optional(),
+  email: z.string().optional(),
   // profileId, etc.
 })
 
+/**
+ * This represents the Identity with respect to the OneGrep API.
+ * It is comprised of the attributes that direct how the API responds in terms of
+ * the identity of the caller.
+ */
 export class Identity extends SerializableModel<
   z.infer<typeof IdentitySchema>
 > {
   constructor(
+    public apiUrl?: string,
+    public apiKey?: string,
     public userId?: string,
-    public email?: string, // If this identity is associated with a human user, this is their authentication email.
-    public apiKey?: string // If this identity is associated with a human user, this is their API key.
+    public email?: string
   ) {
     super()
   }
@@ -42,10 +59,15 @@ export class Identity extends SerializableModel<
    * Updates the identity with new values. Allows us to be flexible with partial updates.
    */
   update(params: {
+    apiUrl?: string
+    apiKey?: string
     userId?: string
     email?: string
-    apiKey?: string
   }) {
+    if (isDefined(params.apiUrl)) {
+      this.apiUrl = params.apiUrl
+    }
+
     if (isDefined(params.userId)) {
       this.userId = params.userId
     }
@@ -71,9 +93,10 @@ export class Identity extends SerializableModel<
     }
 
     return new Identity(
+      validated.data.apiUrl,
+      validated.data.apiKey,
       validated.data.userId,
-      validated.data.email,
-      validated.data.apiKey
+      validated.data.email
     )
   }
 }

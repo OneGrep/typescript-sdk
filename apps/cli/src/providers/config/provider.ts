@@ -4,6 +4,7 @@ import * as path from 'path'
 import * as os from 'os'
 import { Config, Identity, OAuth2Config } from './models'
 import { isDefined } from 'utils/helpers'
+import { logger } from 'utils/logger'
 
 /** Responsible for providing the runtime configuration for the CLI that is comprised of
  * any locally cached data that is needed in order to interact with the user's resources.
@@ -14,24 +15,29 @@ import { isDefined } from 'utils/helpers'
  * - User's profile data
  */
 export class ConfigProvider {
+  private readonly CONF_DIR_NAME = '.onegrep'
+  private readonly CONF_FILE_NAME = 'config.json'
+
   private config: Config
   private readonly userCfgDir: string
   private readonly userCfgPath: string
 
   constructor() {
+    logger.debug('Initializing config provider...')
+
     // Load environment variables from .env file
     dotenv.config()
 
     // Set up paths for config storage
     // TODO: update - os.homedir()
-    this.userCfgDir = path.join('/Users/achintyaashok/Downloads', '.onegrep')
-    this.userCfgPath = path.join(this.userCfgDir, 'config.json')
+    this.userCfgDir = path.join('/Users/achintyaashok/Downloads', this.CONF_DIR_NAME)
+    this.userCfgPath = path.join(this.userCfgDir, this.CONF_FILE_NAME)
 
     // Initialize with empty config
     this.config = new Config()
   }
 
-  // We cannot make a constructor async so we initialize separately.
+  /** Call this method to initialize the config provider. */
   async init(): Promise<void> {
     await this.loadConfig()
   }
@@ -61,12 +67,21 @@ export class ConfigProvider {
   }
 
   /**
+   * Clears the auth state of the config & updates environment variables accordingly.
+   */
+  clearAuthState() {
+    this.config.auth = undefined
+    this.updateEnvVars()
+  }
+
+  /**
    * Updates the identity of the config.
    */
   updateIdentity(params: {
+    apiUrl?: string
+    apiKey?: string
     userId?: string
     email?: string
-    apiKey?: string
   }) {
     if (!this.config.identity) {
       this.config.identity = new Identity()
@@ -80,6 +95,7 @@ export class ConfigProvider {
    * Loads configuration from environment variables and persisted config
    */
   private async loadConfig(): Promise<void> {
+    logger.debug(`Loading config from FS... ${this.userCfgPath}`)
     let persistedConfig: string | undefined
 
     // First try to load from persisted config
@@ -88,9 +104,8 @@ export class ConfigProvider {
       try {
         this.config = Config.modelValidateJSON(persistedConfig!)
       } catch (error) {
-        console.error(
-          'Failed to validate config. Not updating with persisted config.',
-          error
+        logger.error(
+          `Failed to validate config. Not updating with persisted config. ${error}`
         )
       }
     }
@@ -99,9 +114,8 @@ export class ConfigProvider {
       try {
         this.config = Config.modelValidateJSON(persistedConfig!)
       } catch (error) {
-        console.error(
-          'Failed to validate config. Not updating with persisted config.',
-          error
+        logger.error(
+          `Failed to validate config. Not updating with persisted config. ${error}`
         )
       }
     } else {
@@ -117,6 +131,8 @@ export class ConfigProvider {
     let cfgDump = this.config.modelDump()
 
     // Remove sensitive keys from our config before making it persistable.
+    // ? performing the model_dump allows us to update a copy of the config without
+    // ? affecting the original config object.
     if (isDefined(cfgDump.identity)) {
       cfgDump.identity!.apiKey = undefined
     }
@@ -128,6 +144,8 @@ export class ConfigProvider {
    * Persists configuration to the user's home directory
    */
   private async persistConfig(): Promise<void> {
+    logger.debug(`Persisting configuration...`)
+
     try {
       // Get config with only persistent values
       const persistentConfig = this.generatePersistableConfigObject()
@@ -144,15 +162,13 @@ export class ConfigProvider {
         'utf8'
       )
     } catch (error) {
-      console.error('Failed to persist configuration:', error)
+      logger.error(`Failed to persist configuration: ${error}`)
     }
   }
 
   private updateEnvVars() {
     // Update process.env directly
-    process.env.ONEGREP_ACCESS_TOKEN =
-      this.config.auth?.accessToken
-    process.env.ONEGREP_API_KEY =
-      this.config.identity?.apiKey
+    process.env.ONEGREP_ACCESS_TOKEN = this.config.auth?.accessToken
+    process.env.ONEGREP_API_KEY = this.config.identity?.apiKey
   }
 }

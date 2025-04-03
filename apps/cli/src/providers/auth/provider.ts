@@ -5,6 +5,7 @@ import { URL } from 'url'
 import { ConfigProvider } from 'providers/config/provider'
 import { OAuth2Config } from 'providers/config/models'
 import { isDefined } from 'utils/helpers'
+import { chalk, logger } from 'utils/logger'
 
 export class AuthzProvider {
   private readonly redirectPort = 3080 // Port for the local callback server
@@ -14,31 +15,37 @@ export class AuthzProvider {
     this.configProvider = params.configProvider
   }
 
-
-  isAuthenticated(): boolean {
-    // If we already have an api key, no need to go through an auth flow.
-    if (isDefined(this.configProvider.getConfig().identity?.apiKey)) {
-      return true
-    }
-
-    // Check the authentication state of our OAuth2 config.
-    const oauth2Config = this.configProvider.getConfig().auth
-    if (!oauth2Config) {
+  async isAuthenticated(): Promise<boolean> {
+    // A requirement in order for us to even select where to route calls.
+    if (!isDefined(this.configProvider.getConfig().identity?.apiUrl)) {
       return false
     }
 
-    return !oauth2Config!.isTokenExpired()
+    // If we already have an api key, no need to go through a user-based auth flow.
+    if (isDefined(this.configProvider.getConfig().identity?.apiKey)) {
+      // TODO: Validate that the api key is valid for this domain.
+      return await this.isApiKeyValid()
+    }
+
+    // We should have a valid token & our api key should be valid.
+    const oauth2Config = this.configProvider.getConfig().auth
+    if (isDefined(oauth2Config) && !oauth2Config!.isTokenExpired()) {
+      await this.exchangeAccessTokenForApiKey()
+      return await this.isApiKeyValid()
+    }
+
+    return false
   }
 
   /** Refreshes the underlying JWT provided by the provider and caches it for a short time
    * in order to get the API KEY to interact with the user's resources.
    */
-  async refreshAuthenticationState(): Promise<void> {
+  async initOAuthFlow(): Promise<void> {
     const config = this.configProvider.getConfig()
     const oauth2Config = config.auth || new OAuth2Config()
 
     // Check if we already have a valid access token and an API key.
-    if (this.isAuthenticated()) {
+    if (await this.isAuthenticated()) {
       return
     }
 
@@ -75,24 +82,24 @@ export class AuthzProvider {
       const redirectTo = client.buildAuthorizationUrl(oidcConfig, parameters)
 
       // Open the browser for the user to authenticate
-      console.log('Please open this URL in your browser to authenticate:')
-      console.log(redirectTo.href)
+      logger.info('Please open this URL in your browser to authenticate (if it doesn\'t open automatically):\n')
+      logger.info(chalk.blue(redirectTo.href))
+      logger.info('\n')
 
       try {
         await open.default(redirectTo.href)
-        console.log('Browser opened automatically.')
+        logger.info('Browser opened automatically.')
       } catch (error) {
-        console.log(
+        logger.error(
           'Unable to open browser automatically. Please copy the URL manually.'
         )
       }
 
-      // Wait for the callback
-      console.log('Waiting for authentication...')
+
       const callbackUrl = await codePromise
 
       // Exchange the authorization code for tokens
-      console.log('Exchanging code for tokens...')
+      logger.debug('Exchanging code for tokens...')
       const tokens = await client.authorizationCodeGrant(
         oidcConfig,
         callbackUrl,
@@ -103,7 +110,7 @@ export class AuthzProvider {
       )
 
       // TODO: Remove this from the log.
-      console.log('Authentication successful!', tokens)
+      logger.info(chalk.bold.green('✓ Authentication successful!'))
 
       this.configProvider.updateAuthState({
         access_token: tokens.access_token,
@@ -111,15 +118,7 @@ export class AuthzProvider {
         id_token: tokens.id_token
       })
 
-      const apiKey = await this.exchangeAccessTokenForApiKey()
-      if (!isDefined(apiKey)) {
-        throw new Error('Failed to exchange access token for API key')
-      }
-
-      this.configProvider.updateIdentity({
-        apiKey: apiKey
-      })
-
+      await this.exchangeAccessTokenForApiKey()
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error)
@@ -243,12 +242,23 @@ export class AuthzProvider {
    * Exchanges an access token for an API key by calling the backend service then updates the
    * local config with the API Key for usage across boundaries.
    */
-  private async exchangeAccessTokenForApiKey(): Promise<string | undefined> {
+  private async exchangeAccessTokenForApiKey(): Promise<void> {
     // TODO: Implement the actual API call to exchange the access token for an API key
     // This is a placeholder implementation
     console.log('Exchanging access token for API key...')
 
-    return undefined
+    // TODO: Implement the actual API call for the key exchange.
+    this.configProvider.updateIdentity({
+      apiKey: '1234567890'
+    })
+  }
+
+  /** Used when we have some kind of a cached API Key that we want to explicitly validate
+   * before using it to make API calls.
+   */
+  private async isApiKeyValid(): Promise<boolean> {
+    // TODO: Implement the actual API call to check the validity of the API key.
+    return true
   }
 }
 

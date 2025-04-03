@@ -1,7 +1,7 @@
 import { healthcheck } from './commands/healthcheck'
 import { getAuditLogs } from './commands/audit'
 import { Command } from 'commander'
-import { logger } from './utils/logger'
+import { chalk, logger } from './utils/logger'
 
 import { version } from '../package.json'
 import { toolsCommand } from 'commands/tools'
@@ -10,60 +10,13 @@ import { ConfigProvider } from 'providers/config/provider'
 import AuthzProvider from 'providers/auth/provider'
 import { createAccountCommand } from 'commands/account'
 
-function validateConfiguration() {
-  logger.info(`Validating configuration...`)
-  const requiredEnvVars = ['ONEGREP_API_URL']
-
-  let isMissingEnvVars = false
-  for (const envVar of requiredEnvVars) {
-    if (!process.env[envVar]) {
-      logger.error(`Missing required environment variable: ${envVar}`)
-      isMissingEnvVars = true
-    }
-  }
-
-  if (isMissingEnvVars) {
-    console.info(
-      `Please set the required environment variables (${requiredEnvVars.join(
-        ', '
-      )}) in your .env file or export them in your shell`
-    )
-
+async function validateAuthenticationState(authProvider: AuthzProvider) {
+  if (!(await authProvider.isAuthenticated())) {
+    logger.error('You are current unauthenticated.')
+    logger.info(`${chalk.bold.green('onegrep-cli')} account login`)
     process.exit(1)
   }
 }
-
-// /**
-//  * Validates that required configuration is available
-//  * @param command The Command instance
-//  */
-// function validateConfiguration(command: Command) {
-//   logger.info(`Validating configuration...`)
-//   const requiredEnvVars = ['ONEGREP_API_KEY', 'ONEGREP_API_URL']
-
-//   let isMissingEnvVars = false
-//   for (const envVar of requiredEnvVars) {
-//     if (!process.env[envVar]) {
-//       logger.error(`Missing required environment variable: ${envVar}`)
-//       isMissingEnvVars = true
-//     }
-//   }
-
-//   if (isMissingEnvVars) {
-//     console.info(
-//       `Please set the required environment variables (${requiredEnvVars.join(
-//         ', '
-//       )}) in your .env file or export them in your shell`
-//     )
-
-//     process.exit(1)
-//   }
-
-//   if (command.opts().debug) {
-//     logger.info(`API URL: ${process.env.ONEGREP_API_URL}`)
-//     logger.info(`API Key: ${process.env.ONEGREP_API_KEY?.slice(0, 3)}...`)
-//   }
-// }
 
 async function main() {
   clearTerminal()
@@ -84,8 +37,8 @@ async function main() {
     )
     .version(version || '0.0.1')
     .option('--debug', 'Enable debug mode', false)
-    .hook('preAction', () => {
-      validateConfiguration()
+    .hook('preAction', async () => {
+      await validateAuthenticationState(authProvider)
     })
 
   cli.addCommand(healthcheck)
