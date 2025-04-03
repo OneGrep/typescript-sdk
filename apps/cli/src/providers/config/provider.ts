@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv'
 import * as fs from 'fs'
 import * as path from 'path'
 import * as os from 'os'
-import { Config } from './models'
+import { Config, Identity, OAuth2Config } from './models'
 import { isDefined } from 'utils/helpers'
 
 /** Responsible for providing the runtime configuration for the CLI that is comprised of
@@ -17,9 +17,6 @@ export class ConfigProvider {
   private config: Config
   private readonly userCfgDir: string
   private readonly userCfgPath: string
-
-  // List of configuration keys that should not be persisted to disk
-  private readonly keyBlacklist: Array<keyof Config> = ['apiKey']
 
   constructor() {
     // Load environment variables from .env file
@@ -40,10 +37,43 @@ export class ConfigProvider {
   }
 
   /**
-   * Gets the current configuration
+   * Returns a read-only reference to the current config. The caller should only use
+   * explicit setters to update this.
    */
-  getConfig(): Config {
+  getConfig(): Readonly<Config> {
     return this.config
+  }
+
+  /**
+   * Updates the auth state of the config.
+   */
+  updateAuthState(params: {
+    access_token: string
+    expires_in?: number
+    id_token?: string
+  }) {
+    if (!this.config.auth) {
+      this.config.auth = new OAuth2Config()
+    }
+
+    this.config.auth.updateState(params)
+    this.updateEnvVars()
+  }
+
+  /**
+   * Updates the identity of the config.
+   */
+  updateIdentity(params: {
+    userId?: string
+    email?: string
+    apiKey?: string
+  }) {
+    if (!this.config.identity) {
+      this.config.identity = new Identity()
+    }
+
+    this.config.identity.update(params)
+    this.updateEnvVars()
   }
 
   /**
@@ -84,15 +114,14 @@ export class ConfigProvider {
    * Creates a filtered version of the config containing only persistent values
    */
   private generatePersistableConfigObject(): object {
-    const cfgDump = this.config.modelDump()
+    let cfgDump = this.config.modelDump()
 
-    // We get a typed object from model dump but we need to cast it as a Record type in order to remove the non-persistent keys.
-    const cfgObj = { ...cfgDump } as Record<string, unknown>
-    for (const key of this.keyBlacklist) {
-      delete cfgObj[key]
+    // Remove sensitive keys from our config before making it persistable.
+    if (isDefined(cfgDump.identity)) {
+      cfgDump.identity!.apiKey = undefined
     }
 
-    return cfgObj
+    return { ...cfgDump } as Record<string, unknown>
   }
 
   /**
@@ -119,14 +148,11 @@ export class ConfigProvider {
     }
   }
 
-  /**
-   * Overrides the configuration and persists relevant parts to disk
-   */
-  async updateConfig(updatedConfig: Config): Promise<void> {
-    // Update in-memory config
-    this.config = updatedConfig
-
-    // Persist config to disk (excluding blacklisted properties)
-    await this.persistConfig()
+  private updateEnvVars() {
+    // Update process.env directly
+    process.env.ONEGREP_ACCESS_TOKEN =
+      this.config.auth?.accessToken
+    process.env.ONEGREP_API_KEY =
+      this.config.identity?.apiKey
   }
 }

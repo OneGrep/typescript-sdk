@@ -10,7 +10,7 @@ const _AUTHZ_DEFAULTS = {
 
 // Schema for the OneGrep Identity that is being used to interact with resources.
 export const IdentitySchema = z.object({
-  userId: z.string(),
+  userId: z.string().optional(),
   email: z.string().optional(),
   apiKey: z
     .string()
@@ -31,11 +31,32 @@ export class Identity extends SerializableModel<
   z.infer<typeof IdentitySchema>
 > {
   constructor(
-    public userId: string,
+    public userId?: string,
     public email?: string, // If this identity is associated with a human user, this is their authentication email.
     public apiKey?: string // If this identity is associated with a human user, this is their API key.
   ) {
     super()
+  }
+
+  /**
+   * Updates the identity with new values. Allows us to be flexible with partial updates.
+   */
+  update(params: {
+    userId?: string
+    email?: string
+    apiKey?: string
+  }) {
+    if (isDefined(params.userId)) {
+      this.userId = params.userId
+    }
+
+    if (isDefined(params.email)) {
+      this.email = params.email
+    }
+
+    if (isDefined(params.apiKey)) {
+      this.apiKey = params.apiKey
+    }
   }
 
   modelDump(): z.infer<typeof IdentitySchema> {

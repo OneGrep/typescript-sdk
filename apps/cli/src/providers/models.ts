@@ -11,6 +11,10 @@
  * that throw errors. Concrete classes should override these methods.
  */
 export abstract class SerializableModel<T> {
+  /** Returns a typed object of this model. Ex. type Thing{ foo: x, bar: y }.
+   * Properties are accessible using attribute notification => Thing.foo, Thing.bar
+   * rather than object notification => Thing["foo"], Thing["bar"].
+  */
   abstract modelDump(): T
 
   // @ts-ignore - This method is not abstract because it is static and we can't specify static abstract methods.

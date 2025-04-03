@@ -14,16 +14,6 @@ export class AuthzProvider {
     this.configProvider = params.configProvider
   }
 
-  /**
-   * Updates environment variables with new token values
-   */
-  private updateEnvVars(): void {
-    // Update process.env directly
-    process.env.ONEGREP_ACCESS_TOKEN =
-      this.configProvider.getConfig().auth?.accessToken
-    process.env.ONEGREP_API_KEY =
-      this.configProvider.getConfig().identity?.apiKey
-  }
 
   isAuthenticated(): boolean {
     // If we already have an api key, no need to go through an auth flow.
@@ -115,23 +105,21 @@ export class AuthzProvider {
       // TODO: Remove this from the log.
       console.log('Authentication successful!', tokens)
 
-      // Store token information in the config
-      const updatedConfig = this.configProvider.getConfig()
-
-      if (!updatedConfig.auth) {
-        updatedConfig.auth = new OAuth2Config()
-      }
-
-      updatedConfig.auth.updateState({
+      this.configProvider.updateAuthState({
         access_token: tokens.access_token,
         expires_in: tokens.expires_in,
         id_token: tokens.id_token
       })
 
-      await this.configProvider.updateConfig(updatedConfig)
-      await this.exchangeAccessTokenForApiKey()
+      const apiKey = await this.exchangeAccessTokenForApiKey()
+      if (!isDefined(apiKey)) {
+        throw new Error('Failed to exchange access token for API key')
+      }
 
-      this.updateEnvVars()
+      this.configProvider.updateIdentity({
+        apiKey: apiKey
+      })
+
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error)
@@ -255,10 +243,12 @@ export class AuthzProvider {
    * Exchanges an access token for an API key by calling the backend service then updates the
    * local config with the API Key for usage across boundaries.
    */
-  private async exchangeAccessTokenForApiKey(): Promise<void> {
+  private async exchangeAccessTokenForApiKey(): Promise<string | undefined> {
     // TODO: Implement the actual API call to exchange the access token for an API key
     // This is a placeholder implementation
     console.log('Exchanging access token for API key...')
+
+    return undefined
   }
 }
 
