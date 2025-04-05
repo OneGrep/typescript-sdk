@@ -22,7 +22,10 @@ import { ConfigProvider } from 'providers/config/provider'
  * @param authProvider The authentication client to use
  * @returns The configured account command
  */
-export function createAccountCommand(params: { configProvider: ConfigProvider, authProvider: AuthzProvider }): Command {
+export function createAccountCommand(params: {
+  configProvider: ConfigProvider
+  authProvider: AuthzProvider
+}): Command {
   const accountCommand = new Command('account').description(
     'Manage your OneGrep account and authentication'
   )
@@ -49,7 +52,6 @@ export function createAccountCommand(params: { configProvider: ConfigProvider, a
             return
           }
         }
-
 
         // Invoke the authentication flow
         const authenticated = await authProvider.initOAuthFlow(true)

@@ -30,7 +30,7 @@ export class ConfigProvider {
 
     // Set up paths for config storage
     this.userCfgDir = path.join(
-      "/Users/achintyaashok/Downloads",
+      '/Users/achintyaashok/Downloads',
       this.CONF_DIR_NAME
     )
     this.userCfgPath = path.join(this.userCfgDir, this.CONF_FILE_NAME)
@@ -104,7 +104,9 @@ export class ConfigProvider {
    */
   private async loadConfig(): Promise<void> {
     logger.debug(`Loading config from => ${this.userCfgPath}`)
-    logger.debug(`Current env vars: ONEGREP_API_URL=${process.env.ONEGREP_API_URL}, ONEGREP_API_KEY=${process.env.ONEGREP_API_KEY ? '[REDACTED]' : 'undefined'}`)
+    logger.debug(
+      `Current env vars: ONEGREP_API_URL=${process.env.ONEGREP_API_URL}, ONEGREP_API_KEY=${process.env.ONEGREP_API_KEY ? '[REDACTED]' : 'undefined'}`
+    )
 
     let persistedConfig: string | undefined
 
@@ -115,7 +117,7 @@ export class ConfigProvider {
       try {
         this.config = Config.modelValidateJSON(persistedConfig!)
 
-        // Avoids the case where a partial config was persisted and now the user has set 
+        // Avoids the case where a partial config was persisted and now the user has set
         // environment variables that generate an identity.
         if (!isDefined(this.config.identity)) {
           logger.debug('No identity found in config, creating empty identity')
@@ -138,8 +140,12 @@ export class ConfigProvider {
     // Update environment variables after loading config
     this.updateEnvVars()
 
-    logger.debug(`Config loaded, identity: ${JSON.stringify(this.config.identity)}`)
-    logger.debug(`After loading, env vars: ONEGREP_API_URL=${process.env.ONEGREP_API_URL}, ONEGREP_API_KEY=${process.env.ONEGREP_API_KEY ? '[REDACTED]' : 'undefined'}`)
+    logger.debug(
+      `Config loaded, identity: ${JSON.stringify(this.config.identity)}`
+    )
+    logger.debug(
+      `After loading, env vars: ONEGREP_API_URL=${process.env.ONEGREP_API_URL}, ONEGREP_API_KEY=${process.env.ONEGREP_API_KEY ? '[REDACTED]' : 'undefined'}`
+    )
   }
 
   /**
@@ -187,18 +193,18 @@ export class ConfigProvider {
   private updateEnvVars() {
     // Update process.env directly
     try {
-      const identity = this.config.identity;
+      const identity = this.config.identity
 
       if (identity && identity.apiKey) {
         logger.debug('Setting ONEGREP_API_KEY from config')
-        process.env.ONEGREP_API_KEY = identity.apiKey;
+        process.env.ONEGREP_API_KEY = identity.apiKey
       } else {
         logger.debug('No API key found in config')
       }
 
       if (identity && identity.apiUrl) {
         logger.debug('Setting ONEGREP_API_URL from config')
-        process.env.ONEGREP_API_URL = identity.apiUrl;
+        process.env.ONEGREP_API_URL = identity.apiUrl
       }
     } catch (error) {
       logger.error(`Error updating environment variables: ${error}`)

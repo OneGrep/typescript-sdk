@@ -12,7 +12,9 @@ import { createAccountCommand } from 'commands/account'
 
 async function validateAuthenticationState(authProvider: AuthzProvider) {
   if (!(await authProvider.isAuthenticated())) {
-    logger.log('You are current unauthenticated. Run the following command to authenticate:')
+    logger.log(
+      'You are current unauthenticated. Run the following command to authenticate:'
+    )
     logger.log(`$> ${chalk.bold.green('onegrep-cli')} account login\n\n`)
   }
 }

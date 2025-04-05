@@ -46,7 +46,7 @@ export class AuthzProvider {
     const oauth2Config = config.auth || new OAuth2Config()
 
     // Check if we already have a valid access token and an API key.
-    if (await this.isAuthenticated() && !reauthenticate) {
+    if ((await this.isAuthenticated()) && !reauthenticate) {
       return true
     }
 

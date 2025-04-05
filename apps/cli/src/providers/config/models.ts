@@ -120,9 +120,7 @@ export const OAuth2Schema = z.object({
 
       return _AUTHZ_DEFAULTS.clientId
     }),
-  accessToken: z
-    .string()
-    .optional(),
+  accessToken: z.string().optional(),
   expiresIn: z.number().optional(),
   idToken: z.string().optional()
 })
