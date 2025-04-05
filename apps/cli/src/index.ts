@@ -8,46 +8,77 @@ import { toolsCommand } from 'commands/tools'
 import { clearTerminal } from 'utils/helpers'
 import { ConfigProvider } from 'providers/config/provider'
 import AuthzProvider from 'providers/auth/provider'
-import { createAccountCommand } from 'commands/account'
+import { getAccountsCommand } from 'commands/account'
 
+// Authentication validation function that checks if user is authenticated
 async function validateAuthenticationState(authProvider: AuthzProvider) {
-  if (!(await authProvider.isAuthenticated())) {
+  try {
+    if (!(await authProvider.isAuthenticated())) {
+      logger.log(
+        'You are currently unauthenticated. Run the following command to authenticate:'
+      )
+      logger.log(`$> ${chalk.bold.green('onegrep-cli')} account help\n\n`)
+      process.exit(1)
+    }
+  } catch (error) {
+    logger.debug(`Authentication check failed: ${error}`)
     logger.log(
-      'You are current unauthenticated. Run the following command to authenticate:'
+      'Authentication check failed. Run the following command to set up your account:'
     )
-    logger.log(`$> ${chalk.bold.green('onegrep-cli')} account login\n\n`)
+    logger.log(`$> ${chalk.bold.green('onegrep-cli')} account setup\n\n`)
   }
 }
 
 async function main() {
-  clearTerminal()
-  const configProvider = new ConfigProvider()
-  await configProvider.init()
+  try {
+    clearTerminal()
+    const configProvider = new ConfigProvider()
+    await configProvider.init()
 
-  // Create auth client
-  const authProvider = new AuthzProvider({
-    configProvider
-  })
-
-  logger.debug(`Config: ${configProvider.getConfig().modelDumpJSON()}`)
-
-  const cli = new Command()
-    .name('onegrep-cli')
-    .description(
-      'Use the OneGrep CLI to debug and manage your OneGrep Toolbox.'
-    )
-    .version(version || '0.0.1')
-    .option('--debug', 'Enable debug mode', false)
-    .hook('preAction', async () => {
-      await validateAuthenticationState(authProvider)
+    // Create auth client
+    const authProvider = new AuthzProvider({
+      configProvider
     })
 
-  cli.addCommand(healthcheck)
-  cli.addCommand(getAuditLogs)
-  cli.addCommand(toolsCommand)
-  cli.addCommand(createAccountCommand({ configProvider, authProvider }))
+    logger.debug(`Config: ${configProvider.getConfig().modelDumpJSON()}`)
 
-  cli.parse()
+    const cli = new Command()
+      .name('onegrep-cli')
+      .description(
+        'Use the OneGrep CLI to debug and manage your OneGrep Toolbox.'
+      )
+      .version(version || '0.0.1')
+      .option('--debug', 'Enable debug mode', false)
+      .hook('preAction', async (_thisCommand, actionCommand) => {
+        // Commands that should not trigger authentication validation
+        const authBlacklist = ['account'];
+
+        // Skip authentication for blacklisted commands
+        const commandName = actionCommand.name();
+        const parentName = actionCommand.parent?.name();
+
+        // Check if this command or its parent is in the blacklist
+        if (authBlacklist.includes(commandName) ||
+          (parentName !== undefined && authBlacklist.includes(parentName))) {
+          return;
+        }
+
+        // Run authentication validation for all other commands
+        await validateAuthenticationState(authProvider);
+      });
+
+    // Add all the commands
+    cli.addCommand(healthcheck)
+    cli.addCommand(getAuditLogs)
+    cli.addCommand(toolsCommand)
+    cli.addCommand(getAccountsCommand({ configProvider, authProvider }))
+
+    cli.parse()
+  } catch (err) {
+    logger.error(`Error setting up CLI: ${err}`)
+    logger.log(`Run ${chalk.bold.green('onegrep-cli account setup')} to initialize your configuration.`)
+    process.exit(1)
+  }
 }
 
 // Instead of await main() - we do this because we are outputting a CJS module which does not support top-level awaits.

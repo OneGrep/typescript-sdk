@@ -6,38 +6,83 @@ import { ConfigProvider } from 'providers/config/provider'
 import { OAuth2Config } from 'providers/config/models'
 import { isDefined } from 'utils/helpers'
 import { chalk, logger } from 'utils/logger'
-import { AccountInformation, clientFromConfig, OneGrepApiClient } from '@onegrep/sdk'
+import {
+  AccountInformation,
+  clientFromConfig,
+  OneGrepApiClient
+} from '@onegrep/sdk'
 
 export class AuthzProvider {
   private readonly redirectPort = 3080 // Port for the local callback server
   private readonly configProvider: ConfigProvider
-  private readonly apiClient: OneGrepApiClient
 
   constructor(params: { configProvider: ConfigProvider }) {
     this.configProvider = params.configProvider
-    this.apiClient = clientFromConfig()
+    logger.debug('AuthzProvider initialized')
+  }
+
+  /**
+   * Get an API client for a specific operation or command
+   * @returns The API client
+   * @throws Error if API URL is not set or API key is missing
+   */
+  private getApiClient(): OneGrepApiClient {
+    try {
+      // Check if API URL is set
+      const config = this.configProvider.getConfig();
+      if (!config.identity?.apiUrl) {
+        throw new Error('API URL is not set. Please set an API URL using the account setup command.');
+      }
+
+      // Set env variables to be used by clientFromConfig
+      process.env.ONEGREP_API_URL = config.identity.apiUrl;
+      if (config.identity?.apiKey) {
+        process.env.ONEGREP_API_KEY = config.identity.apiKey;
+      }
+
+      return clientFromConfig();
+    } catch (error) {
+      logger.debug(`Failed to create API client: ${error}`);
+      throw error;
+    }
   }
 
   async isAuthenticated(): Promise<boolean> {
-    // A requirement in order for us to even select where to route calls.
-    if (!isDefined(this.configProvider.getConfig().identity?.apiUrl)) {
+    try {
+      // A requirement in order for us to even select where to route calls.
+      if (!isDefined(this.configProvider.getConfig().identity?.apiUrl)) {
+        logger.debug('No API URL set, cannot authenticate')
+        return false
+      }
+
+      // If we already have an api key, no need to go through a user-based auth flow.
+      if (isDefined(this.configProvider.getConfig().identity?.apiKey)) {
+        // TODO: Validate that the api key is valid for this domain.
+        try {
+          return await this.isApiKeyValid()
+        } catch (error) {
+          logger.debug(`API key validation failed: ${error}`)
+          return false
+        }
+      }
+
+      // We should have a valid token & our api key should be valid.
+      const oauth2Config = this.configProvider.getConfig().auth
+      if (isDefined(oauth2Config) && !oauth2Config!.isTokenExpired()) {
+        try {
+          await this.exchangeAccessTokenForApiKey()
+          return await this.isApiKeyValid()
+        } catch (error) {
+          logger.debug(`Token exchange failed: ${error}`)
+          return false
+        }
+      }
+
+      return false
+    } catch (error) {
+      logger.debug(`Authentication check failed: ${error}`)
       return false
     }
-
-    // If we already have an api key, no need to go through a user-based auth flow.
-    if (isDefined(this.configProvider.getConfig().identity?.apiKey)) {
-      // TODO: Validate that the api key is valid for this domain.
-      return await this.isApiKeyValid()
-    }
-
-    // We should have a valid token & our api key should be valid.
-    const oauth2Config = this.configProvider.getConfig().auth
-    if (isDefined(oauth2Config) && !oauth2Config!.isTokenExpired()) {
-      await this.exchangeAccessTokenForApiKey()
-      return await this.isApiKeyValid()
-    }
-
-    return false
   }
 
   /** Refreshes the underlying JWT provided by the provider and caches it for a short time
@@ -54,8 +99,10 @@ export class AuthzProvider {
     const config = this.configProvider.getConfig()
     const oauth2Config = config.auth || new OAuth2Config()
 
+    // Check if API URL is configured
     if (!config.identity?.apiUrl) {
-      throw new Error('No API URL found in the config. Please set an API URL.')
+      logger.error('No API URL found in the config. Please set an API URL using "account setup" or "account set-url" command first.')
+      return false
     }
 
     // Check if we already have a valid access token and an API key.
@@ -277,39 +324,48 @@ export class AuthzProvider {
 
     logger.log('Exchanging access token for API key...')
     const accessToken = authConfig!.accessToken
-    const authStatus = await this.apiClient.get_auth_status_api_v1_account_auth_status_get({
-      headers: {
-        Authorization: `Bearer ${accessToken}`
-      }
-    })
+    const authStatus =
+      await this.getApiClient().get_auth_status_api_v1_account_auth_status_get({
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        }
+      })
 
     let accountInfo: AccountInformation | undefined
 
     if (authStatus.credentials_provided && !authStatus.is_authenticated) {
-      logger.log("No OneGrep account found for this token.")
+      logger.log('No OneGrep account found for this token.')
 
       if (!isDefined(params?.invitationCode)) {
-        throw new Error('No invitation token provided. Please provide an invitation token to create an account.')
+        throw new Error(
+          'No invitation token provided. Please provide an invitation token to create an account.'
+        )
       }
 
       // Create an account for this user in the domain that they're pointed at.
       // TODO: Include invitation code in request body.
-      accountInfo = await this.apiClient.create_account_api_v1_account__post(undefined, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`
+      accountInfo = await this.getApiClient().create_account_api_v1_account__post(
+        undefined,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }
         }
-      })
+      )
     } else {
       // Fetch the account information for the user.
-      accountInfo = await this.apiClient.get_account_information_api_v1_account__get({
-        headers: {
-          Authorization: `Bearer ${accessToken}`
-        }
-      })
+      accountInfo =
+        await this.getApiClient().get_account_information_api_v1_account__get({
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }
+        })
     }
 
     if (!isDefined(accountInfo)) {
-      throw new Error('No account information found. Please re-authenticate or get an invitation code.')
+      throw new Error(
+        'No account information found. Please re-authenticate or get an invitation code.'
+      )
     }
 
     // TODO: Implement the actual API call for the key exchange.
@@ -319,12 +375,20 @@ export class AuthzProvider {
     })
   }
 
-  /** Used when we have some kind of a cached API Key that we want to explicitly validate
-   * before using it to make API calls.
+  /**
+   * Validates the API key by making a simple authenticated request
+   * @returns true if the API key is valid
+   * @throws Error if the API key is not valid
    */
   private async isApiKeyValid(): Promise<boolean> {
-    // TODO: Implement the actual API call to check the validity of the API key.
-    return true
+    try {
+      // Make a simple API call that requires authentication
+      await this.getApiClient().health_health_get()
+      return true
+    } catch (error) {
+      logger.error(`API key validation failed: ${error}`)
+      return false
+    }
   }
 }
 

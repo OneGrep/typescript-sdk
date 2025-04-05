@@ -29,10 +29,7 @@ export class ConfigProvider {
     dotenv.config()
 
     // Set up paths for config storage
-    this.userCfgDir = path.join(
-      os.homedir(),
-      this.CONF_DIR_NAME
-    )
+    this.userCfgDir = path.join(os.homedir(), this.CONF_DIR_NAME)
     this.userCfgPath = path.join(this.userCfgDir, this.CONF_FILE_NAME)
 
     // Initialize with empty config
