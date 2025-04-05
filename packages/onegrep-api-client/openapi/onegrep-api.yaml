@@ -416,6 +416,110 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/account/auth/status:
+    get:
+      tags:
+        - account
+      summary: Get Auth Status
+      description: >-
+        Returns the authentications state of the caller. Will read their API Key
+        or JWT and then determine
+
+        if a OneGrep account exists. If yes, then it will be considered
+        authenticated.
+
+
+        # ! NOTE: The User may have a valid JWT but if they do not have a
+        OneGrep account, they will not be considered authenticated.
+      operationId: get_auth_status_api_v1_account_auth_status_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationStatus'
+      security:
+        - APIKeyHeader: []
+        - HTTPBearer: []
+  /api/v1/account/api-key:
+    get:
+      tags:
+        - account
+      summary: Get Api Key
+      description: Returns the API key information for the authenticated user.
+      operationId: get_api_key_api_v1_account_api_key_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserAccount'
+      security:
+        - HTTPBearer: []
+    post:
+      tags:
+        - account
+      summary: Create Api Key
+      description: Creates a new user account for the authenticated user with an API key.
+      operationId: create_api_key_api_v1_account_api_key_post
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserAccount'
+      security:
+        - HTTPBearer: []
+  /api/v1/account/:
+    get:
+      tags:
+        - account
+      summary: Get Account Information
+      operationId: get_account_information_api_v1_account__get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountInformation'
+      security:
+        - HTTPBearer: []
+    post:
+      tags:
+        - account
+      summary: Create Account
+      description: >-
+        Creates a new account for the authenticated user with an API key and
+        organization.
+      operationId: create_account_api_v1_account__post
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountInformation'
+      security:
+        - HTTPBearer: []
+    delete:
+      tags:
+        - account
+      summary: Delete Account
+      operationId: delete_account_api_v1_account__delete
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: boolean
+                title: Response Delete Account Api V1 Account  Delete
+      security:
+        - HTTPBearer: []
   /api/v1/clients/meta:
     get:
       tags:

@@ -30,7 +30,7 @@ export class ConfigProvider {
 
     // Set up paths for config storage
     this.userCfgDir = path.join(
-      '/Users/achintyaashok/Downloads',
+      os.homedir(),
       this.CONF_DIR_NAME
     )
     this.userCfgPath = path.join(this.userCfgDir, this.CONF_FILE_NAME)

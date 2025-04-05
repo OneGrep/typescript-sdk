@@ -54,7 +54,9 @@ export function createAccountCommand(params: {
         }
 
         // Invoke the authentication flow
-        const authenticated = await authProvider.initOAuthFlow(true)
+        const authenticated = await authProvider.initOAuthFlow({
+          reauthenticate: true
+        })
 
         if (!authenticated) {
           logger.error('Authentication failed. Please try again.')

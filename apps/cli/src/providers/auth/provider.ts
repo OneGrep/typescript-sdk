@@ -6,13 +6,16 @@ import { ConfigProvider } from 'providers/config/provider'
 import { OAuth2Config } from 'providers/config/models'
 import { isDefined } from 'utils/helpers'
 import { chalk, logger } from 'utils/logger'
+import { AccountInformation, clientFromConfig, OneGrepApiClient } from '@onegrep/sdk'
 
 export class AuthzProvider {
   private readonly redirectPort = 3080 // Port for the local callback server
   private readonly configProvider: ConfigProvider
+  private readonly apiClient: OneGrepApiClient
 
   constructor(params: { configProvider: ConfigProvider }) {
     this.configProvider = params.configProvider
+    this.apiClient = clientFromConfig()
   }
 
   async isAuthenticated(): Promise<boolean> {
@@ -41,9 +44,19 @@ export class AuthzProvider {
    * in order to get the API KEY to interact with the user's resources. Will return true if
    * the flow was successful, false if authentication failed.
    */
-  async initOAuthFlow(reauthenticate: boolean = false): Promise<boolean> {
+  async initOAuthFlow(params: {
+    reauthenticate?: boolean
+    invitationCode?: string
+  }): Promise<boolean> {
+    const reauthenticate = params.reauthenticate ?? false
+    const invitationCode = params.invitationCode
+
     const config = this.configProvider.getConfig()
     const oauth2Config = config.auth || new OAuth2Config()
+
+    if (!config.identity?.apiUrl) {
+      throw new Error('No API URL found in the config. Please set an API URL.')
+    }
 
     // Check if we already have a valid access token and an API key.
     if ((await this.isAuthenticated()) && !reauthenticate) {
@@ -125,7 +138,9 @@ export class AuthzProvider {
         id_token: tokens.id_token
       })
 
-      await this.exchangeAccessTokenForApiKey()
+      await this.exchangeAccessTokenForApiKey({
+        invitationCode: invitationCode
+      })
 
       return true
     } catch (error) {
@@ -134,8 +149,9 @@ export class AuthzProvider {
       console.error('Authentication failed:', errorMessage)
       throw error
     } finally {
-      // Ensure server is closed
+      // Clean up and update state.
       server.close()
+      this.configProvider.saveConfig()
     }
   }
 
@@ -251,14 +267,55 @@ export class AuthzProvider {
    * Exchanges an access token for an API key by calling the backend service then updates the
    * local config with the API Key for usage across boundaries.
    */
-  private async exchangeAccessTokenForApiKey(): Promise<void> {
-    // TODO: Implement the actual API call to exchange the access token for an API key
-    // This is a placeholder implementation
-    console.log('Exchanging access token for API key...')
+  private async exchangeAccessTokenForApiKey(params?: {
+    invitationCode?: string
+  }): Promise<void> {
+    const authConfig = this.configProvider.getConfig().auth
+    if (!isDefined(authConfig) || !isDefined(authConfig!.accessToken)) {
+      throw new Error('Invalid authentication state. Please re-authenticate.')
+    }
+
+    logger.log('Exchanging access token for API key...')
+    const accessToken = authConfig!.accessToken
+    const authStatus = await this.apiClient.get_auth_status_api_v1_account_auth_status_get({
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    })
+
+    let accountInfo: AccountInformation | undefined
+
+    if (authStatus.credentials_provided && !authStatus.is_authenticated) {
+      logger.log("No OneGrep account found for this token.")
+
+      if (!isDefined(params?.invitationCode)) {
+        throw new Error('No invitation token provided. Please provide an invitation token to create an account.')
+      }
+
+      // Create an account for this user in the domain that they're pointed at.
+      // TODO: Include invitation code in request body.
+      accountInfo = await this.apiClient.create_account_api_v1_account__post(undefined, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        }
+      })
+    } else {
+      // Fetch the account information for the user.
+      accountInfo = await this.apiClient.get_account_information_api_v1_account__get({
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        }
+      })
+    }
+
+    if (!isDefined(accountInfo)) {
+      throw new Error('No account information found. Please re-authenticate or get an invitation code.')
+    }
 
     // TODO: Implement the actual API call for the key exchange.
     this.configProvider.updateIdentity({
-      apiKey: '1234567890'
+      apiKey: accountInfo.account.api_key,
+      userId: accountInfo.user_id
     })
   }
 
