@@ -13,11 +13,11 @@ export const IdentitySchema = z.object({
     .string()
     .optional()
     .transform((v) => {
-      if (isDefined(v)) return v
-
       if (isDefined(process.env.ONEGREP_API_URL)) {
         return process.env.ONEGREP_API_URL
       }
+
+      if (isDefined(v)) return v
 
       return undefined
     }),
@@ -25,16 +25,16 @@ export const IdentitySchema = z.object({
     .string()
     .optional()
     .transform((v) => {
-      if (isDefined(v)) return v
-
       if (isDefined(process.env.ONEGREP_API_KEY)) {
         return process.env.ONEGREP_API_KEY
       }
 
+      if (isDefined(v)) return v
+
       return undefined
     }),
   userId: z.string().optional(),
-  email: z.string().optional(),
+  email: z.string().optional()
   // profileId, etc.
 })
 
@@ -110,10 +110,6 @@ export const OAuth2Schema = z.object({
     .transform((v) => {
       if (isDefined(v)) return v
 
-      if (isDefined(process.env.ONEGREP_OAUTH2_PROVIDER_URL)) {
-        return process.env.ONEGREP_OAUTH2_PROVIDER_URL
-      }
-
       return _AUTHZ_DEFAULTS.openIdDiscoveryEndpoint
     }),
   clientId: z
@@ -122,18 +118,11 @@ export const OAuth2Schema = z.object({
     .transform((v) => {
       if (isDefined(v)) return v
 
-      if (isDefined(process.env.ONEGREP_OAUTH2_CLIENT_ID)) {
-        return process.env.ONEGREP_OAUTH2_CLIENT_ID
-      }
-
       return _AUTHZ_DEFAULTS.clientId
     }),
   accessToken: z
     .string()
-    .optional()
-    .transform((v) => {
-      return isDefined(v) ? v : process.env.ONEGREP_ACCESS_TOKEN
-    }),
+    .optional(),
   expiresIn: z.number().optional(),
   idToken: z.string().optional()
 })

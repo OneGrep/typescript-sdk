@@ -15,16 +15,19 @@ import { select, input, confirm, checkbox } from '@inquirer/prompts'
 import Table from 'cli-table3'
 import { highlight } from 'cli-highlight'
 import AuthzProvider from '../providers/auth/provider'
+import { ConfigProvider } from 'providers/config/provider'
 
 /**
  * Creates the account command with subcommands for authentication and account management
- * @param authClient The authentication client to use
+ * @param authProvider The authentication client to use
  * @returns The configured account command
  */
-export function createAccountCommand(authClient: AuthzProvider): Command {
+export function createAccountCommand(params: { configProvider: ConfigProvider, authProvider: AuthzProvider }): Command {
   const accountCommand = new Command('account').description(
     'Manage your OneGrep account and authentication'
   )
+
+  const { configProvider, authProvider } = params
 
   // Login command
   accountCommand
@@ -35,20 +38,35 @@ export function createAccountCommand(authClient: AuthzProvider): Command {
         const spinner = getSpinner('Authenticating with OneGrep...')
         spinner.start()
 
+        if (await authProvider.isAuthenticated()) {
+          logger.log(chalk.green('You are already authenticated.'))
+          const choice = await confirm({
+            message: 'Would you like to re-authenticate?',
+            default: false
+          })
+
+          if (!choice) {
+            return
+          }
+        }
+
+
         // Invoke the authentication flow
-        const apiKey = await authClient.getAPIKey()
+        const authenticated = await authProvider.initOAuthFlow(true)
+
+        if (!authenticated) {
+          logger.error('Authentication failed. Please try again.')
+          return
+        }
 
         spinner.succeed('Authentication successful!')
+        configProvider.saveConfig()
 
-        logger.info(chalk.green(`You are now logged in to OneGrep`))
-        if (apiKey) {
-          logger.info(chalk.dim(`API Key: ${apiKey.substring(0, 5)}...`))
-        }
+        logger.log(`Run ${chalk.bold.blue('onegrep-cli help')} to get started.`)
       } catch (error) {
         logger.error(
           `Authentication failed: ${error instanceof Error ? error.message : String(error)}`
         )
-        process.exit(1)
       }
     })
 

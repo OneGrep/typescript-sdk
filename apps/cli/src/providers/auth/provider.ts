@@ -38,15 +38,16 @@ export class AuthzProvider {
   }
 
   /** Refreshes the underlying JWT provided by the provider and caches it for a short time
-   * in order to get the API KEY to interact with the user's resources.
+   * in order to get the API KEY to interact with the user's resources. Will return true if
+   * the flow was successful, false if authentication failed.
    */
-  async initOAuthFlow(): Promise<void> {
+  async initOAuthFlow(reauthenticate: boolean = false): Promise<boolean> {
     const config = this.configProvider.getConfig()
     const oauth2Config = config.auth || new OAuth2Config()
 
     // Check if we already have a valid access token and an API key.
-    if (await this.isAuthenticated()) {
-      return
+    if (await this.isAuthenticated() && !reauthenticate) {
+      return true
     }
 
     // Set up a local server to receive the callback
@@ -82,19 +83,20 @@ export class AuthzProvider {
       const redirectTo = client.buildAuthorizationUrl(oidcConfig, parameters)
 
       // Open the browser for the user to authenticate
-      logger.info('Please open this URL in your browser to authenticate (if it doesn\'t open automatically):\n')
+      logger.info(
+        "Please open this URL in your browser to authenticate (if it doesn't open automatically):\n"
+      )
       logger.info(chalk.blue(redirectTo.href))
       logger.info('\n')
 
       try {
         await open.default(redirectTo.href)
-        logger.info('Browser opened automatically.')
+        logger.debug('Browser opened automatically.')
       } catch (error) {
         logger.error(
           'Unable to open browser automatically. Please copy the URL manually.'
         )
       }
-
 
       const callbackUrl = await codePromise
 
@@ -109,8 +111,13 @@ export class AuthzProvider {
         }
       )
 
+      if (!isDefined(tokens.access_token)) {
+        logger.error('Authentication failed. No access token received.')
+        return false
+      }
+
       // TODO: Remove this from the log.
-      logger.info(chalk.bold.green('✓ Authentication successful!'))
+      logger.debug('✓ Authentication successful!')
 
       this.configProvider.updateAuthState({
         access_token: tokens.access_token,
@@ -119,6 +126,8 @@ export class AuthzProvider {
       })
 
       await this.exchangeAccessTokenForApiKey()
+
+      return true
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error)

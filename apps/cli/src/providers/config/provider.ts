@@ -29,8 +29,10 @@ export class ConfigProvider {
     dotenv.config()
 
     // Set up paths for config storage
-    // TODO: update - os.homedir()
-    this.userCfgDir = path.join('/Users/achintyaashok/Downloads', this.CONF_DIR_NAME)
+    this.userCfgDir = path.join(
+      "/Users/achintyaashok/Downloads",
+      this.CONF_DIR_NAME
+    )
     this.userCfgPath = path.join(this.userCfgDir, this.CONF_FILE_NAME)
 
     // Initialize with empty config
@@ -91,37 +93,53 @@ export class ConfigProvider {
     this.updateEnvVars()
   }
 
+  /** Use this as a mechanism to forcibly save the config to disk. */
+  saveConfig() {
+    this.persistConfig()
+    this.updateEnvVars()
+  }
+
   /**
    * Loads configuration from environment variables and persisted config
    */
   private async loadConfig(): Promise<void> {
-    logger.debug(`Loading config from FS... ${this.userCfgPath}`)
+    logger.debug(`Loading config from => ${this.userCfgPath}`)
+    logger.debug(`Current env vars: ONEGREP_API_URL=${process.env.ONEGREP_API_URL}, ONEGREP_API_KEY=${process.env.ONEGREP_API_KEY ? '[REDACTED]' : 'undefined'}`)
+
     let persistedConfig: string | undefined
 
     // First try to load from persisted config
     if (fs.existsSync(this.userCfgPath)) {
+      logger.debug('Config file exists, loading from disk...')
       persistedConfig = fs.readFileSync(this.userCfgPath, 'utf8')
       try {
         this.config = Config.modelValidateJSON(persistedConfig!)
-      } catch (error) {
-        logger.error(
-          `Failed to validate config. Not updating with persisted config. ${error}`
-        )
-      }
-    }
 
-    if (isDefined(persistedConfig)) {
-      try {
-        this.config = Config.modelValidateJSON(persistedConfig!)
+        // Avoids the case where a partial config was persisted and now the user has set 
+        // environment variables that generate an identity.
+        if (!isDefined(this.config.identity)) {
+          logger.debug('No identity found in config, creating empty identity')
+          this.config.identity = new Identity()
+        }
       } catch (error) {
         logger.error(
           `Failed to validate config. Not updating with persisted config. ${error}`
         )
       }
     } else {
+      logger.debug('Config file does not exist, will create with defaults')
+    }
+
+    if (!isDefined(persistedConfig)) {
       // Stub out our config with empty values.
       await this.persistConfig()
     }
+
+    // Update environment variables after loading config
+    this.updateEnvVars()
+
+    logger.debug(`Config loaded, identity: ${JSON.stringify(this.config.identity)}`)
+    logger.debug(`After loading, env vars: ONEGREP_API_URL=${process.env.ONEGREP_API_URL}, ONEGREP_API_KEY=${process.env.ONEGREP_API_KEY ? '[REDACTED]' : 'undefined'}`)
   }
 
   /**
@@ -168,7 +186,22 @@ export class ConfigProvider {
 
   private updateEnvVars() {
     // Update process.env directly
-    process.env.ONEGREP_ACCESS_TOKEN = this.config.auth?.accessToken
-    process.env.ONEGREP_API_KEY = this.config.identity?.apiKey
+    try {
+      const identity = this.config.identity;
+
+      if (identity && identity.apiKey) {
+        logger.debug('Setting ONEGREP_API_KEY from config')
+        process.env.ONEGREP_API_KEY = identity.apiKey;
+      } else {
+        logger.debug('No API key found in config')
+      }
+
+      if (identity && identity.apiUrl) {
+        logger.debug('Setting ONEGREP_API_URL from config')
+        process.env.ONEGREP_API_URL = identity.apiUrl;
+      }
+    } catch (error) {
+      logger.error(`Error updating environment variables: ${error}`)
+    }
   }
 }

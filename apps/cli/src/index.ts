@@ -12,9 +12,8 @@ import { createAccountCommand } from 'commands/account'
 
 async function validateAuthenticationState(authProvider: AuthzProvider) {
   if (!(await authProvider.isAuthenticated())) {
-    logger.error('You are current unauthenticated.')
-    logger.info(`${chalk.bold.green('onegrep-cli')} account login`)
-    process.exit(1)
+    logger.log('You are current unauthenticated. Run the following command to authenticate:')
+    logger.log(`$> ${chalk.bold.green('onegrep-cli')} account login\n\n`)
   }
 }
 
@@ -28,7 +27,7 @@ async function main() {
     configProvider
   })
 
-  logger.info(`Config: ${configProvider.getConfig().modelDumpJSON()}`)
+  logger.debug(`Config: ${configProvider.getConfig().modelDumpJSON()}`)
 
   const cli = new Command()
     .name('onegrep-cli')
@@ -44,7 +43,7 @@ async function main() {
   cli.addCommand(healthcheck)
   cli.addCommand(getAuditLogs)
   cli.addCommand(toolsCommand)
-  cli.addCommand(createAccountCommand(authProvider))
+  cli.addCommand(createAccountCommand({ configProvider, authProvider }))
 
   cli.parse()
 }
