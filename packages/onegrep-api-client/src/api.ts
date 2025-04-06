@@ -340,6 +340,10 @@ const AccountInformation: z.ZodType<AccountInformation> = z
   })
   .strict()
   .passthrough()
+const AccountCreateRequest = z
+  .object({ invitation_code: z.string(), email: z.string() })
+  .strict()
+  .passthrough()
 const RemoteClientConfig = z
   .object({
     org_id: z.string(),
@@ -506,6 +510,7 @@ export const schemas = {
   UserAccount,
   Organization,
   AccountInformation,
+  AccountCreateRequest,
   RemoteClientConfig,
   BasePolicy,
   ToolCustomProperties,
@@ -554,14 +559,6 @@ const endpoints = makeApi([
     response: UserAccount
   },
   {
-    method: 'post',
-    path: '/api/v1/account/api-key',
-    alias: 'create_api_key_api_v1_account_api_key_post',
-    description: `Creates a new user account for the authenticated user with an API key.`,
-    requestFormat: 'json',
-    response: UserAccount
-  },
-  {
     method: 'get',
     path: '/api/v1/account/auth/status',
     alias: 'get_auth_status_api_v1_account_auth_status_get',
@@ -571,6 +568,28 @@ if a OneGrep account exists. If yes, then it will be considered authenticated.
 # ! NOTE: The User may have a valid JWT but if they do not have a OneGrep account, they will not be considered authenticated.`,
     requestFormat: 'json',
     response: AuthenticationStatus
+  },
+  {
+    method: 'post',
+    path: '/api/v1/account/invitation-code',
+    alias: 'create_account_by_invitation_api_v1_account_invitation_code_post',
+    description: `Creates a new account given an authenticated user and a valid invitation code.`,
+    requestFormat: 'json',
+    parameters: [
+      {
+        name: 'body',
+        type: 'Body',
+        schema: AccountCreateRequest
+      }
+    ],
+    response: AccountInformation,
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError
+      }
+    ]
   },
   {
     method: 'get',

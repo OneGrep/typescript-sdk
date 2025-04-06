@@ -11,6 +11,48 @@ import {
   createApiClientFromParams,
   OneGrepApiClient
 } from '@onegrep/sdk'
+import * as jose from 'jose'
+
+// Define interface for JWT claims based on standard OpenID Connect claims
+// that match our requested scopes: 'openid profile email'
+/**
+ * Interface for JWT claims that aligns with the OpenID Connect (OIDC) specification.
+ * 
+ * These fields are defined in the OIDC Core specification:
+ * https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
+ * 
+ * We request the scopes 'openid profile email' which provides access to these claims.
+ * The actual claims returned will depend on the identity provider and user permissions.
+ */
+interface UserJwtClaims {
+  // Required by OpenID Connect
+  sub: string;
+
+  // Email scope
+  email?: string;
+  email_verified?: boolean;
+
+  // Profile scope
+  name?: string;
+  given_name?: string;
+  family_name?: string;
+  middle_name?: string;
+  nickname?: string;
+  preferred_username?: string;
+  profile?: string;
+  picture?: string;
+  website?: string;
+  gender?: string;
+  birthdate?: string;
+  zoneinfo?: string;
+  locale?: string;
+  updated_at?: number;
+
+  // JWT standard fields
+  iat?: number;
+  exp?: number;
+  iss?: string;
+}
 
 export class AuthzProvider {
   private readonly redirectPort = 3080 // Port for the local callback server
@@ -312,6 +354,23 @@ export class AuthzProvider {
     return { server, codePromise }
   }
 
+  private async getUserDetailsFromJwt(): Promise<UserJwtClaims> {
+    if (!this.isAuthenticated() || !isDefined(this.configProvider.getConfig().auth?.accessToken)) {
+      throw new Error('No access token found. Cannot fetch user details.')
+    }
+
+    const jwt = this.configProvider.getConfig().auth?.accessToken
+
+    try {
+      // Decode the JWT without verifying the signature
+      const decoded = jose.decodeJwt(jwt!)
+      return decoded as UserJwtClaims
+    } catch (error) {
+      logger.error(`Failed to decode JWT: ${error}`)
+      throw new Error('Failed to extract user details from token')
+    }
+  }
+
   /**
    * Exchanges an access token for an API key by calling the backend service then updates the
    * local config with the API Key for usage across boundaries.
@@ -339,10 +398,29 @@ export class AuthzProvider {
         )
       }
 
+      // Get user details including email from the JWT
+      let userEmail: string | undefined
+      try {
+        const claims = await this.getUserDetailsFromJwt()
+        // Try email first, then preferred_username, then fall back to sub
+        userEmail = claims.email!
+        logger.debug(`Extracted email from token: ${userEmail}`)
+      } catch (error) {
+        logger.error(`Failed to extract email from token: ${error}`)
+        throw new Error('Could not extract email from authentication tokens')
+      }
+
+      if (!userEmail) {
+        throw new Error('Could not extract email from authentication tokens')
+      }
+
       // Create an account for this user in the domain that they're pointed at.
-      // TODO: Include invitation code in request body.
+      logger.debug(`Creating account with email: ${userEmail} and invitation code: ${params?.invitationCode}`)
       accountInfo =
-        await this.getApiClient().create_account_api_v1_account__post(undefined)
+        await this.getApiClient().create_account_by_invitation_api_v1_account_invitation_code_post({
+          invitation_code: params?.invitationCode as string,
+          email: userEmail
+        })
     } else {
       // Fetch the account information for the user.
       accountInfo =

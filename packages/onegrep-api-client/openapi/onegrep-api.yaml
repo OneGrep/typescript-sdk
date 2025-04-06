@@ -458,21 +458,6 @@ paths:
                 $ref: '#/components/schemas/UserAccount'
       security:
         - HTTPBearer: []
-    post:
-      tags:
-        - account
-      summary: Create Api Key
-      description: Creates a new user account for the authenticated user with an API key.
-      operationId: create_api_key_api_v1_account_api_key_post
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserAccount'
-      security:
-        - HTTPBearer: []
   /api/v1/account/:
     get:
       tags:
@@ -518,6 +503,36 @@ paths:
               schema:
                 type: boolean
                 title: Response Delete Account Api V1 Account  Delete
+      security:
+        - HTTPBearer: []
+  /api/v1/account/invitation-code:
+    post:
+      tags:
+        - account
+      summary: Create Account By Invitation
+      description: >-
+        Creates a new account given an authenticated user and a valid invitation
+        code.
+      operationId: create_account_by_invitation_api_v1_account_invitation_code_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountCreateRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountInformation'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
       security:
         - HTTPBearer: []
   /api/v1/clients/meta:
@@ -786,6 +801,19 @@ components:
         - REQUIRES_PERMISSION
       title: AccessPolicyType
       description: Enum for access policy types
+    AccountCreateRequest:
+      properties:
+        invitation_code:
+          type: string
+          title: Invitation Code
+        email:
+          type: string
+          title: Email
+      type: object
+      required:
+        - invitation_code
+        - email
+      title: AccountCreateRequest
     AccountInformation:
       properties:
         user_id:

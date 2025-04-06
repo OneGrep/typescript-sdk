@@ -80,6 +80,9 @@ importers:
       dotenv:
         specifier: ^16.4.7
         version: 16.4.7
+      jose:
+        specifier: ^6.0.10
+        version: 6.0.10
       open:
         specifier: ^10.1.0
         version: 10.1.0
@@ -305,7 +308,7 @@ importers:
         version: 22.13.4
       '@typescript-eslint/parser':
         specifier: ^7.15.0
-        version: 7.18.0(eslint@8.57.1)(typescript@5.8.2)
+        version: 7.18.0(eslint@8.57.1)(typescript@5.8.3)
       dotenv:
         specifier: ^16.4.7
         version: 16.4.7
@@ -314,19 +317,19 @@ importers:
         version: 8.57.1
       eslint-plugin-n8n-nodes-base:
         specifier: ^1.16.1
-        version: 1.16.3(eslint@8.57.1)(typescript@5.8.2)
+        version: 1.16.3(eslint@8.57.1)(typescript@5.8.3)
       n8n:
         specifier: '*'
-        version: 1.78.1(9d1bf5114ce593791c7f931a3ab096e6)
+        version: 1.78.1(744e864bd0eb2e52264101a5941fbf09)
       n8n-workflow:
         specifier: '*'
         version: 1.70.0
       tsup:
         specifier: ^8.3.6
-        version: 8.3.6(@swc/core@1.10.16(@swc/helpers@0.5.15))(jiti@2.4.2)(postcss@8.5.2)(tsx@4.19.2)(typescript@5.8.2)(yaml@2.7.0)
+        version: 8.3.6(@swc/core@1.10.16(@swc/helpers@0.5.15))(jiti@2.4.2)(postcss@8.5.2)(tsx@4.19.2)(typescript@5.8.3)(yaml@2.7.0)
       typescript:
         specifier: latest
-        version: 5.8.2
+        version: 5.8.3
       vitest:
         specifier: ^3.0.5
         version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.4)(jiti@2.4.2)(jsdom@23.0.1(canvas@2.11.2(encoding@0.1.13)))(terser@5.39.0)(tsx@4.19.2)(yaml@2.7.0)
@@ -363,7 +366,7 @@ importers:
         version: 6.0.1
       typescript:
         specifier: latest
-        version: 5.8.2
+        version: 5.8.3
       vitest:
         specifier: ^3.0.5
         version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.4)(jiti@2.4.2)(jsdom@23.0.1(canvas@2.11.2(encoding@0.1.13)))(terser@5.39.0)(tsx@4.19.2)(yaml@2.7.0)
@@ -424,7 +427,7 @@ importers:
         version: 0.4.4(rollup@4.34.9)
       '@rollup/plugin-typescript':
         specifier: ^12.1.2
-        version: 12.1.2(rollup@4.34.9)(tslib@2.8.1)(typescript@5.8.2)
+        version: 12.1.2(rollup@4.34.9)(tslib@2.8.1)(typescript@5.8.3)
       '@types/eslint':
         specifier: ^8.56.0
         version: 8.56.12
@@ -457,13 +460,13 @@ importers:
         version: 4.34.9
       rollup-plugin-dts:
         specifier: ^6.1.1
-        version: 6.1.1(rollup@4.34.9)(typescript@5.8.2)
+        version: 6.1.1(rollup@4.34.9)(typescript@5.8.3)
       thread-stream:
         specifier: ^1.0.0
         version: 1.0.1
       typescript:
         specifier: latest
-        version: 5.8.2
+        version: 5.8.3
       vitest:
         specifier: ^3.0.5
         version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.4)(jiti@2.4.2)(jsdom@23.0.1(canvas@2.11.2(encoding@0.1.13)))(terser@5.39.0)(tsx@4.19.2)(yaml@2.7.0)
@@ -512,7 +515,7 @@ importers:
         version: 0.4.4(rollup@4.34.9)
       '@rollup/plugin-typescript':
         specifier: ^12.1.2
-        version: 12.1.2(rollup@4.34.9)(tslib@2.8.1)(typescript@5.8.2)
+        version: 12.1.2(rollup@4.34.9)(tslib@2.8.1)(typescript@5.8.3)
       '@types/eslint':
         specifier: ^8.56.0
         version: 8.56.12
@@ -533,16 +536,16 @@ importers:
         version: 4.34.9
       rollup-plugin-dts:
         specifier: ^6.1.1
-        version: 6.1.1(rollup@4.34.9)(typescript@5.8.2)
+        version: 6.1.1(rollup@4.34.9)(typescript@5.8.3)
       thread-stream:
         specifier: ^1.0.0
         version: 1.0.1
       tsup:
         specifier: ^8.3.6
-        version: 8.3.6(@swc/core@1.10.16(@swc/helpers@0.5.15))(jiti@2.4.2)(postcss@8.5.2)(tsx@4.19.2)(typescript@5.8.2)(yaml@2.7.0)
+        version: 8.3.6(@swc/core@1.10.16(@swc/helpers@0.5.15))(jiti@2.4.2)(postcss@8.5.2)(tsx@4.19.2)(typescript@5.8.3)(yaml@2.7.0)
       typescript:
         specifier: latest
-        version: 5.8.2
+        version: 5.8.3
       vitest:
         specifier: ^3.0.5
         version: 3.0.5(@types/debug@4.1.12)(@types/node@22.13.4)(jiti@2.4.2)(jsdom@23.0.1(canvas@2.11.2(encoding@0.1.13)))(terser@5.39.0)(tsx@4.19.2)(yaml@2.7.0)
@@ -584,7 +587,7 @@ importers:
         version: 16.0.0(rollup@4.34.9)
       '@rollup/plugin-typescript':
         specifier: ^12.1.2
-        version: 12.1.2(rollup@4.34.9)(tslib@2.8.1)(typescript@5.8.2)
+        version: 12.1.2(rollup@4.34.9)(tslib@2.8.1)(typescript@5.8.3)
       '@types/node':
         specifier: ^22.13.4
         version: 22.13.4
@@ -593,13 +596,13 @@ importers:
         version: 4.34.9
       rollup-plugin-dts:
         specifier: ^6.1.1
-        version: 6.1.1(rollup@4.34.9)(typescript@5.8.2)
+        version: 6.1.1(rollup@4.34.9)(typescript@5.8.3)
       tsup:
         specifier: ^8.2.0
-        version: 8.3.6(@swc/core@1.10.16(@swc/helpers@0.5.15))(jiti@2.4.2)(postcss@8.5.2)(tsx@4.19.2)(typescript@5.8.2)(yaml@2.7.0)
+        version: 8.3.6(@swc/core@1.10.16(@swc/helpers@0.5.15))(jiti@2.4.2)(postcss@8.5.2)(tsx@4.19.2)(typescript@5.8.3)(yaml@2.7.0)
       typescript:
         specifier: latest
-        version: 5.8.2
+        version: 5.8.3
 
 packages:
 
@@ -9548,11 +9551,6 @@ packages:
     engines: {node: '>=4.2.0'}
     hasBin: true
 
-  typescript@4.9.5:
-    resolution: {integrity: sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==}
-    engines: {node: '>=4.2.0'}
-    hasBin: true
-
   typescript@5.7.3:
     resolution: {integrity: sha512-84MVSjMEHP+FQRPy3pX9sTVV/INIex71s9TL2Gm5FG/WG1SqXeKyZ0k7/blY/4FdOzI12CBy1vGc4og/eus0fw==}
     engines: {node: '>=14.17'}
@@ -9560,6 +9558,11 @@ packages:
 
   typescript@5.8.2:
     resolution: {integrity: sha512-aJn6wq13/afZp/jT9QZmwEjDqqvSGp1VT5GVg+f/t6/oVyrgXM6BY1h9BRh/O5p3PlUPAe+WuiEZOmb/49RqoQ==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+
+  typescript@5.8.3:
+    resolution: {integrity: sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -12241,7 +12244,7 @@ snapshots:
   '@gar/promisify@1.1.3':
     optional: true
 
-  '@getzep/zep-cloud@1.0.12(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))(encoding@0.1.13)(langchain@0.3.11(487886563a6617abcb3f609f792a7311))':
+  '@getzep/zep-cloud@1.0.12(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))(encoding@0.1.13)(langchain@0.3.11(a1b1d8f579acddeca1083aab38e85215))':
     dependencies:
       form-data: 4.0.0
       node-fetch: 2.7.0(encoding@0.1.13)
@@ -12250,7 +12253,7 @@ snapshots:
       zod: 3.24.2
     optionalDependencies:
       '@langchain/core': 0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2))
-      langchain: 0.3.11(487886563a6617abcb3f609f792a7311)
+      langchain: 0.3.11(a1b1d8f579acddeca1083aab38e85215)
     transitivePeerDependencies:
       - encoding
 
@@ -12258,7 +12261,7 @@ snapshots:
     dependencies:
       '@supercharge/promise-pool': 3.2.0
       semver: 7.7.1
-      typescript: 5.8.2
+      typescript: 5.8.3
 
   '@google-ai/generativelanguage@2.6.0(encoding@0.1.13)':
     dependencies:
@@ -12579,7 +12582,7 @@ snapshots:
       - aws-crt
       - encoding
 
-  '@langchain/community@0.3.24(f35a0e4516d1aca89c37027562a0152f)':
+  '@langchain/community@0.3.24(5a0a4a7816379da0aea795d3a15dd83f)':
     dependencies:
       '@browserbasehq/stagehand': 1.12.0(@playwright/test@1.50.1)(deepmerge@4.3.1)(dotenv@16.4.7)(encoding@0.1.13)(openai@4.78.1(encoding@0.1.13)(zod@3.24.2))(zod@3.24.2)
       '@ibm-cloud/watsonx-ai': 1.5.0(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))
@@ -12590,7 +12593,7 @@ snapshots:
       flat: 5.0.2
       ibm-cloud-sdk-core: 5.1.3
       js-yaml: 4.1.0
-      langchain: 0.3.11(487886563a6617abcb3f609f792a7311)
+      langchain: 0.3.11(a1b1d8f579acddeca1083aab38e85215)
       langsmith: 0.2.15(openai@4.78.1(encoding@0.1.13)(zod@3.24.2))
       openai: 4.78.1(encoding@0.1.13)(zod@3.24.1)
       uuid: 10.0.0
@@ -12605,17 +12608,17 @@ snapshots:
       '@aws-sdk/credential-provider-node': 3.750.0
       '@azure/storage-blob': 12.18.0(encoding@0.1.13)
       '@browserbasehq/sdk': 2.3.0(encoding@0.1.13)
-      '@getzep/zep-cloud': 1.0.12(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))(encoding@0.1.13)(langchain@0.3.11(487886563a6617abcb3f609f792a7311))
+      '@getzep/zep-cloud': 1.0.12(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))(encoding@0.1.13)(langchain@0.3.11(a1b1d8f579acddeca1083aab38e85215))
       '@getzep/zep-js': 0.9.0
       '@google-ai/generativelanguage': 2.6.0(encoding@0.1.13)
       '@google-cloud/storage': 7.15.1(encoding@0.1.13)
       '@huggingface/inference': 2.8.0
       '@mozilla/readability': 0.5.0
       '@pinecone-database/pinecone': 4.0.0
-      '@qdrant/js-client-rest': 1.11.0(typescript@5.8.2)
+      '@qdrant/js-client-rest': 1.11.0(typescript@5.8.3)
       '@smithy/util-utf8': 2.3.0
       '@supabase/supabase-js': 2.45.4
-      '@xata.io/client': 0.28.4(typescript@5.8.2)
+      '@xata.io/client': 0.28.4(typescript@5.8.3)
       cheerio: 1.0.0
       cohere-ai: 7.14.0(encoding@0.1.13)
       crypto-js: 4.2.0
@@ -12704,7 +12707,7 @@ snapshots:
       - supports-color
       - zod
 
-  '@langchain/google-genai@0.1.6(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))(zod@3.24.1)':
+  '@langchain/google-genai@0.1.6(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))(zod@3.24.2)':
     dependencies:
       '@google/generative-ai': 0.21.0
       '@langchain/core': 0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2))
@@ -12712,7 +12715,7 @@ snapshots:
     transitivePeerDependencies:
       - zod
 
-  '@langchain/google-vertexai@0.1.8(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))(encoding@0.1.13)(zod@3.24.1)':
+  '@langchain/google-vertexai@0.1.8(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))(encoding@0.1.13)(zod@3.24.2)':
     dependencies:
       '@langchain/core': 0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2))
       '@langchain/google-gauth': 0.1.8(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))(encoding@0.1.13)(zod@3.24.1)
@@ -12764,10 +12767,10 @@ snapshots:
       flat: 5.0.2
       uuid: 10.0.0
 
-  '@langchain/qdrant@0.1.1(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))(typescript@5.8.2)':
+  '@langchain/qdrant@0.1.1(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))(typescript@5.8.3)':
     dependencies:
       '@langchain/core': 0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2))
-      '@qdrant/js-client-rest': 1.11.0(typescript@5.8.2)
+      '@qdrant/js-client-rest': 1.11.0(typescript@5.8.3)
       uuid: 10.0.0
     transitivePeerDependencies:
       - typescript
@@ -12896,10 +12899,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@n8n/n8n-nodes-langchain@1.78.0(ee324423ddf79d7be970ffb3a69cbed1)':
+  '@n8n/n8n-nodes-langchain@1.78.0(c4b4ca898796671679334e804ab64066)':
     dependencies:
       '@aws-sdk/client-sso-oidc': 3.666.0(@aws-sdk/client-sts@3.750.0)
-      '@getzep/zep-cloud': 1.0.12(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))(encoding@0.1.13)(langchain@0.3.11(487886563a6617abcb3f609f792a7311))
+      '@getzep/zep-cloud': 1.0.12(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))(encoding@0.1.13)(langchain@0.3.11(a1b1d8f579acddeca1083aab38e85215))
       '@getzep/zep-js': 0.9.0
       '@google-ai/generativelanguage': 2.6.0(encoding@0.1.13)
       '@google-cloud/resource-manager': 5.3.0(encoding@0.1.13)
@@ -12908,26 +12911,26 @@ snapshots:
       '@langchain/anthropic': 0.3.11(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))(encoding@0.1.13)
       '@langchain/aws': 0.1.3(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))
       '@langchain/cohere': 0.3.2(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))(encoding@0.1.13)
-      '@langchain/community': 0.3.24(f35a0e4516d1aca89c37027562a0152f)
+      '@langchain/community': 0.3.24(5a0a4a7816379da0aea795d3a15dd83f)
       '@langchain/core': 0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2))
-      '@langchain/google-genai': 0.1.6(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))(zod@3.24.1)
-      '@langchain/google-vertexai': 0.1.8(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))(encoding@0.1.13)(zod@3.24.1)
+      '@langchain/google-genai': 0.1.6(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))(zod@3.24.2)
+      '@langchain/google-vertexai': 0.1.8(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))(encoding@0.1.13)(zod@3.24.2)
       '@langchain/groq': 0.1.3(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))(encoding@0.1.13)(ws@8.17.1)
       '@langchain/mistralai': 0.2.0(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))
       '@langchain/ollama': 0.1.4(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))
       '@langchain/openai': 0.3.17(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))(encoding@0.1.13)(ws@8.17.1)
       '@langchain/pinecone': 0.1.3(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))
-      '@langchain/qdrant': 0.1.1(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))(typescript@5.8.2)
+      '@langchain/qdrant': 0.1.1(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))(typescript@5.8.3)
       '@langchain/redis': 0.1.0(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))
       '@langchain/textsplitters': 0.1.0(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))
       '@mozilla/readability': 0.5.0
       '@n8n/json-schema-to-zod': 1.2.0(zod@3.24.1)
-      '@n8n/typeorm': 0.3.20-12(@sentry/node@8.52.1)(ioredis@5.3.2)(mssql@10.0.2)(mysql2@3.11.0)(pg@8.12.0)(redis@4.6.12)(sqlite3@5.1.7)(ts-node@10.9.2(@swc/core@1.10.16(@swc/helpers@0.5.15))(@types/node@22.13.4)(typescript@5.8.2))
+      '@n8n/typeorm': 0.3.20-12(@sentry/node@8.52.1)(ioredis@5.3.2)(mssql@10.0.2)(mysql2@3.11.0)(pg@8.12.0)(redis@4.6.12)(sqlite3@5.1.7)(ts-node@10.9.2(@swc/core@1.10.16(@swc/helpers@0.5.15))(@types/node@22.13.4)(typescript@5.8.3))
       '@n8n/vm2': 3.9.25
       '@pinecone-database/pinecone': 4.0.0
-      '@qdrant/js-client-rest': 1.11.0(typescript@5.8.2)
+      '@qdrant/js-client-rest': 1.11.0(typescript@5.8.3)
       '@supabase/supabase-js': 2.45.4
-      '@xata.io/client': 0.28.4(typescript@5.8.2)
+      '@xata.io/client': 0.28.4(typescript@5.8.3)
       basic-auth: 2.0.1
       cheerio: 1.0.0
       cohere-ai: 7.14.0(encoding@0.1.13)
@@ -12937,7 +12940,7 @@ snapshots:
       generate-schema: 2.6.0
       html-to-text: 9.0.5
       jsdom: 23.0.1(canvas@2.11.2)
-      langchain: 0.3.11(487886563a6617abcb3f609f792a7311)
+      langchain: 0.3.11(a1b1d8f579acddeca1083aab38e85215)
       lodash: 4.17.21
       mammoth: 1.7.2
       mime-types: 2.1.35
@@ -13138,7 +13141,7 @@ snapshots:
       esprima-next: 5.8.4
       recast: 0.22.0
 
-  '@n8n/typeorm@0.3.20-12(@sentry/node@8.52.1)(ioredis@5.3.2)(mssql@10.0.2)(mysql2@3.11.0)(pg@8.12.0)(redis@4.6.12)(sqlite3@5.1.7)(ts-node@10.9.2(@swc/core@1.10.16(@swc/helpers@0.5.15))(@types/node@22.13.4)(typescript@5.8.2))':
+  '@n8n/typeorm@0.3.20-12(@sentry/node@8.52.1)(ioredis@5.3.2)(mssql@10.0.2)(mysql2@3.11.0)(pg@8.12.0)(redis@4.6.12)(sqlite3@5.1.7)(ts-node@10.9.2(@swc/core@1.10.16(@swc/helpers@0.5.15))(@types/node@22.13.4)(typescript@5.8.3))':
     dependencies:
       '@n8n/p-retry': 6.2.0-2
       '@sqltools/formatter': 1.2.5
@@ -13165,7 +13168,7 @@ snapshots:
       pg: 8.12.0
       redis: 4.6.12
       sqlite3: 5.1.7
-      ts-node: 10.9.2(@swc/core@1.10.16(@swc/helpers@0.5.15))(@types/node@22.13.4)(typescript@5.8.2)
+      ts-node: 10.9.2(@swc/core@1.10.16(@swc/helpers@0.5.15))(@types/node@22.13.4)(typescript@5.8.3)
     transitivePeerDependencies:
       - supports-color
 
@@ -13567,11 +13570,11 @@ snapshots:
 
   '@protobufjs/utf8@1.1.0': {}
 
-  '@qdrant/js-client-rest@1.11.0(typescript@5.8.2)':
+  '@qdrant/js-client-rest@1.11.0(typescript@5.8.3)':
     dependencies:
       '@qdrant/openapi-typescript-fetch': 1.2.6
       '@sevinf/maybe': 0.5.0
-      typescript: 5.8.2
+      typescript: 5.8.3
       undici: 5.28.5
 
   '@qdrant/openapi-typescript-fetch@1.2.6': {}
@@ -13695,6 +13698,15 @@ snapshots:
       '@rollup/pluginutils': 5.1.4(rollup@4.34.9)
       resolve: 1.22.10
       typescript: 5.8.2
+    optionalDependencies:
+      rollup: 4.34.9
+      tslib: 2.8.1
+
+  '@rollup/plugin-typescript@12.1.2(rollup@4.34.9)(tslib@2.8.1)(typescript@5.8.3)':
+    dependencies:
+      '@rollup/pluginutils': 5.1.4(rollup@4.34.9)
+      resolve: 1.22.10
+      typescript: 5.8.3
     optionalDependencies:
       rollup: 4.34.9
       tslib: 2.8.1
@@ -14927,16 +14939,16 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/parser@7.18.0(eslint@8.57.1)(typescript@5.8.2)':
+  '@typescript-eslint/parser@7.18.0(eslint@8.57.1)(typescript@5.8.3)':
     dependencies:
       '@typescript-eslint/scope-manager': 7.18.0
       '@typescript-eslint/types': 7.18.0
-      '@typescript-eslint/typescript-estree': 7.18.0(typescript@5.8.2)
+      '@typescript-eslint/typescript-estree': 7.18.0(typescript@5.8.3)
       '@typescript-eslint/visitor-keys': 7.18.0
       debug: 4.4.0(supports-color@8.1.1)
       eslint: 8.57.1
     optionalDependencies:
-      typescript: 5.8.2
+      typescript: 5.8.3
     transitivePeerDependencies:
       - supports-color
 
@@ -14984,7 +14996,7 @@ snapshots:
 
   '@typescript-eslint/types@8.26.0': {}
 
-  '@typescript-eslint/typescript-estree@6.21.0(typescript@5.8.2)':
+  '@typescript-eslint/typescript-estree@6.21.0(typescript@5.8.3)':
     dependencies:
       '@typescript-eslint/types': 6.21.0
       '@typescript-eslint/visitor-keys': 6.21.0
@@ -14993,13 +15005,13 @@ snapshots:
       is-glob: 4.0.3
       minimatch: 9.0.3
       semver: 7.7.1
-      ts-api-utils: 1.4.3(typescript@5.8.2)
+      ts-api-utils: 1.4.3(typescript@5.8.3)
     optionalDependencies:
-      typescript: 5.8.2
+      typescript: 5.8.3
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/typescript-estree@7.18.0(typescript@5.8.2)':
+  '@typescript-eslint/typescript-estree@7.18.0(typescript@5.8.3)':
     dependencies:
       '@typescript-eslint/types': 7.18.0
       '@typescript-eslint/visitor-keys': 7.18.0
@@ -15008,9 +15020,9 @@ snapshots:
       is-glob: 4.0.3
       minimatch: 9.0.5
       semver: 7.7.1
-      ts-api-utils: 1.4.3(typescript@5.8.2)
+      ts-api-utils: 1.4.3(typescript@5.8.3)
     optionalDependencies:
-      typescript: 5.8.2
+      typescript: 5.8.3
     transitivePeerDependencies:
       - supports-color
 
@@ -15028,14 +15040,14 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/utils@6.21.0(eslint@8.57.1)(typescript@5.8.2)':
+  '@typescript-eslint/utils@6.21.0(eslint@8.57.1)(typescript@5.8.3)':
     dependencies:
       '@eslint-community/eslint-utils': 4.4.1(eslint@8.57.1)
       '@types/json-schema': 7.0.15
       '@types/semver': 7.5.8
       '@typescript-eslint/scope-manager': 6.21.0
       '@typescript-eslint/types': 6.21.0
-      '@typescript-eslint/typescript-estree': 6.21.0(typescript@5.8.2)
+      '@typescript-eslint/typescript-estree': 6.21.0(typescript@5.8.3)
       eslint: 8.57.1
       semver: 7.7.1
     transitivePeerDependencies:
@@ -15179,9 +15191,9 @@ snapshots:
       loupe: 3.1.3
       tinyrainbow: 2.0.0
 
-  '@xata.io/client@0.28.4(typescript@5.8.2)':
+  '@xata.io/client@0.28.4(typescript@5.8.3)':
     dependencies:
-      typescript: 5.8.2
+      typescript: 5.8.3
 
   '@xmldom/xmldom@0.8.10': {}
 
@@ -16855,9 +16867,9 @@ snapshots:
 
   eslint-plugin-local@1.0.0: {}
 
-  eslint-plugin-n8n-nodes-base@1.16.3(eslint@8.57.1)(typescript@5.8.2):
+  eslint-plugin-n8n-nodes-base@1.16.3(eslint@8.57.1)(typescript@5.8.3):
     dependencies:
-      '@typescript-eslint/utils': 6.21.0(eslint@8.57.1)(typescript@5.8.2)
+      '@typescript-eslint/utils': 6.21.0(eslint@8.57.1)(typescript@5.8.3)
       camel-case: 4.1.2
       eslint-plugin-local: 1.0.0
       indefinite: 2.5.1
@@ -18505,7 +18517,7 @@ snapshots:
 
   kuler@2.0.0: {}
 
-  langchain@0.3.11(487886563a6617abcb3f609f792a7311):
+  langchain@0.3.11(a1b1d8f579acddeca1083aab38e85215):
     dependencies:
       '@langchain/core': 0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2))
       '@langchain/openai': 0.3.17(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))(encoding@0.1.13)(ws@8.17.1)
@@ -18524,8 +18536,8 @@ snapshots:
       '@langchain/anthropic': 0.3.11(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))(encoding@0.1.13)
       '@langchain/aws': 0.1.3(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))
       '@langchain/cohere': 0.3.2(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))(encoding@0.1.13)
-      '@langchain/google-genai': 0.1.6(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))(zod@3.24.1)
-      '@langchain/google-vertexai': 0.1.8(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))(encoding@0.1.13)(zod@3.24.1)
+      '@langchain/google-genai': 0.1.6(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))(zod@3.24.2)
+      '@langchain/google-vertexai': 0.1.8(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))(encoding@0.1.13)(zod@3.24.2)
       '@langchain/groq': 0.1.3(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))(encoding@0.1.13)(ws@8.17.1)
       '@langchain/mistralai': 0.2.0(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))
       '@langchain/ollama': 0.1.4(@langchain/core@0.3.30(openai@4.78.1(encoding@0.1.13)(zod@3.24.2)))
@@ -19306,7 +19318,7 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
-  n8n@1.78.1(9d1bf5114ce593791c7f931a3ab096e6):
+  n8n@1.78.1(744e864bd0eb2e52264101a5941fbf09):
     dependencies:
       '@azure/identity': 4.6.0
       '@azure/keyvault-secrets': 4.9.0
@@ -19316,10 +19328,10 @@ snapshots:
       '@n8n/config': 1.28.0
       '@n8n/di': 0.3.0
       '@n8n/localtunnel': 3.0.0
-      '@n8n/n8n-nodes-langchain': 1.78.0(ee324423ddf79d7be970ffb3a69cbed1)
+      '@n8n/n8n-nodes-langchain': 1.78.0(c4b4ca898796671679334e804ab64066)
       '@n8n/permissions': 0.17.0
       '@n8n/task-runner': 1.16.0(openai@4.78.1(encoding@0.1.13)(zod@3.24.2))
-      '@n8n/typeorm': 0.3.20-12(@sentry/node@8.52.1)(ioredis@5.3.2)(mssql@10.0.2)(mysql2@3.11.0)(pg@8.12.0)(redis@4.6.12)(sqlite3@5.1.7)(ts-node@10.9.2(@swc/core@1.10.16(@swc/helpers@0.5.15))(@types/node@22.13.4)(typescript@5.8.2))
+      '@n8n/typeorm': 0.3.20-12(@sentry/node@8.52.1)(ioredis@5.3.2)(mssql@10.0.2)(mysql2@3.11.0)(pg@8.12.0)(redis@4.6.12)(sqlite3@5.1.7)(ts-node@10.9.2(@swc/core@1.10.16(@swc/helpers@0.5.15))(@types/node@22.13.4)(typescript@5.8.3))
       '@n8n_io/ai-assistant-sdk': 1.13.0
       '@n8n_io/license-sdk': 2.15.1
       '@oclif/core': 4.0.7
@@ -20811,6 +20823,14 @@ snapshots:
     optionalDependencies:
       '@babel/code-frame': 7.26.2
 
+  rollup-plugin-dts@6.1.1(rollup@4.34.9)(typescript@5.8.3):
+    dependencies:
+      magic-string: 0.30.17
+      rollup: 4.34.9
+      typescript: 5.8.3
+    optionalDependencies:
+      '@babel/code-frame': 7.26.2
+
   rollup@4.34.9:
     dependencies:
       '@types/estree': 1.0.6
@@ -21507,7 +21527,7 @@ snapshots:
   tanu@0.1.13:
     dependencies:
       tslib: 2.8.1
-      typescript: 4.9.5
+      typescript: 4.9.4
 
   tar-fs@2.1.2:
     dependencies:
@@ -21685,9 +21705,9 @@ snapshots:
 
   triple-beam@1.4.1: {}
 
-  ts-api-utils@1.4.3(typescript@5.8.2):
+  ts-api-utils@1.4.3(typescript@5.8.3):
     dependencies:
-      typescript: 5.8.2
+      typescript: 5.8.3
 
   ts-api-utils@2.0.1(typescript@5.8.2):
     dependencies:
@@ -21742,7 +21762,7 @@ snapshots:
     optionalDependencies:
       '@swc/core': 1.10.16(@swc/helpers@0.5.15)
 
-  ts-node@10.9.2(@swc/core@1.10.16(@swc/helpers@0.5.15))(@types/node@22.13.4)(typescript@5.8.2):
+  ts-node@10.9.2(@swc/core@1.10.16(@swc/helpers@0.5.15))(@types/node@22.13.4)(typescript@5.8.3):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.11
@@ -21756,7 +21776,7 @@ snapshots:
       create-require: 1.1.1
       diff: 4.0.2
       make-error: 1.3.6
-      typescript: 5.8.2
+      typescript: 5.8.3
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
     optionalDependencies:
@@ -21837,6 +21857,34 @@ snapshots:
       '@swc/core': 1.10.16(@swc/helpers@0.5.15)
       postcss: 8.5.2
       typescript: 5.8.2
+    transitivePeerDependencies:
+      - jiti
+      - supports-color
+      - tsx
+      - yaml
+
+  tsup@8.3.6(@swc/core@1.10.16(@swc/helpers@0.5.15))(jiti@2.4.2)(postcss@8.5.2)(tsx@4.19.2)(typescript@5.8.3)(yaml@2.7.0):
+    dependencies:
+      bundle-require: 5.1.0(esbuild@0.24.2)
+      cac: 6.7.14
+      chokidar: 4.0.3
+      consola: 3.4.0
+      debug: 4.4.0(supports-color@8.1.1)
+      esbuild: 0.24.2
+      joycon: 3.1.1
+      picocolors: 1.1.1
+      postcss-load-config: 6.0.1(jiti@2.4.2)(postcss@8.5.2)(tsx@4.19.2)(yaml@2.7.0)
+      resolve-from: 5.0.0
+      rollup: 4.34.9
+      source-map: 0.8.0-beta.0
+      sucrase: 3.35.0
+      tinyexec: 0.3.2
+      tinyglobby: 0.2.10
+      tree-kill: 1.2.2
+    optionalDependencies:
+      '@swc/core': 1.10.16(@swc/helpers@0.5.15)
+      postcss: 8.5.2
+      typescript: 5.8.3
     transitivePeerDependencies:
       - jiti
       - supports-color
@@ -21961,11 +22009,11 @@ snapshots:
 
   typescript@4.9.4: {}
 
-  typescript@4.9.5: {}
-
   typescript@5.7.3: {}
 
   typescript@5.8.2: {}
+
+  typescript@5.8.3: {}
 
   uc.micro@2.1.0: {}
 

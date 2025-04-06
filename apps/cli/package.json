@@ -59,6 +59,7 @@
     "cli-table3": "^0.6.5",
     "commander": "^11.1.0",
     "dotenv": "^16.4.7",
+    "jose": "^6.0.10",
     "open": "^10.1.0",
     "openid-client": "^6.3.4",
     "ora": "^8.0.1",

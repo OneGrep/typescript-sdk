@@ -52,6 +52,8 @@ async function handleAccountCreation(params: {
   authProvider: AuthzProvider
   configProvider: ConfigProvider
 }) {
+  const spinner = getSpinner('Creating your account...')
+
   try {
     // Ensure API URL is set first
     if (!(await validateApiUrl(params.configProvider))) {
@@ -68,20 +70,19 @@ async function handleAccountCreation(params: {
       }
     })
 
-    const spinner = getSpinner('Creating your account...')
     spinner.start()
 
     // Invoke the authentication flow with the invitation code
     const authenticated = await params.authProvider.initOAuthFlow({
       reauthenticate: true,
-      invitationCode
+      invitationCode: invitationCode
     })
 
     if (!authenticated) {
       spinner.fail(
         'Account creation failed. Please check your invitation code and try again.'
       )
-      return
+      process.exit(1)
     }
 
     spinner.succeed('Account created successfully!')
@@ -89,9 +90,13 @@ async function handleAccountCreation(params: {
 
     logger.log(`Run ${chalk.bold.blue('onegrep-cli help')} to get started.`)
   } catch (error) {
+    // Force stop the spinner in case it's still running
+    spinner.stop()
     logger.error(
       `Account creation failed: ${error instanceof Error ? error.message : String(error)}`
     )
+    // Exit with error code to prevent hanging
+    process.exit(1)
   }
 }
 
@@ -180,13 +185,14 @@ async function handleLogin(params: {
   authProvider: AuthzProvider
   configProvider: ConfigProvider
 }) {
+  const spinner = getSpinner('Authenticating with OneGrep...')
+
   try {
     // Ensure API URL is set first
     if (!(await validateApiUrl(params.configProvider))) {
       return
     }
 
-    const spinner = getSpinner('Authenticating with OneGrep...')
     spinner.start()
 
     if (await params.authProvider.isAuthenticated()) {
@@ -217,6 +223,8 @@ async function handleLogin(params: {
 
     logger.log(`Run ${chalk.bold.blue('onegrep-cli help')} to get started.`)
   } catch (error) {
+    // Force stop the spinner in case it's still running
+    spinner.stop()
     logger.error(
       `Authentication failed: ${error instanceof Error ? error.message : String(error)}`
     )
@@ -254,9 +262,10 @@ async function handleAccountStatus(params: {
   configProvider: ConfigProvider
   authProvider: AuthzProvider
 }) {
+  const spinner = getSpinner('Checking account status...')
+
   try {
     // For status command, we don't require API URL validation as we just want to show current status
-    const spinner = getSpinner('Checking account status...')
     spinner.start()
 
     let isAuthenticated = false
@@ -306,6 +315,8 @@ async function handleAccountStatus(params: {
 
     logger.log(statusTable.toString())
   } catch (error) {
+    // Force stop the spinner in case it's still running
+    spinner.stop()
     logger.error(
       `Failed to retrieve account status: ${error instanceof Error ? error.message : String(error)}`
     )
