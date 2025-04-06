@@ -17,41 +17,41 @@ import * as jose from 'jose'
 // that match our requested scopes: 'openid profile email'
 /**
  * Interface for JWT claims that aligns with the OpenID Connect (OIDC) specification.
- * 
+ *
  * These fields are defined in the OIDC Core specification:
  * https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
- * 
+ *
  * We request the scopes 'openid profile email' which provides access to these claims.
  * The actual claims returned will depend on the identity provider and user permissions.
  */
 interface UserJwtClaims {
   // Required by OpenID Connect
-  sub: string;
+  sub: string
 
   // Email scope
-  email?: string;
-  email_verified?: boolean;
+  email?: string
+  email_verified?: boolean
 
   // Profile scope
-  name?: string;
-  given_name?: string;
-  family_name?: string;
-  middle_name?: string;
-  nickname?: string;
-  preferred_username?: string;
-  profile?: string;
-  picture?: string;
-  website?: string;
-  gender?: string;
-  birthdate?: string;
-  zoneinfo?: string;
-  locale?: string;
-  updated_at?: number;
+  name?: string
+  given_name?: string
+  family_name?: string
+  middle_name?: string
+  nickname?: string
+  preferred_username?: string
+  profile?: string
+  picture?: string
+  website?: string
+  gender?: string
+  birthdate?: string
+  zoneinfo?: string
+  locale?: string
+  updated_at?: number
 
   // JWT standard fields
-  iat?: number;
-  exp?: number;
-  iss?: string;
+  iat?: number
+  exp?: number
+  iss?: string
 }
 
 export class AuthzProvider {
@@ -355,7 +355,10 @@ export class AuthzProvider {
   }
 
   private async getUserDetailsFromJwt(): Promise<UserJwtClaims> {
-    if (!this.isAuthenticated() || !isDefined(this.configProvider.getConfig().auth?.accessToken)) {
+    if (
+      !this.isAuthenticated() ||
+      !isDefined(this.configProvider.getConfig().auth?.accessToken)
+    ) {
       throw new Error('No access token found. Cannot fetch user details.')
     }
 
@@ -415,12 +418,16 @@ export class AuthzProvider {
       }
 
       // Create an account for this user in the domain that they're pointed at.
-      logger.debug(`Creating account with email: ${userEmail} and invitation code: ${params?.invitationCode}`)
+      logger.debug(
+        `Creating account with email: ${userEmail} and invitation code: ${params?.invitationCode}`
+      )
       accountInfo =
-        await this.getApiClient().create_account_by_invitation_api_v1_account_invitation_code_post({
-          invitation_code: params?.invitationCode as string,
-          email: userEmail
-        })
+        await this.getApiClient().create_account_by_invitation_api_v1_account_invitation_code_post(
+          {
+            invitation_code: params?.invitationCode as string,
+            email: userEmail
+          }
+        )
     } else {
       // Fetch the account information for the user.
       accountInfo =
