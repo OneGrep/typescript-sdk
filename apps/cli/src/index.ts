@@ -51,21 +51,23 @@ async function main() {
       .option('--debug', 'Enable debug mode', false)
       .hook('preAction', async (_thisCommand, actionCommand) => {
         // Commands that should not trigger authentication validation
-        const authBlacklist = ['account'];
+        const authBlacklist = ['account']
 
         // Skip authentication for blacklisted commands
-        const commandName = actionCommand.name();
-        const parentName = actionCommand.parent?.name();
+        const commandName = actionCommand.name()
+        const parentName = actionCommand.parent?.name()
 
         // Check if this command or its parent is in the blacklist
-        if (authBlacklist.includes(commandName) ||
-          (parentName !== undefined && authBlacklist.includes(parentName))) {
-          return;
+        if (
+          authBlacklist.includes(commandName) ||
+          (parentName !== undefined && authBlacklist.includes(parentName))
+        ) {
+          return
         }
 
         // Run authentication validation for all other commands
-        await validateAuthenticationState(authProvider);
-      });
+        await validateAuthenticationState(authProvider)
+      })
 
     // Add all the commands
     cli.addCommand(healthcheck)
@@ -76,7 +78,9 @@ async function main() {
     cli.parse()
   } catch (err) {
     logger.error(`Error setting up CLI: ${err}`)
-    logger.log(`Run ${chalk.bold.green('onegrep-cli account setup')} to initialize your configuration.`)
+    logger.log(
+      `Run ${chalk.bold.green('onegrep-cli account setup')} to initialize your configuration.`
+    )
     process.exit(1)
   }
 }

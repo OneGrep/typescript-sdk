@@ -11,11 +11,15 @@ import { ConfigProvider } from 'providers/config/provider'
  * Ensures API URL is set before proceeding with auth operations
  * @returns true if API URL is set (either already or by user input)
  */
-async function validateApiUrl(configProvider: ConfigProvider): Promise<boolean> {
+async function validateApiUrl(
+  configProvider: ConfigProvider
+): Promise<boolean> {
   const currentUrl = configProvider.getConfig().identity?.apiUrl
 
   if (!currentUrl) {
-    logger.info(chalk.yellow('API URL is not set. You need to set it before proceeding.'))
+    logger.info(
+      chalk.yellow('API URL is not set. You need to set it before proceeding.')
+    )
     const apiUrl = await input({
       message: 'Enter the API URL:',
       default: 'https://test-sandbox.onegrep.dev',
@@ -45,13 +49,13 @@ async function validateApiUrl(configProvider: ConfigProvider): Promise<boolean> 
  * Handles account creation using an invitation code
  */
 async function handleAccountCreation(params: {
-  authProvider: AuthzProvider,
+  authProvider: AuthzProvider
   configProvider: ConfigProvider
 }) {
   try {
     // Ensure API URL is set first
     if (!(await validateApiUrl(params.configProvider))) {
-      return;
+      return
     }
 
     logger.info('Create a new OneGrep account with an invitation code')
@@ -74,7 +78,9 @@ async function handleAccountCreation(params: {
     })
 
     if (!authenticated) {
-      spinner.fail('Account creation failed. Please check your invitation code and try again.')
+      spinner.fail(
+        'Account creation failed. Please check your invitation code and try again.'
+      )
       return
     }
 
@@ -92,13 +98,11 @@ async function handleAccountCreation(params: {
 /**
  * Handles setting an API key manually
  */
-async function handleApiKeyInput(params: {
-  configProvider: ConfigProvider
-}) {
+async function handleApiKeyInput(params: { configProvider: ConfigProvider }) {
   try {
     // Ensure API URL is set first
     if (!(await validateApiUrl(params.configProvider))) {
-      return;
+      return
     }
 
     logger.info('Set your OneGrep API key')
@@ -127,9 +131,7 @@ async function handleApiKeyInput(params: {
 /**
  * Handles setting the API URL
  */
-async function handleApiUrlInput(params: {
-  configProvider: ConfigProvider
-}) {
+async function handleApiUrlInput(params: { configProvider: ConfigProvider }) {
   try {
     const currentUrl = params.configProvider.getConfig().identity?.apiUrl
 
@@ -175,13 +177,13 @@ async function handleApiUrlInput(params: {
  * Handles the standard login flow
  */
 async function handleLogin(params: {
-  authProvider: AuthzProvider,
+  authProvider: AuthzProvider
   configProvider: ConfigProvider
 }) {
   try {
     // Ensure API URL is set first
     if (!(await validateApiUrl(params.configProvider))) {
-      return;
+      return
     }
 
     const spinner = getSpinner('Authenticating with OneGrep...')
@@ -224,9 +226,7 @@ async function handleLogin(params: {
 /**
  * Handles the logout flow
  */
-async function handleLogout(params: {
-  configProvider: ConfigProvider
-}) {
+async function handleLogout(params: { configProvider: ConfigProvider }) {
   try {
     const confirmed = await confirm({
       message: 'Are you sure you want to log out?',
@@ -251,7 +251,7 @@ async function handleLogout(params: {
 }
 
 async function handleAccountStatus(params: {
-  configProvider: ConfigProvider,
+  configProvider: ConfigProvider
   authProvider: AuthzProvider
 }) {
   try {
@@ -259,7 +259,7 @@ async function handleAccountStatus(params: {
     const spinner = getSpinner('Checking account status...')
     spinner.start()
 
-    let isAuthenticated = false;
+    let isAuthenticated = false
     try {
       isAuthenticated = await params.authProvider.isAuthenticated()
     } catch (error) {
@@ -280,8 +280,16 @@ async function handleAccountStatus(params: {
     })
 
     statusTable.push(
-      [chalk.blueBright('Status:'), isAuthenticated ? chalk.green('Authenticated') : chalk.red('Not authenticated')],
-      [chalk.blueBright('API URL:'), config.identity?.apiUrl || chalk.red('Not set')]
+      [
+        chalk.blueBright('Status:'),
+        isAuthenticated
+          ? chalk.green('Authenticated')
+          : chalk.red('Not authenticated')
+      ],
+      [
+        chalk.blueBright('API URL:'),
+        config.identity?.apiUrl || chalk.red('Not set')
+      ]
     )
 
     if (config.identity?.email) {
@@ -305,7 +313,7 @@ async function handleAccountStatus(params: {
 }
 
 async function handleAccountSetup(params: {
-  configProvider: ConfigProvider,
+  configProvider: ConfigProvider
   authProvider: AuthzProvider
 }) {
   try {
@@ -313,9 +321,9 @@ async function handleAccountSetup(params: {
     logger.info(chalk.bold.blueBright('OneGrep Account Setup'))
 
     // First check if we have an API URL, if not, set it
-    const hasApiUrl = await validateApiUrl(params.configProvider);
+    const hasApiUrl = await validateApiUrl(params.configProvider)
     if (!hasApiUrl) {
-      return;
+      return
     }
 
     // Now show the account setup options

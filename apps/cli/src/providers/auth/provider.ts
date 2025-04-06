@@ -8,7 +8,7 @@ import { isDefined } from 'utils/helpers'
 import { chalk, logger } from 'utils/logger'
 import {
   AccountInformation,
-  clientFromConfig,
+  createApiClientFromParams,
   OneGrepApiClient
 } from '@onegrep/sdk'
 
@@ -29,21 +29,21 @@ export class AuthzProvider {
   private getApiClient(): OneGrepApiClient {
     try {
       // Check if API URL is set
-      const config = this.configProvider.getConfig();
+      const config = this.configProvider.getConfig()
       if (!config.identity?.apiUrl) {
-        throw new Error('API URL is not set. Please set an API URL using the account setup command.');
+        throw new Error(
+          'API URL is not set. Please set an API URL using the account setup command.'
+        )
       }
 
-      // Set env variables to be used by clientFromConfig
-      process.env.ONEGREP_API_URL = config.identity.apiUrl;
-      if (config.identity?.apiKey) {
-        process.env.ONEGREP_API_KEY = config.identity.apiKey;
-      }
-
-      return clientFromConfig();
+      return createApiClientFromParams({
+        baseUrl: config.identity!.apiUrl!,
+        apiKey: config.identity!.apiKey,
+        accessToken: config.auth?.accessToken
+      })
     } catch (error) {
-      logger.debug(`Failed to create API client: ${error}`);
-      throw error;
+      logger.debug(`Failed to create API client: ${error}`)
+      throw error
     }
   }
 
@@ -101,7 +101,9 @@ export class AuthzProvider {
 
     // Check if API URL is configured
     if (!config.identity?.apiUrl) {
-      logger.error('No API URL found in the config. Please set an API URL using "account setup" or "account set-url" command first.')
+      logger.error(
+        'No API URL found in the config. Please set an API URL using "account setup" or "account set-url" command first.'
+      )
       return false
     }
 
@@ -323,13 +325,8 @@ export class AuthzProvider {
     }
 
     logger.log('Exchanging access token for API key...')
-    const accessToken = authConfig!.accessToken
     const authStatus =
-      await this.getApiClient().get_auth_status_api_v1_account_auth_status_get({
-        headers: {
-          Authorization: `Bearer ${accessToken}`
-        }
-      })
+      await this.getApiClient().get_auth_status_api_v1_account_auth_status_get()
 
     let accountInfo: AccountInformation | undefined
 
@@ -344,22 +341,12 @@ export class AuthzProvider {
 
       // Create an account for this user in the domain that they're pointed at.
       // TODO: Include invitation code in request body.
-      accountInfo = await this.getApiClient().create_account_api_v1_account__post(
-        undefined,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`
-          }
-        }
-      )
+      accountInfo =
+        await this.getApiClient().create_account_api_v1_account__post(undefined)
     } else {
       // Fetch the account information for the user.
       accountInfo =
-        await this.getApiClient().get_account_information_api_v1_account__get({
-          headers: {
-            Authorization: `Bearer ${accessToken}`
-          }
-        })
+        await this.getApiClient().get_account_information_api_v1_account__get()
     }
 
     if (!isDefined(accountInfo)) {
