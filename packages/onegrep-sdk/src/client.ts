@@ -9,7 +9,11 @@ export type OneGrepApiClient = ReturnType<typeof createApiClient>
  * @param clientParams - The parameters for the client
  * @returns An instance of the OneGrep API Client
  */
-export function createApiClientFromParams(clientParams: { baseUrl: string, apiKey?: string, accessToken?: string }) {
+export function createApiClientFromParams(clientParams: {
+  baseUrl: string
+  apiKey?: string
+  accessToken?: string
+}) {
   const { apiKey, accessToken, baseUrl } = clientParams
 
   let authSchemeProvided = false
@@ -25,7 +29,9 @@ export function createApiClientFromParams(clientParams: { baseUrl: string, apiKe
   }
 
   if (!authSchemeProvided) {
-    throw new Error('No authentication scheme provided. Must provide either an API Key or an Access Token.')
+    throw new Error(
+      'No authentication scheme provided. Must provide either an API Key or an Access Token.'
+    )
   }
 
   const options: ZodiosOptions = {
