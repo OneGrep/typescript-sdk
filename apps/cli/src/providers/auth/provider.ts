@@ -99,7 +99,8 @@ export class AuthzProvider {
 
       // If we already have an api key, no need to go through a user-based auth flow.
       if (isDefined(this.configProvider.getConfig().identity?.apiKey)) {
-        // TODO: Validate that the api key is valid for this domain.
+        logger.debug('API key discovered. Checking validity...')
+
         try {
           return await this.isApiKeyValid()
         } catch (error) {
@@ -109,6 +110,7 @@ export class AuthzProvider {
       }
 
       // We should have a valid token & our api key should be valid.
+      logger.debug("Checking validity of access token...")
       const oauth2Config = this.configProvider.getConfig().auth
       if (isDefined(oauth2Config) && !oauth2Config!.isTokenExpired()) {
         try {
@@ -120,6 +122,7 @@ export class AuthzProvider {
         }
       }
 
+      logger.debug('No valid token was found...')
       return false
     } catch (error) {
       logger.debug(`Authentication check failed: ${error}`)
@@ -397,7 +400,7 @@ export class AuthzProvider {
 
       if (!isDefined(params?.invitationCode)) {
         throw new Error(
-          'No invitation token provided. Please provide an invitation token to create an account.'
+          'No account was found. If you have an invitation code, please use it to create an account.'
         )
       }
 
@@ -447,20 +450,15 @@ export class AuthzProvider {
     })
   }
 
-  /**
-   * Validates the API key by making a simple authenticated request
-   * @returns true if the API key is valid
-   * @throws Error if the API key is not valid
-   */
   private async isApiKeyValid(): Promise<boolean> {
-    try {
-      // Make a simple API call that requires authentication
-      await this.getApiClient().health_health_get()
-      return true
-    } catch (error) {
-      logger.error(`API key validation failed: ${error}`)
-      return false
+    if (!isDefined(this.configProvider.getConfig().identity?.apiKey)) {
+      throw new Error('No API key was found in the config.')
     }
+
+    const authStatus =
+      await this.getApiClient().get_auth_status_api_v1_account_auth_status_get()
+
+    return authStatus.credentials_provided && authStatus.is_authenticated
   }
 }
 

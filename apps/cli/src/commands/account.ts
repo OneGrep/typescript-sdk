@@ -7,6 +7,11 @@ import Table from 'cli-table3'
 import AuthzProvider from '../providers/auth/provider'
 import { ConfigProvider } from 'providers/config/provider'
 
+export function outputAuthenticationPrompt() {
+  logger.log('\n\nYou are not authenticated.')
+  logger.log(`Please run ${chalk.bold.blue('onegrep-cli account login')} to authenticate.\n\n`)
+}
+
 /**
  * Ensures API URL is set before proceeding with auth operations
  * @returns true if API URL is set (either already or by user input)
@@ -236,8 +241,13 @@ async function handleLogin(params: {
  */
 async function handleLogout(params: { configProvider: ConfigProvider }) {
   try {
+    const purgeApiUrl = await confirm({
+      message: `Would you also like to clear your configured API URL (${params.configProvider.getConfig().identity?.apiUrl})?`,
+      default: false
+    })
+
     const confirmed = await confirm({
-      message: 'Are you sure you want to log out?',
+      message: 'Are you sure you want to log out? This will clear all your credentials and you will need to re-authenticate.',
       default: false
     })
 
@@ -248,6 +258,7 @@ async function handleLogout(params: { configProvider: ConfigProvider }) {
 
     // Clear auth state
     params.configProvider.clearAuthState()
+    params.configProvider.clearIdentity(purgeApiUrl)
     params.configProvider.saveConfig()
 
     logger.log(chalk.green('Logged out successfully.'))
@@ -314,6 +325,10 @@ async function handleAccountStatus(params: {
     }
 
     logger.log(statusTable.toString())
+
+    if (!isAuthenticated) {
+      outputAuthenticationPrompt()
+    }
   } catch (error) {
     // Force stop the spinner in case it's still running
     spinner.stop()

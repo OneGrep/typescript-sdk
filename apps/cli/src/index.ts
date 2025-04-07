@@ -8,16 +8,13 @@ import { toolsCommand } from 'commands/tools'
 import { clearTerminal } from 'utils/helpers'
 import { ConfigProvider } from 'providers/config/provider'
 import AuthzProvider from 'providers/auth/provider'
-import { getAccountsCommand } from 'commands/account'
+import { getAccountsCommand, outputAuthenticationPrompt } from 'commands/account'
 
 // Authentication validation function that checks if user is authenticated
 async function validateAuthenticationState(authProvider: AuthzProvider) {
   try {
     if (!(await authProvider.isAuthenticated())) {
-      logger.log(
-        'You are currently unauthenticated. Run the following command to authenticate:'
-      )
-      logger.log(`$> ${chalk.bold.green('onegrep-cli')} account help\n\n`)
+      outputAuthenticationPrompt()
       process.exit(1)
     }
   } catch (error) {
@@ -79,7 +76,7 @@ async function main() {
   } catch (err) {
     logger.error(`Error setting up CLI: ${err}`)
     logger.log(
-      `Run ${chalk.bold.green('onegrep-cli account setup')} to initialize your configuration.`
+      `If you are running into authentication issues, run ${chalk.bold.blue('onegrep-cli account setup')} to setup your environment.`
     )
     process.exit(1)
   }

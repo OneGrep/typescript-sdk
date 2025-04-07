@@ -90,6 +90,22 @@ export class ConfigProvider {
     this.updateEnvVars()
   }
 
+  /**
+   * Clears the identity of the config. If purgeApiUrl is true, the API URL set by the user will also be cleared.
+   */
+  clearIdentity(purgeApiUrl: boolean = false) {
+    if (purgeApiUrl) {
+      this.config.identity = new Identity()
+    } else {
+      if (isDefined(this.config.identity)) {
+        this.config.identity!.userId = undefined
+        this.config.identity!.email = undefined
+      }
+    }
+
+    this.updateEnvVars()
+  }
+
   /** Use this as a mechanism to forcibly save the config to disk. */
   saveConfig() {
     this.persistConfig()
