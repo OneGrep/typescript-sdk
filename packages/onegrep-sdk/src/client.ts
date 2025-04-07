@@ -14,7 +14,7 @@ export function createApiClientFromParams(clientParams: {
   apiKey?: string
   accessToken?: string
 }) {
-  const { apiKey, accessToken, baseUrl } = clientParams
+  const { baseUrl, apiKey, accessToken } = clientParams
 
   let authSchemeProvided = false
   const headers: Record<string, string> = {}
@@ -53,8 +53,10 @@ export function clientFromConfig(): OneGrepApiClient {
     throw new Error('ONEGREP_API_KEY is not set')
   }
 
-  return createApiClientFromParams({
-    apiKey: env.ONEGREP_API_KEY?.toString(),
+  const params = {
+    apiKey: env.ONEGREP_API_KEY.toString(),
     baseUrl: env.ONEGREP_API_URL.toString()
-  })
+  }
+
+  return createApiClientFromParams(params)
 }

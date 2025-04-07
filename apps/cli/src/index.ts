@@ -48,7 +48,6 @@ async function main() {
         'Use the OneGrep CLI to debug and manage your OneGrep Toolbox.'
       )
       .version(version || '0.0.1')
-      .option('--debug', 'Enable debug mode', false)
       .hook('preAction', async (_thisCommand, actionCommand) => {
         // Commands that should not trigger authentication validation
         const authBlacklist = ['account']

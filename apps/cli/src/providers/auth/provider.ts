@@ -165,7 +165,7 @@ export class AuthzProvider {
 
     try {
       // Discover OpenID configuration
-      console.log('Discovering OAuth provider...')
+      logger.debug('Discovering OAuth provider...')
       const oidcConfig = await client.discovery(
         new URL(oauth2Config.discoveryEndpoint),
         oauth2Config.clientId
@@ -245,7 +245,7 @@ export class AuthzProvider {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error)
-      console.error('Authentication failed:', errorMessage)
+      logger.error(`Authentication failed: ${errorMessage}`)
       throw error
     } finally {
       // Clean up and update state.
@@ -253,15 +253,6 @@ export class AuthzProvider {
       logger.debug('Saving updated config...')
       this.configProvider.saveConfig()
     }
-  }
-
-  /**
-   * Clears the auth state and identity from the config.
-   */
-  clearAuthState() {
-    this.configProvider.clearAuthState()
-    this.configProvider.clearIdentity()
-    this.configProvider.saveConfig()
   }
 
   /**
@@ -363,7 +354,7 @@ export class AuthzProvider {
 
       // Start the server
       server.listen(this.redirectPort, () => {
-        console.log(
+        logger.debug(
           `Local authentication server listening on port ${this.redirectPort}`
         )
       })
@@ -407,14 +398,14 @@ export class AuthzProvider {
       throw new Error('Invalid authentication state. Please re-authenticate.')
     }
 
-    logger.log('Exchanging access token for API key...')
+    logger.debug('Exchanging access token for API key...')
     const authStatus =
       await this.getApiClient().get_auth_status_api_v1_account_auth_status_get()
 
     let accountInfo: AccountInformation | undefined
 
     if (authStatus.credentials_provided && !authStatus.is_authenticated) {
-      logger.log('No OneGrep account found for this token.')
+      logger.debug('No OneGrep account found for this token.')
 
       if (!isDefined(params?.invitationCode)) {
         throw new Error(
@@ -475,7 +466,8 @@ export class AuthzProvider {
 
     const authStatus =
       await this.getApiClient().get_auth_status_api_v1_account_auth_status_get()
-    const apiKeyValid = authStatus.credentials_provided && authStatus.is_authenticated
+    const apiKeyValid =
+      authStatus.credentials_provided && authStatus.is_authenticated
     logger.debug(`API key is valid: ${apiKeyValid}`)
 
     return apiKeyValid

@@ -188,7 +188,6 @@ async function handleLogin(params: {
   authProvider: AuthzProvider
   configProvider: ConfigProvider
 }) {
-
   try {
     // Ensure API URL is set first
     if (!(await forceSetApiUrl(params.configProvider))) {
@@ -211,8 +210,14 @@ async function handleLogin(params: {
       }
 
       await handleLogout({ configProvider: params.configProvider })
-      await loginUser({ authProvider: params.authProvider, configProvider: params.configProvider })
-      await handleAccountStatus({ configProvider: params.configProvider, authProvider: params.authProvider })
+      await loginUser({
+        authProvider: params.authProvider,
+        configProvider: params.configProvider
+      })
+      await handleAccountStatus({
+        configProvider: params.configProvider,
+        authProvider: params.authProvider
+      })
       return
     }
 
@@ -229,14 +234,20 @@ async function handleLogin(params: {
 
     switch (choice) {
       case 'login':
-        await loginUser({ authProvider: params.authProvider, configProvider: params.configProvider })
+        await loginUser({
+          authProvider: params.authProvider,
+          configProvider: params.configProvider
+        })
         break
       case 'create-account':
         await handleAccountCreation(params)
         break
     }
 
-    await handleAccountStatus({ configProvider: params.configProvider, authProvider: params.authProvider })
+    await handleAccountStatus({
+      configProvider: params.configProvider,
+      authProvider: params.authProvider
+    })
   } catch (error) {
     logger.error(
       `Login failed: ${error instanceof Error ? error.message : String(error)}`
@@ -282,7 +293,7 @@ async function handleAccountStatus(params: {
   configProvider: ConfigProvider
   authProvider: AuthzProvider
 }) {
-  logger.log("\n\n")
+  logger.log('\n\n')
   const spinner = getSpinner('Checking account status...')
 
   try {
@@ -305,7 +316,7 @@ async function handleAccountStatus(params: {
         head: ['cyan'],
         border: []
       },
-      head: ['Authentication Status', ''],
+      head: [],
       wordWrap: true,
       colWidths: [20, 60]
     })
@@ -335,6 +346,7 @@ async function handleAccountStatus(params: {
       statusTable.push([chalk.blueBright('API Key:'), '[REDACTED]'])
     }
 
+    logger.log(chalk.bold.blueBright("Authentication Details"))
     logger.log(statusTable.toString())
 
     if (!isAuthenticated) {
@@ -385,7 +397,10 @@ async function handleAccountSetup(params: {
     switch (option) {
       case 'create-account':
         await handleAccountCreation(params)
-        await handleAccountStatus({ configProvider: params.configProvider, authProvider: params.authProvider })
+        await handleAccountStatus({
+          configProvider: params.configProvider,
+          authProvider: params.authProvider
+        })
         break
       case 'api-key':
         await handleSetApiKey(params)
@@ -397,8 +412,6 @@ async function handleAccountSetup(params: {
         logger.info('Operation cancelled.')
         return
     }
-
-
   } catch (error) {
     logger.error(
       `Setup failed: ${error instanceof Error ? error.message : String(error)}`
