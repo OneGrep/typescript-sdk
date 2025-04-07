@@ -69,7 +69,7 @@ export class ConfigProvider {
    * Clears the auth state of the config & updates environment variables accordingly.
    */
   clearAuthState() {
-    this.config.auth = undefined
+    this.config.auth = new OAuth2Config()
     this.updateEnvVars()
   }
 
@@ -100,6 +100,7 @@ export class ConfigProvider {
       if (isDefined(this.config.identity)) {
         this.config.identity!.userId = undefined
         this.config.identity!.email = undefined
+        this.config.identity!.apiKey = undefined
       }
     }
 
@@ -208,14 +209,14 @@ export class ConfigProvider {
     try {
       const identity = this.config.identity
 
-      if (identity && identity.apiKey) {
+      if (identity) {
         logger.debug('Setting ONEGREP_API_KEY from config')
         process.env.ONEGREP_API_KEY = identity.apiKey
       } else {
         logger.debug('No API key found in config')
       }
 
-      if (identity && identity.apiUrl) {
+      if (identity) {
         logger.debug('Setting ONEGREP_API_URL from config')
         process.env.ONEGREP_API_URL = identity.apiUrl
       }

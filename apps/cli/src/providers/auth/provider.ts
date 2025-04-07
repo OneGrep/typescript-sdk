@@ -78,11 +78,14 @@ export class AuthzProvider {
         )
       }
 
-      return createApiClientFromParams({
+      const clientParams = {
         baseUrl: config.identity!.apiUrl!,
         apiKey: config.identity!.apiKey,
         accessToken: config.auth?.accessToken
-      })
+      }
+      logger.debug(`Client params: ${JSON.stringify(clientParams)}`)
+
+      return createApiClientFromParams(clientParams)
     } catch (error) {
       logger.debug(`Failed to create API client: ${error}`)
       throw error
@@ -250,6 +253,15 @@ export class AuthzProvider {
       logger.debug('Saving updated config...')
       this.configProvider.saveConfig()
     }
+  }
+
+  /**
+   * Clears the auth state and identity from the config.
+   */
+  clearAuthState() {
+    this.configProvider.clearAuthState()
+    this.configProvider.clearIdentity()
+    this.configProvider.saveConfig()
   }
 
   /**
@@ -463,8 +475,10 @@ export class AuthzProvider {
 
     const authStatus =
       await this.getApiClient().get_auth_status_api_v1_account_auth_status_get()
+    const apiKeyValid = authStatus.credentials_provided && authStatus.is_authenticated
+    logger.debug(`API key is valid: ${apiKeyValid}`)
 
-    return authStatus.credentials_provided && authStatus.is_authenticated
+    return apiKeyValid
   }
 }
 
