@@ -247,7 +247,7 @@ export class AuthzProvider {
     } finally {
       // Clean up and update state.
       server.close()
-      logger.debug("Saving updated config...")
+      logger.debug('Saving updated config...')
       this.configProvider.saveConfig()
     }
   }

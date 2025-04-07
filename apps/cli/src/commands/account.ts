@@ -14,11 +14,20 @@ export function outputAuthenticationPrompt() {
   )
 }
 
+export function outputApiKeyInstructions() {
+  logger.log(chalk.bold('\n\nAPI Key Instructions\n'))
+  logger.log('If you want to manually use an API key rather than authenticating, please follow the instructions below:\n')
+  logger.log(`${chalk.bold.blue('• Option 1 - export in your shell')}\n\t${chalk.bold.gray("$>")} ${chalk.yellow('export ONEGREP_API_KEY=<your-api-key>')}\n`)
+  logger.log(`${chalk.bold.blue('• Option 2 - set it in your ".env" file')}\n\t${chalk.bold.gray("$>")} ${chalk.yellow('echo "ONEGREP_API_KEY=<your-api-key>" >> .env')}\n`)
+  logger.log(`\n\nRun ${chalk.bold.blue('onegrep-cli status')} to verify the validity of your API key.\n\n`)
+}
+
+
 /**
  * Ensures API URL is set before proceeding with auth operations
  * @returns true if API URL is set (either already or by user input)
  */
-async function validateApiUrl(
+async function forceSetApiUrl(
   configProvider: ConfigProvider
 ): Promise<boolean> {
   const currentUrl = configProvider.getConfig().identity?.apiUrl
@@ -42,10 +51,10 @@ async function validateApiUrl(
     })
 
     // Update the config with the API URL
-    configProvider.updateIdentity({ apiUrl })
+    configProvider.updateIdentity({ apiUrl: apiUrl })
     configProvider.saveConfig()
 
-    logger.log(chalk.green('API URL updated successfully!'))
+    logger.log(chalk.green('✓ API URL updated successfully!'))
     return true
   }
 
@@ -63,7 +72,7 @@ async function handleAccountCreation(params: {
 
   try {
     // Ensure API URL is set first
-    if (!(await validateApiUrl(params.configProvider))) {
+    if (!(await forceSetApiUrl(params.configProvider))) {
       return
     }
 
@@ -108,42 +117,21 @@ async function handleAccountCreation(params: {
 }
 
 /**
- * Handles setting an API key manually
+ * Provies instructions for setting an API key manually.
  */
-async function handleApiKeyInput(params: { configProvider: ConfigProvider }) {
-  try {
-    // Ensure API URL is set first
-    if (!(await validateApiUrl(params.configProvider))) {
-      return
-    }
-
-    logger.info('Set your OneGrep API key')
-
-    const apiKey = await input({
-      message: 'Enter your API key:',
-      validate: (value) => {
-        if (!value.trim()) return 'API key is required'
-        return true
-      }
-    })
-
-    // Update the config with the API key
-    params.configProvider.updateIdentity({ apiKey })
-    params.configProvider.saveConfig()
-
-    logger.log(chalk.green('API key saved successfully!'))
-    logger.log(`Run ${chalk.bold.blue('onegrep-cli help')} to get started.`)
-  } catch (error) {
-    logger.error(
-      `Failed to save API key: ${error instanceof Error ? error.message : String(error)}`
-    )
+async function handleSetApiKey(params: { configProvider: ConfigProvider }) {
+  // Ensure API URL is set first
+  if (!(await forceSetApiUrl(params.configProvider))) {
+    return
   }
+
+  outputApiKeyInstructions()
 }
 
 /**
  * Handles setting the API URL
  */
-async function handleApiUrlInput(params: { configProvider: ConfigProvider }) {
+async function setOrUpdateApiUrl(params: { configProvider: ConfigProvider }) {
   try {
     const currentUrl = params.configProvider.getConfig().identity?.apiUrl
 
@@ -157,27 +145,9 @@ async function handleApiUrlInput(params: { configProvider: ConfigProvider }) {
       if (!changeUrl) {
         return
       }
-    } else {
-      logger.info('No API URL set. Setting a new API URL.')
     }
 
-    const newApiUrl = await input({
-      message: 'Enter the API URL:',
-      default: currentUrl || 'https://test-sandbox.onegrep.dev',
-      validate: (value) => {
-        if (!value.trim()) return 'API URL is required'
-        try {
-          new URL(value) // Validate URL format
-          return true
-        } catch (e) {
-          return 'Please enter a valid URL'
-        }
-      }
-    })
-
-    params.configProvider.updateIdentity({ apiUrl: newApiUrl })
-    params.configProvider.saveConfig()
-    logger.log(chalk.green('API URL updated successfully!'))
+    await forceSetApiUrl(params.configProvider)
   } catch (error) {
     logger.error(
       `Failed to update API URL: ${error instanceof Error ? error.message : String(error)}`
@@ -196,7 +166,7 @@ async function handleLogin(params: {
 
   try {
     // Ensure API URL is set first
-    if (!(await validateApiUrl(params.configProvider))) {
+    if (!(await forceSetApiUrl(params.configProvider))) {
       return
     }
 
@@ -226,7 +196,9 @@ async function handleLogin(params: {
     }
 
     spinner.succeed('Authentication successful!')
-    logger.log(`\n\nRun ${chalk.bold.blue('onegrep-cli help')} to get started.\n\n`)
+    logger.log(
+      `\n\nRun ${chalk.bold.blue('onegrep-cli help')} to get started.\n\n`
+    )
   } catch (error) {
     // Force stop the spinner in case it's still running
     spinner.stop()
@@ -347,18 +319,14 @@ async function handleAccountSetup(params: {
     clearTerminal()
     logger.info(chalk.bold.blueBright('OneGrep Account Setup'))
 
-    // First check if we have an API URL, if not, set it
-    const hasApiUrl = await validateApiUrl(params.configProvider)
-    if (!hasApiUrl) {
-      return
-    }
+    await setOrUpdateApiUrl({ configProvider: params.configProvider })
 
     // Now show the account setup options
     const option = await select({
-      message: 'Select an option:',
+      message: 'How would you like to setup your account?',
       choices: [
         {
-          name: 'Create an account (I have an invitation code)',
+          name: 'Create a new account (I have an invitation code)',
           value: 'create-account'
         },
         {
@@ -366,7 +334,7 @@ async function handleAccountSetup(params: {
           value: 'api-key'
         },
         {
-          name: 'Set my API URL',
+          name: 'Update my API URL',
           value: 'api-url'
         },
         {
@@ -381,10 +349,10 @@ async function handleAccountSetup(params: {
         await handleAccountCreation(params)
         break
       case 'api-key':
-        await handleApiKeyInput(params)
+        await handleSetApiKey(params)
         break
       case 'api-url':
-        await handleApiUrlInput(params)
+        await setOrUpdateApiUrl(params)
         break
       case 'back':
         logger.info('Operation cancelled.')
@@ -423,7 +391,7 @@ export function getAccountsCommand(params: {
     .command('set-url')
     .description('Set or update the API URL')
     .action(async () => {
-      await handleApiUrlInput(params)
+      await setOrUpdateApiUrl(params)
     })
 
   // Login command
