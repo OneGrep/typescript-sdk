@@ -54,7 +54,7 @@ export class ConfigProvider {
    */
   updateAuthState(params: {
     access_token: string
-    expires_in?: number
+    expiry_timestamp?: number
     id_token?: string
   }) {
     if (!this.config.auth) {

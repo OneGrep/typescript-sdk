@@ -121,7 +121,7 @@ export const OAuth2Schema = z.object({
       return _AUTHZ_DEFAULTS.clientId
     }),
   accessToken: z.string().optional(),
-  expiresIn: z.number().optional(),
+  expiryTimestamp: z.number().optional(),
   idToken: z.string().optional()
 })
 
@@ -142,7 +142,7 @@ export class OAuth2Config extends SerializableModel<
     public discoveryEndpoint: string = _AUTHZ_DEFAULTS.openIdDiscoveryEndpoint,
     public clientId: string = _AUTHZ_DEFAULTS.clientId,
     public accessToken?: string,
-    public expiresIn?: number,
+    public expiryTimestamp?: number,
     public idToken?: string
   ) {
     super()
@@ -163,7 +163,7 @@ export class OAuth2Config extends SerializableModel<
       validated.data.discoveryEndpoint,
       validated.data.clientId,
       validated.data.accessToken,
-      validated.data.expiresIn,
+      validated.data.expiryTimestamp,
       validated.data.idToken
     )
   }
@@ -178,32 +178,32 @@ export class OAuth2Config extends SerializableModel<
       return true
     }
 
-    if (!isDefined(this.expiresIn)) {
+    if (!isDefined(this.expiryTimestamp)) {
       return true
     }
 
     const now = Math.floor(Date.now() / 1000) // Current time in seconds
-    const tokenIssuedAt = now - this.expiresIn! // Approximate time token was issued
-    const expiryTime = tokenIssuedAt + this.expiresIn!
 
-    return now >= expiryTime - bufferSeconds
+    // Simply compare current time with the stored expiry timestamp
+    return now >= this.expiryTimestamp! - bufferSeconds
   }
 
   /**
-   * Updates the token information with new values. Forces the caller to provide
-   * all the necessary information in order to avoid partial incorrect updates.
+   * Updates the token information with new values.
    *
-   * @param params Token response from the authorization server
+   * @param params Token response from the authorization server with expiry timestamp
    */
   updateState(params: {
     access_token: string
-    expires_in?: number
+    expiry_timestamp?: number
     id_token?: string
   }): void {
     this.accessToken = params.access_token
-    if (params.expires_in) {
-      this.expiresIn = params.expires_in
+
+    if (params.expiry_timestamp) {
+      this.expiryTimestamp = params.expiry_timestamp
     }
+
     if (params.id_token) {
       this.idToken = params.id_token
     }

@@ -110,7 +110,7 @@ export class AuthzProvider {
       }
 
       // We should have a valid token & our api key should be valid.
-      logger.debug("Checking validity of access token...")
+      logger.debug('Checking validity of access token...')
       const oauth2Config = this.configProvider.getConfig().auth
       if (isDefined(oauth2Config) && !oauth2Config!.isTokenExpired()) {
         try {
@@ -224,12 +224,14 @@ export class AuthzProvider {
       }
 
       // TODO: Remove this from the log.
-      logger.debug('✓ Authentication successful!')
+      logger.debug('Token generated successfully.')
 
+      // Store the token first so we can use getUserDetailsFromJwt
+      const claims = await this.getUserDetailsFromJwt(tokens.access_token)
       this.configProvider.updateAuthState({
         access_token: tokens.access_token,
-        expires_in: tokens.expires_in,
-        id_token: tokens.id_token
+        id_token: tokens.id_token,
+        expiry_timestamp: claims.exp
       })
 
       await this.exchangeAccessTokenForApiKey({
@@ -245,6 +247,7 @@ export class AuthzProvider {
     } finally {
       // Clean up and update state.
       server.close()
+      logger.debug("Saving updated config...")
       this.configProvider.saveConfig()
     }
   }
@@ -357,19 +360,22 @@ export class AuthzProvider {
     return { server, codePromise }
   }
 
-  private async getUserDetailsFromJwt(): Promise<UserJwtClaims> {
-    if (
-      !this.isAuthenticated() ||
-      !isDefined(this.configProvider.getConfig().auth?.accessToken)
-    ) {
-      throw new Error('No access token found. Cannot fetch user details.')
-    }
+  /** Decodes claims from a provided JWT or uses the access token from the config
+   * if no token is provided.
+   */
+  private async getUserDetailsFromJwt(token?: string): Promise<UserJwtClaims> {
+    if (!isDefined(token)) {
+      const authConfig = this.configProvider.getConfig().auth
+      if (!isDefined(authConfig) || !isDefined(authConfig!.accessToken)) {
+        throw new Error('No access token found. Cannot fetch user details.')
+      }
 
-    const jwt = this.configProvider.getConfig().auth?.accessToken
+      token = authConfig!.accessToken
+    }
 
     try {
       // Decode the JWT without verifying the signature
-      const decoded = jose.decodeJwt(jwt!)
+      const decoded = jose.decodeJwt(token!)
       return decoded as UserJwtClaims
     } catch (error) {
       logger.error(`Failed to decode JWT: ${error}`)

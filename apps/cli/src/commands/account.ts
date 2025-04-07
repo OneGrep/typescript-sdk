@@ -9,7 +9,9 @@ import { ConfigProvider } from 'providers/config/provider'
 
 export function outputAuthenticationPrompt() {
   logger.log('\n\nYou are not authenticated.')
-  logger.log(`Please run ${chalk.bold.blue('onegrep-cli account login')} to authenticate.\n\n`)
+  logger.log(
+    `Please run ${chalk.bold.blue('onegrep-cli account login')} to authenticate.\n\n`
+  )
 }
 
 /**
@@ -224,9 +226,7 @@ async function handleLogin(params: {
     }
 
     spinner.succeed('Authentication successful!')
-    params.configProvider.saveConfig()
-
-    logger.log(`Run ${chalk.bold.blue('onegrep-cli help')} to get started.`)
+    logger.log(`\n\nRun ${chalk.bold.blue('onegrep-cli help')} to get started.\n\n`)
   } catch (error) {
     // Force stop the spinner in case it's still running
     spinner.stop()
@@ -247,7 +247,8 @@ async function handleLogout(params: { configProvider: ConfigProvider }) {
     })
 
     const confirmed = await confirm({
-      message: 'Are you sure you want to log out? This will clear all your credentials and you will need to re-authenticate.',
+      message:
+        'Are you sure you want to log out? This will clear all your credentials and you will need to re-authenticate.',
       default: false
     })
 

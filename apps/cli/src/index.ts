@@ -8,7 +8,10 @@ import { toolsCommand } from 'commands/tools'
 import { clearTerminal } from 'utils/helpers'
 import { ConfigProvider } from 'providers/config/provider'
 import AuthzProvider from 'providers/auth/provider'
-import { getAccountsCommand, outputAuthenticationPrompt } from 'commands/account'
+import {
+  getAccountsCommand,
+  outputAuthenticationPrompt
+} from 'commands/account'
 
 // Authentication validation function that checks if user is authenticated
 async function validateAuthenticationState(authProvider: AuthzProvider) {
