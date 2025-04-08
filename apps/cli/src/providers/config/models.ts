@@ -4,8 +4,8 @@ import { z } from 'zod'
 
 const _AUTHZ_DEFAULTS = {
   openIdDiscoveryEndpoint:
-    'https://640272695.propelauthtest.com/.well-known/openid-configuration',
-  clientId: '65382374d2a3a54262161587a24efd04'
+    'https://auth.onegrep.dev/.well-known/openid-configuration',
+  clientId: '9de8c8c4fd9cf1c63a9c95d079979a09'
 }
 
 export const IdentitySchema = z.object({
@@ -108,6 +108,10 @@ export const OAuth2Schema = z.object({
     .url()
     .optional()
     .transform((v) => {
+      if (isDefined(process.env.AUTHZ_DISCOVERY_ENDPOINT)) {
+        return process.env.AUTHZ_DISCOVERY_ENDPOINT
+      }
+
       if (isDefined(v)) return v
 
       return _AUTHZ_DEFAULTS.openIdDiscoveryEndpoint
