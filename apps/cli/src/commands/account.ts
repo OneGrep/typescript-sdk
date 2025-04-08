@@ -34,18 +34,22 @@ export function outputApiKeyInstructions() {
  * Ensures API URL is set before proceeding with auth operations
  * @returns true if API URL is set (either already or by user input)
  */
-async function forceSetApiUrl(
-  configProvider: ConfigProvider
+async function forceCheckApiUrl(
+  configProvider: ConfigProvider,
+  forceSet: boolean = false
 ): Promise<boolean> {
   const currentUrl = configProvider.getConfig().identity?.apiUrl
 
-  if (!currentUrl) {
-    logger.info(
-      chalk.yellow('API URL is not set. You need to set it before proceeding.')
-    )
+  if (!currentUrl || forceSet) {
+    if (!currentUrl) {
+      logger.info(
+        chalk.yellow('API URL is not set. You need to set it before proceeding.')
+      )
+    }
+
     const apiUrl = await input({
       message: 'Enter the API URL:',
-      default: 'https://test-sandbox.onegrep.dev',
+      default: currentUrl ?? 'https://test-sandbox.onegrep.dev',
       validate: (value) => {
         if (!value.trim()) return 'API URL is required'
         try {
@@ -79,7 +83,7 @@ async function handleAccountCreation(params: {
 
   try {
     // Ensure API URL is set first
-    if (!(await forceSetApiUrl(params.configProvider))) {
+    if (!(await forceCheckApiUrl(params.configProvider))) {
       return
     }
 
@@ -128,7 +132,7 @@ async function handleAccountCreation(params: {
  */
 async function handleSetApiKey(params: { configProvider: ConfigProvider }) {
   // Ensure API URL is set first
-  if (!(await forceSetApiUrl(params.configProvider))) {
+  if (!(await forceCheckApiUrl(params.configProvider))) {
     return
   }
 
@@ -153,8 +157,6 @@ async function setOrUpdateApiUrl(params: { configProvider: ConfigProvider }) {
         return
       }
     }
-
-    await forceSetApiUrl(params.configProvider)
   } catch (error) {
     logger.error(
       `Failed to update API URL: ${error instanceof Error ? error.message : String(error)}`
@@ -166,7 +168,7 @@ async function loginUser(params: {
   authProvider: AuthzProvider
   configProvider: ConfigProvider
 }) {
-  await forceSetApiUrl(params.configProvider)
+  await forceCheckApiUrl(params.configProvider)
   const spinner = getSpinner('Authenticating...')
 
   // Invoke the authentication flow
@@ -190,7 +192,7 @@ async function handleLogin(params: {
 }) {
   try {
     // Ensure API URL is set first
-    if (!(await forceSetApiUrl(params.configProvider))) {
+    if (!(await forceCheckApiUrl(params.configProvider))) {
       return
     }
 
@@ -351,7 +353,29 @@ async function handleAccountStatus(params: {
 
     if (!isAuthenticated) {
       outputAuthenticationPrompt()
+      return
     }
+
+    // Finally give them the option to see their API key.
+    const showApiKey = await confirm({
+      message: '\nWould you like to see your API key?',
+      default: false
+    })
+    if (showApiKey) {
+      logger.log(
+        chalk.bold.redBright(
+          `WARNING: Keep your API key secret. To prevent it from being stored in your shell history, run:`
+        )
+      )
+      logger.log(
+        chalk.red(
+          `export HISTIGNORE="ONEGREP_API_KEY*"\n`
+        )
+      )
+
+      logger.log(`\n\nONEGREP_API_KEY = ${config.identity!.apiKey!}\n\n`)
+    }
+
   } catch (error) {
     // Force stop the spinner in case it's still running
     spinner.stop()
