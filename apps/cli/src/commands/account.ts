@@ -346,7 +346,7 @@ async function handleAccountStatus(params: {
       statusTable.push([chalk.blueBright('API Key:'), '[REDACTED]'])
     }
 
-    logger.log(chalk.bold.blueBright("Authentication Details"))
+    logger.log(chalk.bold.blueBright('Authentication Details'))
     logger.log(statusTable.toString())
 
     if (!isAuthenticated) {
