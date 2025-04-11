@@ -4,7 +4,7 @@ import { getToolbox, Toolbox } from '@onegrep/sdk'
 import { getSpinner } from 'utils/helpers'
 
 async function runHealthcheck() {
-  logger.log(chalk.bold.magenta("Healthcheck"))
+  logger.log(chalk.bold.magenta('Healthcheck'))
   const spinner = getSpinner('Checking connectivity...', 'yellow')
   spinner.start()
 

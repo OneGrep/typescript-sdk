@@ -15,7 +15,7 @@ async function fetchAuditLogs(options: {
   startDate?: string
   endDate?: string
 }) {
-  logger.log(chalk.bold.magenta("Audit Logs"))
+  logger.log(chalk.bold.magenta('Audit Logs'))
   let toolbox: Toolbox | undefined
 
   try {
@@ -66,7 +66,6 @@ async function fetchAuditLogs(options: {
   } finally {
     await toolbox?.close()
   }
-
 }
 
 export const getAuditLogs = new Command()
