@@ -1,6 +1,6 @@
 import { Command } from 'commander'
-import { chalk, logger } from '../utils/logger'
-import { clearTerminal, getSpinner, isDefined } from '../utils/helpers'
+import { chalk, logger } from '../utils/logger.js'
+import { clearTerminal, getSpinner, isDefined } from '../utils/helpers.js'
 import {
   getToolbox,
   ToolResource,
@@ -794,9 +794,8 @@ async function runToolsExperience() {
             const description = integrationDescriptions[integration]
 
             return {
-              name: `${integration} ${chalk.gray(`(${toolCount} tools)`)}${
-                description ? chalk.dim(` - ${description}`) : ''
-              }`,
+              name: `${integration} ${chalk.gray(`(${toolCount} tools)`)}${description ? chalk.dim(` - ${description}`) : ''
+                }`,
               value: integration
             }
           }),
@@ -810,8 +809,7 @@ async function runToolsExperience() {
       }
 
       logger.info(
-        `Selected integration: ${chalk.bold.green(selectedIntegration)} with ${
-          toolsByIntegration[selectedIntegration].length
+        `Selected integration: ${chalk.bold.green(selectedIntegration)} with ${toolsByIntegration[selectedIntegration].length
         } tools available`
       )
 
