@@ -1,6 +1,5 @@
 import ora, { type Color } from 'ora'
-import pkg from '../../package.json' assert { type: 'json' };
-
+import pkg from '../../package.json' with { type: 'json' }
 
 export function getSpinner(text: string, color: Color = 'yellow') {
   return ora({

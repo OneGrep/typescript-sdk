@@ -10,9 +10,7 @@
     "moduleResolution": "nodenext",
     "target": "ES2020",
     "declaration": true,
-    "lib": [
-      "ESNext"
-    ],
+    "lib": ["ESNext"],
     "removeComments": true,
     "useUnknownInCatchVariables": true,
     "forceConsistentCasingInFileNames": true,
@@ -25,10 +23,6 @@
     "resolveJsonModule": true,
     "sourceMap": true
   },
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"]
 }

@@ -11,13 +11,8 @@
     "esModuleInterop": true,
     "skipLibCheck": true
   },
-  "include": [
-    "src"
-  ],
-  "exclude": [
-    "**/*.test.ts",
-    "node_modules"
-  ],
+  "include": ["src"],
+  "exclude": ["**/*.test.ts", "node_modules"],
   "swc": true,
   "ts-node": {
     "swc": true,

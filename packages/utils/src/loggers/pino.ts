@@ -46,7 +46,7 @@ export async function pinoLogger(env: Env): Promise<Logger> {
     logFilepath?: string
   ): Promise<pino.Logger> {
     const options: pino.LoggerOptions = {
-      level: logLevel,
+      level: logLevel
       // Other options can be added here
     }
 

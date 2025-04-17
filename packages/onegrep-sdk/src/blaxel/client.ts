@@ -1,2 +1,1 @@
-import { blTools, blModel } from "@blaxel/sdk";
-
+import { blTools, blModel } from '@blaxel/sdk'
