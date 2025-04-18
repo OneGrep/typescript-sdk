@@ -1,4 +1,4 @@
-import { OneGrepApiClient } from '../client.js'
+import { OneGrepApiClient } from '../core/api/client.js'
 import { ConnectedClientManager } from './client.js'
 import { ToolCache, ApiToolResource, ToolId, ToolResource } from '../types.js'
 import { MCPToolResource, toolResourceFromMcpTool } from './resource.js'
@@ -25,10 +25,9 @@ export class MCPToolCache implements ToolCache {
 
   constructor(
     apiClient: OneGrepApiClient,
-    connectedClientManager: ConnectedClientManager
   ) {
     this.apiClient = apiClient
-    this.connectedClientManager = connectedClientManager
+    this.connectedClientManager = new ConnectedClientManager()
   }
 
   /** A helper function that fetches all the tool details for all the tools for an integration and then converts it into a Map of tool name to tool details. */
@@ -276,5 +275,9 @@ export class MCPToolCache implements ToolCache {
 
   async list(): Promise<ToolResource[]> {
     return Array.from(this.toolIdToResource.values())
+  }
+
+  async cleanup(): Promise<void> {
+    await this.connectedClientManager.close()
   }
 }
