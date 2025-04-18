@@ -59,9 +59,7 @@ export const createGateway = async () => {
   const server: Server = gateway.server
 
   const connectedClientManager = new ConnectedClientManager()
-  const mcpToolCache = new MCPToolCache(
-    clientFromConfig(),
-  )
+  const mcpToolCache = new MCPToolCache(clientFromConfig())
 
   // List Tools Handler
   server.setRequestHandler(ListToolsRequestSchema, async (_request) => {

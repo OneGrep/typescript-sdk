@@ -28,10 +28,7 @@ export class Toolbox implements BaseToolbox<ToolResource> {
   apiClient: OneGrepApiClient
   toolCache: ToolCache
 
-  constructor(
-    apiClient: OneGrepApiClient,
-    toolCache: ToolCache
-  ) {
+  constructor(apiClient: OneGrepApiClient, toolCache: ToolCache) {
     this.apiClient = apiClient
     this.toolCache = toolCache
   }
@@ -74,13 +71,13 @@ export async function createToolbox(apiClient: OneGrepApiClient) {
   // TODO: Get infra parameters from the API to determine which ToolCache to initialize
   // TODO: this will be populated from an api endpoint.
   const providerConfig = {
-    "providerName": "mcp"
+    providerName: 'mcp'
   }
 
   let toolCache: ToolCache | undefined
 
   switch (providerConfig.providerName) {
-    case "mcp":
+    case 'mcp':
       toolCache = new MCPToolCache(apiClient)
       break
     default:

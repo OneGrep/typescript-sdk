@@ -23,9 +23,7 @@ export class MCPToolCache implements ToolCache {
   private toolIdToResource: Map<ToolId, ToolResource> = new Map()
   private toolIdsByIntegration: Map<string, Set<ToolId>> = new Map()
 
-  constructor(
-    apiClient: OneGrepApiClient,
-  ) {
+  constructor(apiClient: OneGrepApiClient) {
     this.apiClient = apiClient
     this.connectedClientManager = new ConnectedClientManager()
   }
