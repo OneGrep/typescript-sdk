@@ -16,7 +16,7 @@ The `@blaxel/sdk` package presents a module format compatibility challenge due t
 3. When imported directly into our ESM codebase, we encounter errors like:
    ```
    ReferenceError: exports is not defined in ES module scope
-   This file is being treated as an ES module because it has a '.js' file extension 
+   This file is being treated as an ES module because it has a '.js' file extension
    and '../node_modules/@blaxel/sdk/dist/esm/package.json' contains "type": "module".
    ```
 
@@ -40,12 +40,12 @@ The Blaxel SDK defines types in its package, but they aren't properly re-exporte
 ```typescript
 // In node_modules/@blaxel/sdk/dist/esm/tools/types.d.ts
 export type Tool = {
-    name: string;
-    description: string;
-    inputSchema: z.ZodObject<any>;
-    originalSchema: object;
-    call(input: unknown): Promise<unknown>;
-};
+  name: string
+  description: string
+  inputSchema: z.ZodObject<any>
+  originalSchema: object
+  call(input: unknown): Promise<unknown>
+}
 ```
 
 However, this type isn't correctly re-exported in the main index file. This is a common issue with dual package hazard patterns where type definitions don't match the runtime exports.
@@ -55,15 +55,15 @@ However, this type isn't correctly re-exported in the main index file. This is a
 Rather than trying to import types directly from `@blaxel/sdk` (which fails), we define the types locally in our code:
 
 ```typescript
-import { ZodObject } from 'zod';
+import { ZodObject } from 'zod'
 
 // This matches the Tool type from Blaxel SDK
 interface Tool {
-    name: string;
-    description: string;
-    inputSchema: ZodObject<any>;
-    originalSchema: object;
-    call(input: unknown): Promise<unknown>;
+  name: string
+  description: string
+  inputSchema: ZodObject<any>
+  originalSchema: object
+  call(input: unknown): Promise<unknown>
 }
 ```
 
@@ -75,12 +75,12 @@ Instead of importing directly from `@blaxel/sdk`:
 
 ```typescript
 // Don't do this - will cause module format conflicts
-import { blTools } from '@blaxel/sdk';
+import { blTools } from '@blaxel/sdk'
 ```
 
 Import from the wrapper:
 
 ```typescript
-import * as blaxelSdk from './modules/blaxel-sdk.js';
+import * as blaxelSdk from './modules/blaxel-sdk.js'
 // Now use blaxelSdk.blTools, etc.
 ```

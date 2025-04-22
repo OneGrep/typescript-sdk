@@ -1,12 +1,12 @@
-import { OneGrepApiClient } from "core/api/client.js";
-import { ToolCache, ToolId, ToolResource } from "types.js";
-import { BlaxelClient } from "./client.js";
-import { BlaxelToolResource } from "./resource.js";
+import { OneGrepApiClient } from 'core/api/client.js'
+import { ToolCache, ToolId, ToolResource } from 'types.js'
+import { BlaxelClient } from './client.js'
+import { BlaxelToolResource } from './resource.js'
 
 export class BlaxelToolCache implements ToolCache {
   private apiClient: OneGrepApiClient
   private blaxelClient: BlaxelClient
-  private toolIdToResource: Map<ToolId, ToolResource> = new Map()
+  private toolIdToResource: Map<ToolId, BlaxelToolResource> = new Map()
 
   constructor(apiClient: OneGrepApiClient) {
     this.apiClient = apiClient
@@ -15,6 +15,7 @@ export class BlaxelToolCache implements ToolCache {
 
   async refresh(): Promise<boolean> {
     await this.blaxelClient.refresh()
+    this.toolIdToResource.clear()
 
     // Generate a new tool for each of the tools in each of the tool servers in the blaxel client
     // after it refreshes.
@@ -27,16 +28,15 @@ export class BlaxelToolCache implements ToolCache {
     return true
   }
 
-  async get(key: ToolId): Promise<BlaxelToolResource | undefined> {
-    return undefined
+  async get(key: ToolId): Promise<ToolResource | undefined> {
+    return this.toolIdToResource.get(key)
   }
 
   async list(): Promise<ToolResource[]> {
-    return []
+    return Array.from(this.toolIdToResource.values())
   }
 
   async cleanup(): Promise<void> {
-    return
+    await this.blaxelClient.cleanup()
   }
 }
-
