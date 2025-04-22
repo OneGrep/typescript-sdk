@@ -1,6 +1,7 @@
 import { clientFromConfig, OneGrepApiClient } from './core/api/client.js'
 import { BaseToolbox, ToolCache, ToolResource } from './types.js'
 import { MCPToolCache } from './mcp/toolcache.js'
+import { BlaxelToolCache } from 'blaxel/toolcache.js'
 
 export interface ToolFilter {
   (resource: ToolResource): boolean
@@ -71,7 +72,7 @@ export async function createToolbox(apiClient: OneGrepApiClient) {
   // TODO: Get infra parameters from the API to determine which ToolCache to initialize
   // TODO: this will be populated from an api endpoint.
   const providerConfig = {
-    providerName: 'mcp'
+    providerName: 'blaxel'
   }
 
   let toolCache: ToolCache | undefined
@@ -79,6 +80,9 @@ export async function createToolbox(apiClient: OneGrepApiClient) {
   switch (providerConfig.providerName) {
     case 'mcp':
       toolCache = new MCPToolCache(apiClient)
+      break
+    case 'blaxel':
+      toolCache = new BlaxelToolCache(apiClient)
       break
     default:
       throw new Error(`Unsupported provider: ${providerConfig.providerName}`)

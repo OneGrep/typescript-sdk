@@ -9,11 +9,10 @@ import {
   retrieveMCPClient
 } from '@blaxel/sdk/tools/mcpTool'
 
-
 export class BlaxelClient {
   private toolServers: Map<string, BlaxelMcpServer> = new Map()
 
-  constructor() { }
+  constructor() {}
 
   private async cleanupToolServers(): Promise<void> {
     this.toolServers.forEach((server: BlaxelMcpServer) => {
@@ -94,5 +93,17 @@ export class BlaxelClient {
     }
 
     await this.refreshServer(integrationName)
+  }
+
+  async getToolServers(): Promise<Map<string, BlaxelMcpServer>> {
+    return this.toolServers
+  }
+
+  async getToolServer(serverName: string): Promise<BlaxelMcpServer> {
+    if (!this.toolServers.has(serverName)) {
+      throw new Error(`Integration ${serverName} not found`)
+    }
+
+    return this.toolServers.get(serverName)!
   }
 }
