@@ -68,6 +68,9 @@ gateway:
 test-sdk:
     pnpm turbo run test --filter=@onegrep/sdk
 
+test-sdk-blaxel:
+    cd packages/onegrep-sdk && pnpm test-debug src/blaxel/toolcache.test.ts --run --testNamePattern="BlaxelToolCacheTests"
+
 test-langchain:
     pnpm turbo run test --filter=@onegrep/langchain -- -v
 
