@@ -13,7 +13,7 @@ import {
 import { Tool as BlaxelTool } from '@blaxel/sdk/tools/types'
 import { CallToolResult } from '@modelcontextprotocol/sdk/types.js'
 import { z } from 'zod'
-import { parseMcpResult } from 'mcp/toolcall.js'
+import { parseMcpResult } from '../mcp/toolcall.js'
 import { BlaxelClient } from './client.js'
 
 export class BlaxelToolMetadata implements ToolMetadata {
