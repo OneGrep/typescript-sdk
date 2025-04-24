@@ -42,7 +42,7 @@
     "licenses": "pnpm licenses list --prod --long > .licenses.txt",
     "package": "mkdir -p pack && pnpm pack --pack-destination pack",
     "version": "changeset version",
-    "publish:github": "changeset publish",
+    "publish:npm": "changeset publish",
     "clean:dist": "rimraf ./dist",
     "clean:modules": "rimraf ./node_modules",
     "clean:pack": "rimraf ./pack"
