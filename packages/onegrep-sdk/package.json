@@ -1,7 +1,6 @@
 {
   "name": "@onegrep/sdk",
   "version": "0.0.2",
-  "private": false,
   "type": "module",
   "license": "MIT",
   "author": "OneGrep, Inc.",
