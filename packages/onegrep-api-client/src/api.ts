@@ -665,6 +665,35 @@ const MultipleToolCustomTagsParamsRequest = z
   })
   .strict()
   .passthrough()
+const Recipe: z.ZodType<Recipe> = z
+  .object({
+    created_at: z.union([z.string(), z.null()]).optional(),
+    updated_at: z.union([z.string(), z.null()]).optional(),
+    goal: z.string(),
+    instructions: z.union([z.string(), z.null()]),
+    id: z.string().uuid().optional(),
+    tools: z.array(Tool)
+  })
+  .strict()
+  .passthrough()
+const SearchRequest = z
+  .object({
+    query: z.string(),
+    k: z.number().int().optional().default(10),
+    min_score: z.number().optional().default(0),
+    page_size: z.number().int().optional().default(10),
+    page: z.number().int().optional().default(0)
+  })
+  .strict()
+  .passthrough()
+const Strategy: z.ZodType<Strategy> = z
+  .object({
+    recipe_id: z.string().uuid(),
+    instructions: z.string(),
+    tools: z.array(ToolResource)
+  })
+  .strict()
+  .passthrough()
 const Policy: z.ZodType<Policy> = z
   .object({
     created_at: z.union([z.string(), z.null()]).optional(),
@@ -741,6 +770,14 @@ const PaginatedResponse_AuditLog_: z.ZodType<PaginatedResponse_AuditLog_> = z
   .object({ items: z.array(AuditLog), pagination: PaginationMetadata })
   .strict()
   .passthrough()
+const MCPToolServerClient = z
+  .object({
+    client_type: z.string(),
+    transport_type: z.enum(['sse', 'websocket']),
+    url: z.string().min(1).url()
+  })
+  .strict()
+  .passthrough()
 const BlaxelToolServerClient = z
   .object({
     client_type: z.string(),
@@ -749,6 +786,76 @@ const BlaxelToolServerClient = z
   })
   .strict()
   .passthrough()
+const ToolResourceBase: z.ZodType<ToolResourceBase> = z
+  .object({
+    integration_name: z.string(),
+    tool_name: z.string(),
+    description: z.union([z.string(), z.null()]).optional()
+  })
+  .strict()
+  .passthrough()
+const RecipeTool: z.ZodType<RecipeTool> = z
+  .object({
+    tool_resource: ToolResourceBase,
+    usage_instructions: z.union([z.string(), z.null()]).optional()
+  })
+  .strict()
+  .passthrough()
+const RecipeDetails_Output: z.ZodType<RecipeDetails_Output> = z
+  .object({ tools: z.array(RecipeTool).default([]) })
+  .partial()
+  .strict()
+  .passthrough()
+const UserRecipe: z.ZodType<UserRecipe> = z
+  .object({
+    id: z.number().int(),
+    goal: z.string(),
+    details: z.object({}).partial().strict().passthrough().optional(),
+    org_id: z.string(),
+    profile_id: z.string(),
+    created_at: z.string().datetime({ offset: true }).optional(),
+    details_data: RecipeDetails_Output
+  })
+  .strict()
+  .passthrough()
+const PaginatedResponse_UserRecipe_: z.ZodType<PaginatedResponse_UserRecipe_> =
+  z
+    .object({ items: z.array(UserRecipe), pagination: PaginationMetadata })
+    .strict()
+    .passthrough()
+const RecipeDetails_Input: z.ZodType<RecipeDetails_Input> = z
+  .object({ tools: z.array(RecipeTool).default([]) })
+  .partial()
+  .strict()
+  .passthrough()
+const NewUserRecipeRequest: z.ZodType<NewUserRecipeRequest> = z
+  .object({ goal: z.string(), details: RecipeDetails_Input })
+  .strict()
+  .passthrough()
+const ScoredItem_Tool_: z.ZodType<ScoredItem_Tool_> = z
+  .object({ item: Tool, score: z.number().gte(0).lte(1) })
+  .strict()
+  .passthrough()
+const SearchResponse_ScoredItem_Tool__: z.ZodType<SearchResponse_ScoredItem_Tool__> =
+  z
+    .object({
+      pagination: PaginationMetadata,
+      results: z.array(ScoredItem_Tool_)
+    })
+    .strict()
+    .passthrough()
+const ScoredItem_Recipe_: z.ZodType<ScoredItem_Recipe_> = z
+  .object({ item: Recipe, score: z.number().gte(0).lte(1) })
+  .strict()
+  .passthrough()
+const SearchResponse_ScoredItem_Recipe__: z.ZodType<SearchResponse_ScoredItem_Recipe__> =
+  z
+    .object({
+      pagination: PaginationMetadata,
+      results: z.array(ScoredItem_Recipe_)
+    })
+    .strict()
+    .passthrough()
 const CreateInvitationRequest = z
   .object({
     email: z.string().email(),
@@ -812,71 +919,6 @@ const MCPServerConfig = z
   })
   .strict()
   .passthrough()
-const MCPToolServerClient = z
-  .object({
-    client_type: z.string(),
-    transport_type: z.enum(['sse', 'websocket']),
-    url: z.string().min(1).url()
-  })
-  .strict()
-  .passthrough()
-const ToolResourceBase: z.ZodType<ToolResourceBase> = z
-  .object({
-    integration_name: z.string(),
-    tool_name: z.string(),
-    description: z.union([z.string(), z.null()]).optional()
-  })
-  .strict()
-  .passthrough()
-const RecipeTool: z.ZodType<RecipeTool> = z
-  .object({
-    tool_resource: ToolResourceBase,
-    usage_instructions: z.union([z.string(), z.null()]).optional()
-  })
-  .strict()
-  .passthrough()
-const RecipeDetails_Input: z.ZodType<RecipeDetails_Input> = z
-  .object({ tools: z.array(RecipeTool).default([]) })
-  .partial()
-  .strict()
-  .passthrough()
-const NewUserRecipeRequest: z.ZodType<NewUserRecipeRequest> = z
-  .object({ goal: z.string(), details: RecipeDetails_Input })
-  .strict()
-  .passthrough()
-const RecipeDetails_Output: z.ZodType<RecipeDetails_Output> = z
-  .object({ tools: z.array(RecipeTool).default([]) })
-  .partial()
-  .strict()
-  .passthrough()
-const UserRecipe: z.ZodType<UserRecipe> = z
-  .object({
-    id: z.number().int(),
-    goal: z.string(),
-    details: z.object({}).partial().strict().passthrough().optional(),
-    org_id: z.string(),
-    profile_id: z.string(),
-    created_at: z.string().datetime({ offset: true }).optional(),
-    details_data: RecipeDetails_Output
-  })
-  .strict()
-  .passthrough()
-const PaginatedResponse_UserRecipe_: z.ZodType<PaginatedResponse_UserRecipe_> =
-  z
-    .object({ items: z.array(UserRecipe), pagination: PaginationMetadata })
-    .strict()
-    .passthrough()
-const Recipe: z.ZodType<Recipe> = z
-  .object({
-    created_at: z.union([z.string(), z.null()]).optional(),
-    updated_at: z.union([z.string(), z.null()]).optional(),
-    goal: z.string(),
-    instructions: z.union([z.string(), z.null()]),
-    id: z.string().uuid().optional(),
-    tools: z.array(Tool)
-  })
-  .strict()
-  .passthrough()
 const RemoteClientConfig = z
   .object({
     org_id: z.string(),
@@ -889,40 +931,6 @@ const RemoteClientConfig = z
   })
   .strict()
   .passthrough()
-const ScoredItem_Recipe_: z.ZodType<ScoredItem_Recipe_> = z
-  .object({ item: Recipe, score: z.number().gte(0).lte(1) })
-  .strict()
-  .passthrough()
-const ScoredItem_Tool_: z.ZodType<ScoredItem_Tool_> = z
-  .object({ item: Tool, score: z.number().gte(0).lte(1) })
-  .strict()
-  .passthrough()
-const SearchRequest = z
-  .object({
-    query: z.string(),
-    k: z.number().int().optional().default(10),
-    min_score: z.number().optional().default(0),
-    page_size: z.number().int().optional().default(10),
-    page: z.number().int().optional().default(0)
-  })
-  .strict()
-  .passthrough()
-const SearchResponse_ScoredItem_Recipe__: z.ZodType<SearchResponse_ScoredItem_Recipe__> =
-  z
-    .object({
-      pagination: PaginationMetadata,
-      results: z.array(ScoredItem_Recipe_)
-    })
-    .strict()
-    .passthrough()
-const SearchResponse_ScoredItem_Tool__: z.ZodType<SearchResponse_ScoredItem_Tool__> =
-  z
-    .object({
-      pagination: PaginationMetadata,
-      results: z.array(ScoredItem_Tool_)
-    })
-    .strict()
-    .passthrough()
 const ServerSpec: z.ZodType<ServerSpec> = z
   .object({
     orgID: z.string(),
@@ -953,14 +961,6 @@ const Server: z.ZodType<Server> = z
       .union([z.object({}).partial().strict().passthrough(), z.null()])
       .optional(),
     apiVersion: z.string()
-  })
-  .strict()
-  .passthrough()
-const Strategy: z.ZodType<Strategy> = z
-  .object({
-    recipe_id: z.string().uuid(),
-    instructions: z.string(),
-    tools: z.array(ToolResource)
   })
   .strict()
   .passthrough()
@@ -1005,6 +1005,9 @@ export const schemas = {
   ToolCustomTagsParamsRequest,
   ToolCustomTagSelectionParamsRequest,
   MultipleToolCustomTagsParamsRequest,
+  Recipe,
+  SearchRequest,
+  Strategy,
   Policy,
   NewPolicyRequest,
   ActionApprovalState,
@@ -1014,31 +1017,28 @@ export const schemas = {
   AuditLog,
   PaginationMetadata,
   PaginatedResponse_AuditLog_,
+  MCPToolServerClient,
   BlaxelToolServerClient,
+  ToolResourceBase,
+  RecipeTool,
+  RecipeDetails_Output,
+  UserRecipe,
+  PaginatedResponse_UserRecipe_,
+  RecipeDetails_Input,
+  NewUserRecipeRequest,
+  ScoredItem_Tool_,
+  SearchResponse_ScoredItem_Tool__,
+  ScoredItem_Recipe_,
+  SearchResponse_ScoredItem_Recipe__,
   CreateInvitationRequest,
   IngressConfig,
   Invitation,
   KindMetadata,
   LauncherConfig,
   MCPServerConfig,
-  MCPToolServerClient,
-  ToolResourceBase,
-  RecipeTool,
-  RecipeDetails_Input,
-  NewUserRecipeRequest,
-  RecipeDetails_Output,
-  UserRecipe,
-  PaginatedResponse_UserRecipe_,
-  Recipe,
   RemoteClientConfig,
-  ScoredItem_Recipe_,
-  ScoredItem_Tool_,
-  SearchRequest,
-  SearchResponse_ScoredItem_Recipe__,
-  SearchResponse_ScoredItem_Tool__,
   ServerSpec,
   Server,
-  Strategy,
   TraefikIngressRoute
 }
 
@@ -1555,6 +1555,419 @@ response and HTTP CODE. 200 &#x3D; approved or didn&#x27;t require approval, 403
       }
     ],
     response: z.object({ approved: z.boolean() }).strict().passthrough(),
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError
+      }
+    ]
+  },
+  {
+    method: 'get',
+    path: '/api/v1/providers/',
+    alias: 'list_providers_api_v1_providers__get',
+    requestFormat: 'json',
+    response: z.array(ToolServerProvider)
+  },
+  {
+    method: 'get',
+    path: '/api/v1/providers/:provider_id',
+    alias: 'get_provider_api_v1_providers__provider_id__get',
+    requestFormat: 'json',
+    parameters: [
+      {
+        name: 'provider_id',
+        type: 'Path',
+        schema: z.string()
+      }
+    ],
+    response: ToolServerProvider,
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError
+      }
+    ]
+  },
+  {
+    method: 'get',
+    path: '/api/v1/providers/:provider_id/servers',
+    alias: 'get_servers_api_v1_providers__provider_id__servers_get',
+    requestFormat: 'json',
+    parameters: [
+      {
+        name: 'provider_id',
+        type: 'Path',
+        schema: z.string()
+      }
+    ],
+    response: z.array(ToolServer),
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError
+      }
+    ]
+  },
+  {
+    method: 'post',
+    path: '/api/v1/providers/:provider_id/sync',
+    alias: 'sync_provider_api_v1_providers__provider_id__sync_post',
+    requestFormat: 'json',
+    parameters: [
+      {
+        name: 'provider_id',
+        type: 'Path',
+        schema: z.string()
+      }
+    ],
+    response: z.unknown(),
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError
+      }
+    ]
+  },
+  {
+    method: 'get',
+    path: '/api/v1/recipes/',
+    alias: 'list_recipes_api_v1_recipes__get',
+    description: `List all recipes for the current user with pagination.
+
+- Page numbers start at 1 (not 0)
+- Results are sorted by creation date (newest first)
+- Filtered by the user&#x27;s organization and optionally by profile
+- Profile can be specified via the X-ONEGREP-PROFILE-ID header`,
+    requestFormat: 'json',
+    parameters: [
+      {
+        name: 'page',
+        type: 'Query',
+        schema: z.number().int().gte(1).optional().default(1)
+      },
+      {
+        name: 'page_size',
+        type: 'Query',
+        schema: z.number().int().gte(1).lte(100).optional().default(20)
+      },
+      {
+        name: 'X-ONEGREP-PROFILE-ID',
+        type: 'Header',
+        schema: X_ONEGREP_PROFILE_ID
+      }
+    ],
+    response: PaginatedResponse_UserRecipe_,
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError
+      }
+    ]
+  },
+  {
+    method: 'post',
+    path: '/api/v1/recipes/',
+    alias: 'create_recipe_api_v1_recipes__post',
+    description: `Create a new recipe.
+
+- Profile ID is specified via the X-ONEGREP-PROFILE-ID header
+- If no profile ID is provided in the header, uses the organization&#x27;s default profile`,
+    requestFormat: 'json',
+    parameters: [
+      {
+        name: 'body',
+        type: 'Body',
+        schema: NewUserRecipeRequest
+      },
+      {
+        name: 'X-ONEGREP-PROFILE-ID',
+        type: 'Header',
+        schema: X_ONEGREP_PROFILE_ID
+      }
+    ],
+    response: Recipe,
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError
+      }
+    ]
+  },
+  {
+    method: 'get',
+    path: '/api/v1/recipes/:recipe_id',
+    alias: 'get_recipe_api_v1_recipes__recipe_id__get',
+    description: `Get a specific recipe by ID.
+
+The recipe must belong to the user&#x27;s organization.`,
+    requestFormat: 'json',
+    parameters: [
+      {
+        name: 'recipe_id',
+        type: 'Path',
+        schema: z.number().int()
+      }
+    ],
+    response: Recipe,
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError
+      }
+    ]
+  },
+  {
+    method: 'post',
+    path: '/api/v1/search/recipes',
+    alias: 'search_recipes_api_v1_search_recipes_post',
+    description: `Searches for the best set of recipes that semantically match the query and returns them
+along with a similarity score for each recipe.`,
+    requestFormat: 'json',
+    parameters: [
+      {
+        name: 'body',
+        type: 'Body',
+        schema: SearchRequest
+      },
+      {
+        name: 'X-ONEGREP-PROFILE-ID',
+        type: 'Header',
+        schema: X_ONEGREP_PROFILE_ID
+      }
+    ],
+    response: SearchResponse_ScoredItem_Recipe__,
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError
+      }
+    ]
+  },
+  {
+    method: 'post',
+    path: '/api/v1/search/reindex',
+    alias: 'reindex_api_v1_search_reindex_post',
+    description: `Reindexes all tools and recipes for an organization.`,
+    requestFormat: 'json',
+    response: z.unknown()
+  },
+  {
+    method: 'post',
+    path: '/api/v1/search/reindex/recipes',
+    alias: 'reindex_recipes_api_v1_search_reindex_recipes_post',
+    description: `Reindexes all recipes for an organization.`,
+    requestFormat: 'json',
+    response: z.unknown()
+  },
+  {
+    method: 'post',
+    path: '/api/v1/search/reindex/tools',
+    alias: 'reindex_tools_api_v1_search_reindex_tools_post',
+    description: `Reindexes all tools for an organization.`,
+    requestFormat: 'json',
+    response: z.unknown()
+  },
+  {
+    method: 'post',
+    path: '/api/v1/search/tools',
+    alias: 'search_tools_api_v1_search_tools_post',
+    description: `Searches for the best set of tools that semantically match the query and returns them
+along with a similarity score for each tool.`,
+    requestFormat: 'json',
+    parameters: [
+      {
+        name: 'body',
+        type: 'Body',
+        schema: SearchRequest
+      },
+      {
+        name: 'X-ONEGREP-PROFILE-ID',
+        type: 'Header',
+        schema: X_ONEGREP_PROFILE_ID
+      }
+    ],
+    response: SearchResponse_ScoredItem_Tool__,
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError
+      }
+    ]
+  },
+  {
+    method: 'get',
+    path: '/api/v1/servers/',
+    alias: 'list_servers_api_v1_servers__get',
+    requestFormat: 'json',
+    response: z.array(ToolServer)
+  },
+  {
+    method: 'get',
+    path: '/api/v1/servers/:server_id',
+    alias: 'get_server_api_v1_servers__server_id__get',
+    requestFormat: 'json',
+    parameters: [
+      {
+        name: 'server_id',
+        type: 'Path',
+        schema: z.string()
+      }
+    ],
+    response: ToolServer,
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError
+      }
+    ]
+  },
+  {
+    method: 'get',
+    path: '/api/v1/servers/:server_id/client',
+    alias: 'get_server_client_api_v1_servers__server_id__client_get',
+    requestFormat: 'json',
+    parameters: [
+      {
+        name: 'server_id',
+        type: 'Path',
+        schema: z.string()
+      }
+    ],
+    response: z.discriminatedUnion('client_type', [
+      MCPToolServerClient,
+      BlaxelToolServerClient
+    ]),
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError
+      }
+    ]
+  },
+  {
+    method: 'post',
+    path: '/api/v1/strategy/',
+    alias: 'get_strategy_api_v1_strategy__post',
+    description: `Gets a strategy for a given goal.`,
+    requestFormat: 'json',
+    parameters: [
+      {
+        name: 'body',
+        type: 'Body',
+        schema: SearchRequest
+      },
+      {
+        name: 'X-ONEGREP-PROFILE-ID',
+        type: 'Header',
+        schema: X_ONEGREP_PROFILE_ID
+      }
+    ],
+    response: z.array(Strategy),
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError
+      }
+    ]
+  },
+  {
+    method: 'post',
+    path: '/api/v1/strategy/fake',
+    alias: 'create_fake_recipes_api_v1_strategy_fake_post',
+    description: `Creates fake strategies for testing purposes.`,
+    requestFormat: 'json',
+    response: z.array(Recipe)
+  },
+  {
+    method: 'get',
+    path: '/api/v1/tools/',
+    alias: 'list_tools_api_v1_tools__get',
+    description: `List all tools for the current user.`,
+    requestFormat: 'json',
+    response: z.array(Tool)
+  },
+  {
+    method: 'get',
+    path: '/api/v1/tools/:tool_id',
+    alias: 'get_tool_api_v1_tools__tool_id__get',
+    requestFormat: 'json',
+    parameters: [
+      {
+        name: 'tool_id',
+        type: 'Path',
+        schema: z.string()
+      }
+    ],
+    response: Tool,
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError
+      }
+    ]
+  },
+  {
+    method: 'get',
+    path: '/api/v1/tools/:tool_id/properties',
+    alias: 'get_tool_properties_api_v1_tools__tool_id__properties_get',
+    requestFormat: 'json',
+    parameters: [
+      {
+        name: 'tool_id',
+        type: 'Path',
+        schema: z.string()
+      },
+      {
+        name: 'X-ONEGREP-PROFILE-ID',
+        type: 'Header',
+        schema: X_ONEGREP_PROFILE_ID
+      }
+    ],
+    response: z
+      .object({ tags: z.object({}).partial().strict().passthrough() })
+      .strict()
+      .passthrough(),
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError
+      }
+    ]
+  },
+  {
+    method: 'get',
+    path: '/api/v1/tools/:tool_id/resource',
+    alias: 'get_tool_resource_api_v1_tools__tool_id__resource_get',
+    description: `Returns the hydrated details for a tool given the current user and profile.`,
+    requestFormat: 'json',
+    parameters: [
+      {
+        name: 'tool_id',
+        type: 'Path',
+        schema: z.string()
+      },
+      {
+        name: 'X-ONEGREP-PROFILE-ID',
+        type: 'Header',
+        schema: X_ONEGREP_PROFILE_ID
+      }
+    ],
+    response: ToolResource,
     errors: [
       {
         status: 422,
