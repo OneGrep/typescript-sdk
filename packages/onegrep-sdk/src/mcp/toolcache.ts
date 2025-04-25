@@ -282,7 +282,7 @@ export class MCPToolCache implements ToolCache {
     }
   }
 
-  async metadata(toolFilter?: ToolFilter): Promise<Map<ToolId, ToolMetadata>> {
+  async metadata(_?: ToolFilter): Promise<Map<ToolId, ToolMetadata>> {
     throw new Error('Not implemented')
   }
 
@@ -294,7 +294,7 @@ export class MCPToolCache implements ToolCache {
     return tool
   }
 
-  async search(query: string): Promise<Array<ScoredResult<EquippedTool>>> {
+  async search(_: string): Promise<Array<ScoredResult<EquippedTool>>> {
     throw new Error('Not implemented')
   }
 

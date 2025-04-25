@@ -67,7 +67,7 @@ export class BlaxelToolCache implements ToolCache {
         continue
       }
 
-      const blaxelTool = toolNameToMcpTool.get(toolName)!
+      // const blaxelTool = toolNameToMcpTool.get(toolName)!
 
       // ! We're deleting this class?
       // const toolResource: BlaxelToolResource = new BlaxelToolResource(
@@ -125,7 +125,7 @@ export class BlaxelToolCache implements ToolCache {
     })
   }
 
-  async search(query: string): Promise<Array<ScoredResult<EquippedTool>>> {
+  async search(_: string): Promise<Array<ScoredResult<EquippedTool>>> {
     return [] // TODO: Implement
   }
 
