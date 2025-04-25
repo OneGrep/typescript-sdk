@@ -12,7 +12,7 @@ import {
 export class BlaxelClient {
   private toolServers: Map<string, BlaxelMcpServer> = new Map()
 
-  constructor() { }
+  constructor() {}
 
   private async cleanupToolServers(): Promise<void> {
     this.toolServers.forEach((server: BlaxelMcpServer) => {
