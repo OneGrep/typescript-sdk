@@ -491,7 +491,9 @@ const Organization: z.ZodType<Organization> = z
 const AccountInformation: z.ZodType<AccountInformation> = z
   .object({
     user_id: z.string(),
-    account: UserAccount,
+    account: UserAccount.describe(
+      'Model for storing user information including their API key'
+    ),
     organization: Organization
   })
   .strict()
@@ -542,17 +544,21 @@ const PolicyAccessRule: z.ZodType<PolicyAccessRule> = z
   .object({
     event_name: z.string(),
     description: z.union([z.string(), z.null()]).optional(),
-    access_policy: AccessPolicyType
+    access_policy: AccessPolicyType.describe('Enum for access policy types')
   })
   .strict()
   .passthrough()
 const IntegrationDefaultPolicies: z.ZodType<IntegrationDefaultPolicies> = z
-  .object({ tools: z.array(PolicyAccessRule) })
+  .object({
+    tools: z
+      .array(PolicyAccessRule)
+      .describe('Policies for tools in this integration.')
+  })
   .strict()
   .passthrough()
 const IntegrationTemplate: z.ZodType<IntegrationTemplate> = z
   .object({
-    version: z.string(),
+    version: z.string().describe('The version of the integration template.'),
     name: z.string(),
     repository: z.string(),
     sha: z.string(),
@@ -562,26 +568,44 @@ const IntegrationTemplate: z.ZodType<IntegrationTemplate> = z
       .optional(),
     args: MCPIntegrationArgs,
     secrets: z.union([z.array(IntegrationSecret), z.null()]).optional(),
-    default_policies: IntegrationDefaultPolicies
+    default_policies: IntegrationDefaultPolicies.describe(
+      'Default policies for an integration.'
+    )
   })
   .strict()
   .passthrough()
 const IntegrationConfigDetails: z.ZodType<IntegrationConfigDetails> = z
   .object({
     name: z.string(),
-    configuration_state: IntegrationConfigurationState,
-    template: IntegrationTemplate
+    configuration_state:
+      IntegrationConfigurationState.describe(`The state of an integration from an account perspective (not runtime).
+To determine the runtime state, we will have to check the server configuration for
+the integration separately depending on our infrastucture selection.`),
+    template:
+      IntegrationTemplate.describe(`Class representation of the server templates that we support. This matches the structure
+of server templates under resources/integrations/templates/*`)
   })
   .strict()
   .passthrough()
 const Tool: z.ZodType<Tool> = z
   .object({
     server_id: z.string().uuid(),
-    name: z.string(),
-    description: z.union([z.string(), z.null()]).optional(),
-    icon_url: z.union([z.string(), z.null()]).optional(),
+    name: z
+      .string()
+      .describe('The name of the tool (should be unique within a server).'),
+    description: z
+      .union([z.string(), z.null()])
+      .describe('A description of the tool.')
+      .optional(),
+    icon_url: z
+      .union([z.string(), z.null()])
+      .describe('A URL to an icon for the tool.')
+      .optional(),
     input_schema: z
       .union([z.object({}).partial().strict().passthrough(), z.boolean()])
+      .describe(
+        "A JSON schema for the tool's input (defaults to 'always valid')."
+      )
       .optional()
       .default(true),
     id: z.string().uuid()
@@ -592,7 +616,7 @@ const PolicyBase: z.ZodType<PolicyBase> = z
   .object({
     event_name: z.string(),
     description: z.union([z.string(), z.null()]).optional(),
-    access_policy: AccessPolicyType,
+    access_policy: AccessPolicyType.describe('Enum for access policy types'),
     organization_id: z.union([z.string(), z.null()]).optional(),
     canonical_resource_name: z.string()
   })
@@ -629,14 +653,16 @@ const ToolResource: z.ZodType<ToolResource> = z
     tool_name: z.string(),
     description: z.union([z.string(), z.null()]).optional(),
     id: z.string(),
-    tool: Tool,
+    tool: Tool.describe('A tool.'),
     org_id: z.string(),
     profile_id: z.string(),
-    policy: PolicyBase,
-    properties: ToolProperties,
+    policy: PolicyBase.describe('Base model with shared policy fields'),
+    properties: ToolProperties.describe('Properties for a tool.'),
     server: ToolServer,
     provider: ToolServerProvider,
-    canonical_resource: CanonicalResource
+    canonical_resource: CanonicalResource.describe(
+      'Represents a canonical resource name in object form.'
+    )
   })
   .strict()
   .passthrough()
@@ -669,8 +695,12 @@ const Recipe: z.ZodType<Recipe> = z
   .object({
     created_at: z.union([z.string(), z.null()]).optional(),
     updated_at: z.union([z.string(), z.null()]).optional(),
-    goal: z.string(),
-    instructions: z.union([z.string(), z.null()]),
+    goal: z
+      .string()
+      .describe('The goal that this recipe is helping an agent achieve.'),
+    instructions: z
+      .union([z.string(), z.null()])
+      .describe('The instructions for this recipe.'),
     id: z.string().uuid().optional(),
     tools: z.array(Tool)
   })
@@ -678,19 +708,45 @@ const Recipe: z.ZodType<Recipe> = z
   .passthrough()
 const SearchRequest = z
   .object({
-    query: z.string(),
-    k: z.number().int().optional().default(10),
-    min_score: z.number().optional().default(0),
-    page_size: z.number().int().optional().default(10),
-    page: z.number().int().optional().default(0)
+    query: z.string().describe('The query used against the search index.'),
+    k: z
+      .number()
+      .int()
+      .describe('The number of results to return from index.')
+      .optional()
+      .default(10),
+    min_score: z
+      .number()
+      .describe('The minimum score to return from index.')
+      .optional()
+      .default(0),
+    page_size: z
+      .number()
+      .int()
+      .describe('The number of results per page.')
+      .optional()
+      .default(10),
+    page: z
+      .number()
+      .int()
+      .describe('The page number to return.')
+      .optional()
+      .default(0)
   })
   .strict()
   .passthrough()
 const Strategy: z.ZodType<Strategy> = z
   .object({
-    recipe_id: z.string().uuid(),
-    instructions: z.string(),
-    tools: z.array(ToolResource)
+    recipe_id: z
+      .string()
+      .uuid()
+      .describe('The ID of the recipe that was used to generate the strategy.'),
+    instructions: z.string().describe('Instructions to follow the strategy.'),
+    tools: z
+      .array(ToolResource)
+      .describe(
+        'List of one or more fully-hydrated tool resources that should be used in the strategy to achieve the goal.'
+      )
   })
   .strict()
   .passthrough()
@@ -700,7 +756,7 @@ const Policy: z.ZodType<Policy> = z
     updated_at: z.union([z.string(), z.null()]).optional(),
     event_name: z.string(),
     description: z.union([z.string(), z.null()]).optional(),
-    access_policy: AccessPolicyType,
+    access_policy: AccessPolicyType.describe('Enum for access policy types'),
     organization_id: z.union([z.string(), z.null()]).optional(),
     canonical_resource_name: z.string(),
     id: z.string().uuid().optional()
@@ -711,7 +767,7 @@ const NewPolicyRequest: z.ZodType<NewPolicyRequest> = z
   .object({
     integration_name: z.string(),
     event_name: z.string(),
-    access_policy: AccessPolicyType
+    access_policy: AccessPolicyType.describe('Enum for access policy types')
   })
   .strict()
   .passthrough()
@@ -720,7 +776,9 @@ const ActionApprovalRequest: z.ZodType<ActionApprovalRequest> = z
   .object({
     id: z.union([z.number(), z.null()]),
     policy_id: z.string().uuid(),
-    state: ActionApprovalState.optional(),
+    state: ActionApprovalState.describe(
+      'Enum for policy approval states'
+    ).optional(),
     created_at: z.string().datetime({ offset: true }).optional(),
     last_updated_at: z.string().datetime({ offset: true }).optional(),
     updated_by_user_id: z.string(),
@@ -732,8 +790,12 @@ const ActionApprovalRequest: z.ZodType<ActionApprovalRequest> = z
   .passthrough()
 const ApprovalAndPolicy: z.ZodType<ApprovalAndPolicy> = z
   .object({
-    approval: ActionApprovalRequest,
-    policy: Policy,
+    approval:
+      ActionApprovalRequest.describe(`Model that holds the state of a request for an action to be taken with respect to a policy.
+Ex. if the policy is set to require approval, then we will have a request for approval.`),
+    policy: Policy.describe(
+      'Policy model that works with both SQL and in-memory storage'
+    ),
     canonical_resource_name: z.string(),
     integration_name: z.string(),
     tool_name: z.string()
@@ -744,6 +806,22 @@ const PolicyCheckResult = z
   .object({ approved: z.boolean() })
   .strict()
   .passthrough()
+const policy_id = z
+  .union([z.string(), z.null()])
+  .describe('Filter by policy ID')
+  .optional()
+const action = z
+  .union([z.string(), z.null()])
+  .describe('Filter by action type')
+  .optional()
+const start_date = z
+  .union([z.string(), z.null()])
+  .describe('Filter logs after this date (ISO format)')
+  .optional()
+const end_date = z
+  .union([z.string(), z.null()])
+  .describe('Filter logs before this date (ISO format)')
+  .optional()
 const AuditLog: z.ZodType<AuditLog> = z
   .object({
     id: z.union([z.number(), z.null()]).optional(),
@@ -767,7 +845,10 @@ const PaginationMetadata: z.ZodType<PaginationMetadata> = z
   .strict()
   .passthrough()
 const PaginatedResponse_AuditLog_: z.ZodType<PaginatedResponse_AuditLog_> = z
-  .object({ items: z.array(AuditLog), pagination: PaginationMetadata })
+  .object({
+    items: z.array(AuditLog),
+    pagination: PaginationMetadata.describe('Metadata for paginated results')
+  })
   .strict()
   .passthrough()
 const MCPToolServerClient = z
@@ -796,62 +877,101 @@ const ToolResourceBase: z.ZodType<ToolResourceBase> = z
   .passthrough()
 const RecipeTool: z.ZodType<RecipeTool> = z
   .object({
-    tool_resource: ToolResourceBase,
-    usage_instructions: z.union([z.string(), z.null()]).optional()
+    tool_resource: ToolResourceBase.describe(
+      'Identification details about a tool in an integration.'
+    ),
+    usage_instructions: z
+      .union([z.string(), z.null()])
+      .describe(
+        'A more in-depth description of this tool and what it should be used for in the context of this recipe.'
+      )
+      .optional()
   })
   .strict()
   .passthrough()
 const RecipeDetails_Output: z.ZodType<RecipeDetails_Output> = z
-  .object({ tools: z.array(RecipeTool).default([]) })
+  .object({
+    tools: z
+      .array(RecipeTool)
+      .describe('An unsorted list of tools that would be used in this recipe.')
+      .default([])
+  })
   .partial()
   .strict()
   .passthrough()
 const UserRecipe: z.ZodType<UserRecipe> = z
   .object({
     id: z.number().int(),
-    goal: z.string(),
+    goal: z
+      .string()
+      .describe('The goal that this recipe is helping an agent achieve.'),
     details: z.object({}).partial().strict().passthrough().optional(),
-    org_id: z.string(),
-    profile_id: z.string(),
+    org_id: z.string().describe('The organization ID that owns this recipe'),
+    profile_id: z
+      .string()
+      .describe('The profile ID within the organization that owns this recipe'),
     created_at: z.string().datetime({ offset: true }).optional(),
-    details_data: RecipeDetails_Output
+    details_data: RecipeDetails_Output.describe(
+      'Details about a recipe. This is an unordered list of tools that are used in the recipe.'
+    )
   })
   .strict()
   .passthrough()
 const PaginatedResponse_UserRecipe_: z.ZodType<PaginatedResponse_UserRecipe_> =
   z
-    .object({ items: z.array(UserRecipe), pagination: PaginationMetadata })
+    .object({
+      items: z.array(UserRecipe),
+      pagination: PaginationMetadata.describe('Metadata for paginated results')
+    })
     .strict()
     .passthrough()
 const RecipeDetails_Input: z.ZodType<RecipeDetails_Input> = z
-  .object({ tools: z.array(RecipeTool).default([]) })
+  .object({
+    tools: z
+      .array(RecipeTool)
+      .describe('An unsorted list of tools that would be used in this recipe.')
+      .default([])
+  })
   .partial()
   .strict()
   .passthrough()
 const NewUserRecipeRequest: z.ZodType<NewUserRecipeRequest> = z
-  .object({ goal: z.string(), details: RecipeDetails_Input })
+  .object({
+    goal: z
+      .string()
+      .describe('The goal that this recipe is helping an agent achieve.'),
+    details: RecipeDetails_Input.describe(
+      'Details about a recipe. This is an unordered list of tools that are used in the recipe.'
+    )
+  })
   .strict()
   .passthrough()
 const ScoredItem_Tool_: z.ZodType<ScoredItem_Tool_> = z
-  .object({ item: Tool, score: z.number().gte(0).lte(1) })
+  .object({
+    item: Tool.describe('A tool.'),
+    score: z.number().gte(0).lte(1).describe('The score of the item [0, 1].')
+  })
   .strict()
   .passthrough()
 const SearchResponse_ScoredItem_Tool__: z.ZodType<SearchResponse_ScoredItem_Tool__> =
   z
     .object({
-      pagination: PaginationMetadata,
+      pagination: PaginationMetadata.describe('Metadata for paginated results'),
       results: z.array(ScoredItem_Tool_)
     })
     .strict()
     .passthrough()
 const ScoredItem_Recipe_: z.ZodType<ScoredItem_Recipe_> = z
-  .object({ item: Recipe, score: z.number().gte(0).lte(1) })
+  .object({
+    item: Recipe.describe('A recipe.'),
+    score: z.number().gte(0).lte(1).describe('The score of the item [0, 1].')
+  })
   .strict()
   .passthrough()
 const SearchResponse_ScoredItem_Recipe__: z.ZodType<SearchResponse_ScoredItem_Recipe__> =
   z
     .object({
-      pagination: PaginationMetadata,
+      pagination: PaginationMetadata.describe('Metadata for paginated results'),
       results: z.array(ScoredItem_Recipe_)
     })
     .strict()
@@ -1014,6 +1134,10 @@ export const schemas = {
   ActionApprovalRequest,
   ApprovalAndPolicy,
   PolicyCheckResult,
+  policy_id,
+  action,
+  start_date,
+  end_date,
   AuditLog,
   PaginationMetadata,
   PaginatedResponse_AuditLog_,
@@ -1120,32 +1244,45 @@ if a OneGrep account exists. If yes, then it will be considered authenticated.
       {
         name: 'page',
         type: 'Query',
-        schema: z.number().int().gte(1).optional().default(1)
+        schema: z
+          .number()
+          .int()
+          .gte(1)
+          .describe('Page number (1-indexed)')
+          .optional()
+          .default(1)
       },
       {
         name: 'page_size',
         type: 'Query',
-        schema: z.number().int().gte(1).lte(500).optional().default(100)
+        schema: z
+          .number()
+          .int()
+          .gte(1)
+          .lte(500)
+          .describe('Items per page')
+          .optional()
+          .default(100)
       },
       {
         name: 'policy_id',
         type: 'Query',
-        schema: X_ONEGREP_PROFILE_ID
+        schema: policy_id
       },
       {
         name: 'action',
         type: 'Query',
-        schema: X_ONEGREP_PROFILE_ID
+        schema: action
       },
       {
         name: 'start_date',
         type: 'Query',
-        schema: X_ONEGREP_PROFILE_ID
+        schema: start_date
       },
       {
         name: 'end_date',
         type: 'Query',
-        schema: X_ONEGREP_PROFILE_ID
+        schema: end_date
       }
     ],
     response: PaginatedResponse_AuditLog_,
@@ -1648,12 +1785,25 @@ response and HTTP CODE. 200 &#x3D; approved or didn&#x27;t require approval, 403
       {
         name: 'page',
         type: 'Query',
-        schema: z.number().int().gte(1).optional().default(1)
+        schema: z
+          .number()
+          .int()
+          .gte(1)
+          .describe('Page number (1-indexed)')
+          .optional()
+          .default(1)
       },
       {
         name: 'page_size',
         type: 'Query',
-        schema: z.number().int().gte(1).lte(100).optional().default(20)
+        schema: z
+          .number()
+          .int()
+          .gte(1)
+          .lte(100)
+          .describe('Items per page')
+          .optional()
+          .default(20)
       },
       {
         name: 'X-ONEGREP-PROFILE-ID',
@@ -1844,10 +1994,7 @@ along with a similarity score for each tool.`,
         schema: z.string()
       }
     ],
-    response: z.discriminatedUnion('client_type', [
-      MCPToolServerClient,
-      BlaxelToolServerClient
-    ]),
+    response: z.union([MCPToolServerClient, BlaxelToolServerClient]),
     errors: [
       {
         status: 422,
