@@ -18,7 +18,7 @@ import {
 import { log } from '@repo/utils'
 import { jsonSchemaUtils } from '../schema.js'
 
-type McpCallToolResultContent = Array<
+export type McpCallToolResultContent = Array<
   TextContent | ImageContent | EmbeddedResource
 >
 
@@ -83,7 +83,7 @@ function validateOutputSchema(
 // A parsing approach to results from MCP when we are not provided an output schema
 // If enabled, attemptStructuredOutput settings will attempt to create ObjectResultContent from TextContent if it is valid JSON
 // Otherwise, we return a TextResultContent as a fallback.  We convert ImageContent to BinaryContent for consistency.
-function parseMcpContent(
+export function parseMcpContent(
   mcpContent: McpCallToolResultContent,
   attemptStructuredOutput: boolean = true // TODO: Should attempt structured output be the default behavior?
 ): ToolCallResultContent {
@@ -123,6 +123,7 @@ function parseMcpContent(
   return resultContent
 }
 
+// ! TODO: Broken for now because we need to refactor output schema
 // Parse raw MCP results into a ToolCallOutput
 // First check if the tool result is an error, if so, throw an error
 // If the tool metadata includes an output schema, we attempt to validate the output schema

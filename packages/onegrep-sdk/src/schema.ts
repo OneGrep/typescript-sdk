@@ -1,5 +1,5 @@
 import { Ajv } from 'ajv'
-import { JsonSchema, ToolResource } from './types.js'
+import { JsonSchema, EquippedTool } from './types.js'
 import {
   jsonSchemaToZod,
   JsonSchema as ToZodJsonSchema
@@ -30,7 +30,7 @@ function toZodAdapter(jsonSchema: JsonSchema): ToZodJsonSchema {
   }
 }
 
-function schemaIdsForTool(tool: ToolResource): Record<string, JsonSchema> {
+function schemaIdsForTool(tool: EquippedTool): Record<string, JsonSchema> {
   const schemas: Record<string, JsonSchema> = {}
   if (tool.metadata.inputSchema) {
     const inputId = schemaIdForTool(tool.id, INPUT_SCHEMA_NAMESPACE)
@@ -103,7 +103,7 @@ class JsonSchemaUtils {
     return this._ajv.compile(schema)
   }
 
-  registerTool(tool: ToolResource) {
+  registerTool(tool: EquippedTool) {
     const schemas = schemaIdsForTool(tool)
     for (const [id, schema] of Object.entries(schemas)) {
       if (!this.validateJsonSchema(schema)) {
@@ -116,7 +116,7 @@ class JsonSchemaUtils {
     log.info(`Registered tool ${tool.id}`)
   }
 
-  getToolValidator(tool: ToolResource) {
+  getToolValidator(tool: EquippedTool) {
     return this._toolValidators[tool.id]
   }
 
