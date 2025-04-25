@@ -12,7 +12,7 @@ import {
 export class BlaxelClient {
   private toolServers: Map<string, BlaxelMcpServer> = new Map()
 
-  constructor() {}
+  constructor() { }
 
   private async cleanupToolServers(): Promise<void> {
     this.toolServers.forEach((server: BlaxelMcpServer) => {
@@ -43,8 +43,6 @@ export class BlaxelClient {
     try {
       // Clear existing tool servers
       await this.cleanupToolServers()
-      console.log('Cleared tool servers')
-      console.log('Starting Blaxel function refresh...')
 
       // Get all available functions
       const { data, error } = await listFunctions()
@@ -54,13 +52,13 @@ export class BlaxelClient {
       }
 
       const functions: BlaxelFunction[] = data as ListFunctionsResponse
-      console.log(functions)
+      console.debug(functions)
 
       const serverNames = functions
         .map((bfn: BlaxelFunction) => bfn.metadata?.name)
         .filter((name: string | undefined) => name !== undefined)
 
-      console.log(
+      console.debug(
         `Discovered servers -> ${JSON.stringify(serverNames, null, 2)}`
       )
 
@@ -71,7 +69,7 @@ export class BlaxelClient {
         this.toolServers.set(serverName, server)
 
         const tools = await server.listTools()
-        console.log(
+        console.debug(
           `Tools for ${serverName} -> ${JSON.stringify(
             tools.map((t: BlaxelTool) => t.name),
             null,
