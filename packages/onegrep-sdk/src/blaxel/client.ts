@@ -52,15 +52,15 @@ export class BlaxelClient {
       }
 
       const functions: BlaxelFunction[] = data as ListFunctionsResponse
-      console.debug(functions)
+      // console.debug(functions)
 
       const serverNames = functions
         .map((bfn: BlaxelFunction) => bfn.metadata?.name)
         .filter((name: string | undefined) => name !== undefined)
 
-      console.debug(
-        `Discovered servers -> ${JSON.stringify(serverNames, null, 2)}`
-      )
+      // console.debug(
+      //   `Discovered servers -> ${JSON.stringify(serverNames, null, 2)}`
+      // )
 
       // Now get the McpToolServer for each of the server names.
       for (const serverName of serverNames) {
@@ -69,13 +69,13 @@ export class BlaxelClient {
         this.toolServers.set(serverName, server)
 
         const tools = await server.listTools()
-        console.debug(
-          `Tools for ${serverName} -> ${JSON.stringify(
-            tools.map((t: BlaxelTool) => t.name),
-            null,
-            2
-          )}`
-        )
+        // console.debug(
+        //   `Tools for ${serverName} -> ${JSON.stringify(
+        //     tools.map((t: BlaxelTool) => t.name),
+        //     null,
+        //     2
+        //   )}`
+        // )
       }
 
       return true
