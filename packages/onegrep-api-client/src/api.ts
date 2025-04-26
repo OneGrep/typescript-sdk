@@ -1994,10 +1994,7 @@ along with a similarity score for each tool.`,
         schema: z.string()
       }
     ],
-    response: z.union([
-      MCPToolServerClient,
-      BlaxelToolServerClient
-    ]),
+    response: z.union([MCPToolServerClient, BlaxelToolServerClient]),
     errors: [
       {
         status: 422,
