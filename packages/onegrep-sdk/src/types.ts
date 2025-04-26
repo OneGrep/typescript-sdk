@@ -36,7 +36,7 @@ export type ToolCallResultContent = Array<ResultContent>
 // ! TODO: Deprecate this
 export type ApiToolResource = z.infer<typeof schemas.ToolResource>
 
-export interface ToolCallApproval { }
+export interface ToolCallApproval {}
 
 export interface ToolCallInput {
   args: ToolCallArgs

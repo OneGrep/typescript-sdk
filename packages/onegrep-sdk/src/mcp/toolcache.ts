@@ -20,7 +20,7 @@ class IntegrationRefreshAttempt {
     public readonly integrationName: string,
     public readonly error?: any,
     public readonly refreshTs: number = getUnixTime(Date.now())
-  ) { }
+  ) {}
 }
 
 // ! Deprecate in favor of the UniversalToolCache
