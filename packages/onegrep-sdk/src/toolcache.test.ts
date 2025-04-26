@@ -21,14 +21,14 @@ describe('UniversalToolCacheTests', () => {
   })
 
   it('should get metadata for all tools', async () => {
-    const metadata = await tc.metadata()
+    const metadata = await tc.getToolMetadata()
     console.log('metadata', metadata)
     expect(metadata).toBeDefined()
     expect(metadata.size).toBeGreaterThan(0)
   })
 
   it('should get a tool', async () => {
-    const toolMetadataMap = await tc.metadata()
+    const toolMetadataMap = await tc.getToolMetadata()
     expect(toolMetadataMap.size).toBeGreaterThan(0)
     console.log(
       'tool names: ',

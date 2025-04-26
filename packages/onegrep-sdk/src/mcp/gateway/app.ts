@@ -62,7 +62,7 @@ export const createGateway = async () => {
   // List Tools Handler
   server.setRequestHandler(ListToolsRequestSchema, async (_request) => {
     log.info(`Listing tools`)
-    const allToolMetadataMap = await mcpToolCache.metadata()
+    const allToolMetadataMap = await mcpToolCache.getToolMetadata()
     const toolResources = Object.values(allToolMetadataMap) as EquippedTool[]
     log.info(`Found ${toolResources.length} tools`)
     const allTools: Tool[] = toolResources.map((resource) =>

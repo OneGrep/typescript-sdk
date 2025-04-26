@@ -36,7 +36,7 @@ export type ToolCallResultContent = Array<ResultContent>
 // ! TODO: Deprecate this
 export type ApiToolResource = z.infer<typeof schemas.ToolResource>
 
-export interface ToolCallApproval {}
+export interface ToolCallApproval { }
 
 export interface ToolCallInput {
   args: ToolCallArgs
@@ -99,6 +99,10 @@ export interface EquippedTool {
 }
 
 export interface ToolFilter {
+  // toolIds?: string[]
+  // serverId?: string
+  // integrationName?: string
+  // ? Not really sure what this filter exactly does. Confusing from a client perspective.
   (metadata: ToolMetadata): boolean
 }
 
@@ -109,7 +113,7 @@ export interface ScoredResult<T> {
 
 export interface ToolCache {
   refresh(): Promise<boolean>
-  metadata(toolFilter?: ToolFilter): Promise<Map<ToolId, ToolMetadata>>
+  getToolMetadata(toolFilter?: ToolFilter): Promise<Map<ToolId, ToolMetadata>>
   get(toolId: ToolId): Promise<EquippedTool>
   search(query: string): Promise<Array<ScoredResult<EquippedTool>>>
   cleanup(): Promise<void>

@@ -20,7 +20,7 @@ class IntegrationRefreshAttempt {
     public readonly integrationName: string,
     public readonly error?: any,
     public readonly refreshTs: number = getUnixTime(Date.now())
-  ) {}
+  ) { }
 }
 
 // ! Deprecate in favor of the UniversalToolCache
@@ -282,7 +282,7 @@ export class MCPToolCache implements ToolCache {
     }
   }
 
-  async metadata(_?: ToolFilter): Promise<Map<ToolId, ToolMetadata>> {
+  async getToolMetadata(_?: ToolFilter): Promise<Map<ToolId, ToolMetadata>> {
     throw new Error('Not implemented')
   }
 

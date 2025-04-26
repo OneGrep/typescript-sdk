@@ -97,7 +97,7 @@ export class BlaxelToolCache implements ToolCache {
     return true
   }
 
-  async metadata(toolFilter?: ToolFilter): Promise<Map<ToolId, ToolMetadata>> {
+  async getToolMetadata(toolFilter?: ToolFilter): Promise<Map<ToolId, ToolMetadata>> {
     const metadataMap = new Map<ToolId, ToolMetadata>()
     for (const [toolId, resource] of this.toolIdToResource) {
       if (toolFilter === undefined || toolFilter(resource.metadata)) {

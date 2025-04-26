@@ -42,7 +42,7 @@ export class Toolbox implements BaseToolbox<EquippedTool> {
   }
 
   async metadata(toolFilter?: ToolFilter): Promise<Map<ToolId, ToolMetadata>> {
-    return this.toolCache.metadata(toolFilter)
+    return this.toolCache.getToolMetadata(toolFilter)
   }
 
   async get(toolId: ToolId): Promise<EquippedTool> {

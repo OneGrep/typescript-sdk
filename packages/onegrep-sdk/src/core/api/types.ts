@@ -2,6 +2,7 @@ import { schemas } from '@repo/onegrep-api-client'
 import { z } from 'zod'
 
 // Export types from the generated API client for use in the high-level API client
+export type AccountInformation = z.infer<typeof schemas.AccountInformation>
 
 export type ToolServerProvider = z.infer<typeof schemas.ToolServerProvider>
 export type ToolServer = z.infer<typeof schemas.ToolServer>

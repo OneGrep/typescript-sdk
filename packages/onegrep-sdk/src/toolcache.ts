@@ -198,7 +198,7 @@ export class UniversalToolCache implements ToolCache {
     }
   }
 
-  private async getToolMetadata(toolId: ToolId): Promise<ToolMetadata> {
+  private async hydrateToolMetadata(toolId: ToolId): Promise<ToolMetadata> {
     return await this.toolMetadataCache.wrap(toolId, async () => {
       const tool: Tool = await this.highLevelClient.getTool(toolId)
       return await this.hydrateMetadata(tool)
@@ -232,7 +232,7 @@ export class UniversalToolCache implements ToolCache {
   }
 
   private async getHandle(toolId: ToolId): Promise<ToolHandle> {
-    const toolMetadata: ToolMetadata = await this.getToolMetadata(toolId)
+    const toolMetadata: ToolMetadata = await this.hydrateToolMetadata(toolId)
     const toolServerClient: ToolServerClient = await this.getServerClient(
       toolMetadata.serverId
     )
@@ -365,7 +365,7 @@ export class UniversalToolCache implements ToolCache {
   }
 
   async get(toolId: ToolId): Promise<EquippedTool> {
-    const toolMetadata: ToolMetadata = await this.getToolMetadata(toolId)
+    const toolMetadata: ToolMetadata = await this.hydrateToolMetadata(toolId)
     log.debug(`Fetched tool metadata for ${toolId}`)
 
     const toolProperties: ToolProperties = await this.getToolProperties(toolId)
