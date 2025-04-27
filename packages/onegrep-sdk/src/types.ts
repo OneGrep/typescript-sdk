@@ -125,6 +125,7 @@ export interface ScoredResult<T> {
 
 export interface ToolCache {
   // Querying methods
+  listTools(): Promise<Map<ToolId, BasicToolDetails>>
   listIntegrations(): Promise<string[]>
   filterTools(toolFilter?: FilterOptions): Promise<Map<ToolId, ToolDetails>>
   get(toolId: ToolId): Promise<EquippedTool>
@@ -137,6 +138,7 @@ export interface ToolCache {
 }
 
 export interface BaseToolbox<T> {
+  listTools(): Promise<Map<ToolId, BasicToolDetails>>
   listIntegrations(): Promise<string[]>
   filterTools(toolFilter?: FilterOptions): Promise<Map<ToolId, ToolDetails>>
   get(toolId: ToolId): Promise<T>

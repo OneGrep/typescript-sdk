@@ -6,7 +6,8 @@ import {
   FilterOptions,
   ToolId,
   ScoredResult,
-  ToolDetails
+  ToolDetails,
+  BasicToolDetails
 } from './types.js'
 import { UniversalToolCache } from './toolcache.js'
 
@@ -17,6 +18,10 @@ export class Toolbox implements BaseToolbox<EquippedTool> {
   constructor(apiClient: OneGrepApiClient, toolCache: ToolCache) {
     this.apiClient = apiClient
     this.toolCache = toolCache
+  }
+
+  async listTools(): Promise<Map<ToolId, BasicToolDetails>> {
+    return this.toolCache.listTools()
   }
 
   async listIntegrations(): Promise<string[]> {

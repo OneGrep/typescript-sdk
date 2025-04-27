@@ -12,7 +12,9 @@ import {
   SearchResponseScoredItemTool,
   // MCPToolServerClient, // ! Add back when MCP is supported
   BlaxelToolServerClient,
-  ToolResource
+  ToolResource,
+  Tool,
+  ToolServer
 } from './core/api/types.js'
 // import { ConnectedClientManager } from './mcp/client.js'; // ! Add back when MCP is supported
 import {
@@ -34,7 +36,8 @@ import {
   EquippedTool,
   FilterOptions,
   ToolCallError,
-  ToolDetails
+  ToolDetails,
+  BasicToolDetails
 } from './types.js'
 
 import { BlaxelClientManager } from './providers/blaxel/clientManager.js'
@@ -200,6 +203,39 @@ export class UniversalToolCache implements ToolCache {
     }
   }
 
+  async listTools(): Promise<Map<ToolId, BasicToolDetails>> {
+    await this.refreshServerNameCache()
+    const tools: Tool[] = await this.highLevelClient.listTools()
+    console.debug(`Found ${tools.length} tools`)
+    const basicTools: Map<ToolId, BasicToolDetails> = new Map()
+
+    for (const t of tools) {
+      try {
+        const sName = await this.serverNameCache.get(t.server_id)
+        if (!sName) {
+          log.warn(`Server name not found for tool ${t.id}`)
+          continue
+        }
+
+        basicTools.set(t.id, {
+          id: t.id,
+          name: t.name,
+          description: t.description as string,
+          serverId: t.server_id,
+          integrationName: sName as string,
+          iconUrl: t.icon_url as URL | undefined,
+          inputSchema: t.input_schema as JsonSchema
+        })
+
+      } catch (e) {
+        log.warn(`Error fetching tool details for ${t.id}`, e)
+        continue
+      }
+    }
+
+    return basicTools
+  }
+
   async listIntegrations(): Promise<string[]> {
     // TODO: Replace with endpoint which lists integration names
     return await this.highLevelClient.getAllServerNames()
@@ -228,13 +264,17 @@ export class UniversalToolCache implements ToolCache {
   async filterTools(
     filterOptions?: FilterOptions
   ): Promise<Map<ToolId, ToolDetails>> {
+    console.info(`Filtering tools with options: ${JSON.stringify(filterOptions)}`
+    )
     if (!filterOptions) {
       const result: Map<ToolId, ToolDetails> = new Map()
       log.warn('No filter options provided, fetching all tools')
       const integrations = await this.listIntegrations()
+      console.info(`Found ${integrations.length} integrations`)
       for (const integration of integrations) {
         const toolResources =
           await this.highLevelClient.getToolResourcesForIntegration(integration)
+        console.info(`Found ${toolResources.length} tools for integration ${integration}`)
         for (const toolResource of toolResources) {
           const toolDetails = await this.getToolDetails(toolResource.tool.id)
           result.set(toolDetails.id, toolDetails)
@@ -327,15 +367,13 @@ export class UniversalToolCache implements ToolCache {
      * Returns true if successful, false otherwise.
      */
     this.serverNameCache.clear()
-    const serverNames = this.highLevelClient.getAllServerNames()
+    const servers: Map<ToolServerId, ToolServer> = await this.highLevelClient.getAllServers()
+    console.debug(`Found ${servers.size} server names -> ${JSON.stringify(servers)}`)
 
-    for (const [serverId, serverName] of Object.entries(serverNames)) {
-      this.serverNameCache.set(serverId as ToolServerId, serverName)
+    for (const [serverId, server] of servers.entries()) {
+      this.serverNameCache.set(serverId as ToolServerId, server.name)
     }
 
-    log.info(
-      `Refreshed server name cache with ${Object.keys(serverNames).length} server names`
-    )
     return true
   }
 

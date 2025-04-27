@@ -27,7 +27,7 @@ describe('Toolbox Tests', () => {
   })
 
   it('should get all tool resources', async () => {
-    const toolDetailsMap = await toolbox.filterTools()
+    const toolDetailsMap = await toolbox.listTools()
     expect(toolDetailsMap.size).toBeGreaterThan(0)
     log.info(`fetched tool metadata: ${JSON.stringify(toolDetailsMap)}`)
   })

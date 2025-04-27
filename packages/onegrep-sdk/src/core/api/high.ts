@@ -1,3 +1,4 @@
+import { ToolServerId } from 'types.js'
 import { OneGrepApiClient } from './client.js'
 import {
   SearchResponseScoredItemTool,
@@ -21,10 +22,19 @@ export class OneGrepApiHighLevelClient {
     return toolServer.name
   }
 
-  async getAllServerNames(): Promise<string[]> {
+  async getAllServers(): Promise<Map<ToolServerId, ToolServer>> {
     const toolServers: ToolServer[] =
       await this.apiClient.list_servers_api_v1_servers__get()
-    return toolServers.map((toolServer) => toolServer.name)
+    const toolServersMap: Map<ToolServerId, ToolServer> = new Map()
+    for (const toolServer of toolServers) {
+      toolServersMap.set(toolServer.id, toolServer)
+    }
+    return toolServersMap
+  }
+
+  async getAllServerNames(): Promise<string[]> {
+    const servers = await this.getAllServers()
+    return Array.from(servers.values()).map((server) => server.name)
   }
 
   /**

@@ -120,10 +120,12 @@ export class Onegrep implements INodeType {
 
     const toolMetadataMap = await toolbox.filterTools({
       integrationNames: [server],
-      tools: [{
-        integrationName: server,
-        toolName: tool
-      }]
+      tools: [
+        {
+          integrationName: server,
+          toolName: tool
+        }
+      ]
     })
 
     const toolMetadata = Array.from(toolMetadataMap.values())[0]

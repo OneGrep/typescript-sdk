@@ -6,6 +6,7 @@ import {
 import { log } from '@repo/utils'
 import {
   BaseToolbox,
+  BasicToolDetails,
   EquippedTool,
   FilterOptions,
   jsonSchemaUtils,
@@ -84,6 +85,10 @@ export class LangchainToolbox implements BaseToolbox<StructuredTool> {
 
   constructor(toolbox: Toolbox) {
     this.toolbox = toolbox
+  }
+
+  async listTools(): Promise<Map<ToolId, BasicToolDetails>> {
+    return this.toolbox.listTools()
   }
 
   async filterTools(
