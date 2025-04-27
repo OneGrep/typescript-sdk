@@ -1,11 +1,11 @@
 import { OneGrepApiClient } from './core/api/client.js'
 // import { ConnectedClientManager } from './mcp/client.js'; // ! Add back when MCP is supported
-import { McpCallToolResultContent, parseMcpContent } from './providers/mcp/toolcall.js'
-
 import {
-  McpTool as BlaxelMcpServer,
-  retrieveMCPClient as getBlaxelMcpServer
-} from '@blaxel/sdk/tools/mcpTool'
+  McpCallToolResultContent,
+  parseMcpContent
+} from './providers/mcp/toolcall.js'
+
+import { McpTool as BlaxelMcpServer } from '@blaxel/sdk/tools/mcpTool'
 
 import { CallToolResult } from '@modelcontextprotocol/sdk/types.js'
 
@@ -25,7 +25,6 @@ import {
 } from './types.js'
 
 import {
-  Tool,
   ToolProperties,
   ToolServerClient,
   SearchResponseScoredItemTool,
@@ -41,7 +40,7 @@ import { Keyv } from 'keyv'
 import { log } from '@repo/utils'
 import { z } from 'zod'
 import { jsonSchemaUtils } from './schema.js'
-import { BlaxelClientManager } from 'providers/blaxel/client.js'
+import { BlaxelClientManager } from 'providers/blaxel/clientManager.js'
 
 export class UniversalToolCache implements ToolCache {
   private highLevelClient: OneGrepApiHighLevelClient
@@ -118,9 +117,10 @@ export class UniversalToolCache implements ToolCache {
         this.blaxelClientManager = new BlaxelClientManager()
       }
 
-      const toolServer: BlaxelMcpServer = await this.blaxelClientManager.getServer(
-        blaxelToolServerClient.blaxel_function
-      )
+      const toolServer: BlaxelMcpServer =
+        await this.blaxelClientManager.getServer(
+          blaxelToolServerClient.blaxel_function
+        )
 
       log.debug(`Found blaxel tool server: ${toolServerClient.blaxel_function}`)
 
@@ -220,28 +220,34 @@ export class UniversalToolCache implements ToolCache {
     return true
   }
 
-  async filterTools(toolFilter?: FilterOptions): Promise<Map<ToolId, ToolDetails>> {
-    return new Map<ToolId, ToolDetails>()
-    // // Consider passing filter instructions to the API client
-    // const tools: Tool[] = await this.highLevelClient.listTools()
-    // log.info(`Fetched ${tools.length} tools`)
+  async filterTools(
+    filterOptions: FilterOptions
+  ): Promise<Map<ToolId, ToolDetails>> {
+    const result: Map<ToolId, ToolDetails> = new Map()
 
-    // const result: Map<ToolId, ToolMetadata> = new Map()
+    if (filterOptions.integrationNames) {
+      for (const integrationName of filterOptions.integrationNames) {
+        const toolResources = await this.highLevelClient.getToolResourcesForIntegration(integrationName)
+        for (const toolResource of toolResources) {
+          const toolDetails = await this.getToolDetails(toolResource.tool.id)
+          result.set(toolDetails.id, toolDetails)
+        }
+      }
+    }
 
-    // for (const tool of tools) {
-    //   const metadata = await this.hydrateMetadata(tool)
-    //   if (!toolFilter || toolFilter(metadata)) {
-    //     result.set(tool.id, metadata)
-    //   }
-    // }
-
-    // return result
+    return result
   }
 
   private async getToolDetails(toolId: ToolId): Promise<ToolDetails> {
-    const resource: ToolResource = await this.highLevelClient.getToolResource(toolId)
+    const cachedToolDetails = await this.toolDetailsCache.get(toolId) as ToolDetails | null
+    if (cachedToolDetails && cachedToolDetails !== null) {
+      return cachedToolDetails
+    }
 
-    return {
+    const resource: ToolResource =
+      await this.highLevelClient.getToolResource(toolId)
+
+    const toolDetails: ToolDetails = {
       id: resource.tool.id,
       name: resource.tool.name,
       description: resource.description as string,
@@ -252,6 +258,9 @@ export class UniversalToolCache implements ToolCache {
       properties: resource.properties as ToolProperties,
       policy: resource.policy
     }
+
+    await this.toolDetailsCache.set(toolId, toolDetails)
+    return toolDetails
   }
 
   async get(toolId: ToolId): Promise<EquippedTool> {

@@ -9,7 +9,8 @@ import {
 } from '@blaxel/sdk/tools/mcpTool'
 import { ServerClientManager } from '../types.js'
 
-export class BlaxelClientManager implements ServerClientManager<BlaxelMcpServer> {
+export class BlaxelClientManager
+  implements ServerClientManager<BlaxelMcpServer> {
   private serverNameMap: Map<string, BlaxelMcpServer> = new Map()
 
   constructor() { }
@@ -71,25 +72,35 @@ export class BlaxelClientManager implements ServerClientManager<BlaxelMcpServer>
     }
   }
 
-  async getServers(serverNames: string[]): Promise<Map<string, BlaxelMcpServer>> {
+  async getServers(
+    serverNames: string[]
+  ): Promise<Map<string, BlaxelMcpServer>> {
     const servers = new Map<string, BlaxelMcpServer>()
     for (const serverName of serverNames) {
-      servers.set(serverName, await this.getServer(serverName))
+      const server = await this.getServer(serverName)
+      if (server) {
+        servers.set(serverName, server)
+      }
     }
 
     return servers
   }
 
-  async getServer(serverName: string): Promise<BlaxelMcpServer> {
+  async getServer(serverName: string): Promise<BlaxelMcpServer | undefined> {
     if (this.serverNameMap.get(serverName)) {
       return this.serverNameMap.get(serverName)!
     }
 
-    // Generate a connection to the underlying server and cache it for cleanup later.
-    const server = retrieveMCPClient(serverName)
-    await server.refresh()
-    this.serverNameMap.set(serverName, server)
+    try {
+      // Generate a connection to the underlying server and cache it for cleanup later.
+      const server = retrieveMCPClient(serverName)
+      await server.refresh()
+      this.serverNameMap.set(serverName, server)
 
-    return server
+      return server
+    } catch (error) {
+      console.error('Error getting Blaxel server:', error)
+      return undefined
+    }
   }
 }

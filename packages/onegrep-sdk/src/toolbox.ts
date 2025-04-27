@@ -10,7 +10,6 @@ import {
 } from './types.js'
 import { UniversalToolCache } from './toolcache.js'
 
-
 export class Toolbox implements BaseToolbox<EquippedTool> {
   apiClient: OneGrepApiClient
   toolCache: ToolCache
@@ -24,7 +23,9 @@ export class Toolbox implements BaseToolbox<EquippedTool> {
     return this.toolCache.listIntegrations()
   }
 
-  async filterTools(toolFilter?: FilterOptions): Promise<Map<ToolId, ToolDetails>> {
+  async filterTools(
+    toolFilter?: FilterOptions
+  ): Promise<Map<ToolId, ToolDetails>> {
     return this.toolCache.filterTools(toolFilter)
   }
 

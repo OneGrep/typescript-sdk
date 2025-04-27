@@ -9,7 +9,7 @@ import {
 } from './types.js'
 
 export class OneGrepApiHighLevelClient {
-  constructor(private readonly apiClient: OneGrepApiClient) { }
+  constructor(private readonly apiClient: OneGrepApiClient) {}
 
   async getServerName(serverId: string): Promise<string> {
     const toolServer =
@@ -71,20 +71,27 @@ export class OneGrepApiHighLevelClient {
   }
 
   async getToolResource(toolId: string): Promise<ToolResource> {
-    const toolResource = await this.apiClient.get_tool_resource_api_v1_tools__tool_id__resource_get({
-      params: {
-        tool_id: toolId
-      }
-    })
+    const toolResource =
+      await this.apiClient.get_tool_resource_api_v1_tools__tool_id__resource_get(
+        {
+          params: {
+            tool_id: toolId
+          }
+        }
+      )
     return toolResource
   }
 
-  async getToolResourcesForIntegration(integrationName: string): Promise<ToolResource[]> {
-    return await this.apiClient.get_integration_tools_api_v1_integrations__integration_name__tools_get({
-      params: {
-        integration_name: integrationName
+  async getToolResourcesForIntegration(
+    integrationName: string
+  ): Promise<ToolResource[]> {
+    return await this.apiClient.get_integration_tools_api_v1_integrations__integration_name__tools_get(
+      {
+        params: {
+          integration_name: integrationName
+        }
       }
-    })
+    )
   }
 
   async searchTools(query: string): Promise<SearchResponseScoredItemTool> {
