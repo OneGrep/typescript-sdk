@@ -10,23 +10,27 @@ import {
   Implementation
 } from '@modelcontextprotocol/sdk/types.js'
 
-import { clientFromConfig } from '../../core/api/client.js'
+import { clientFromConfig } from './../../../core/api/client.js'
 import { log } from '@repo/utils'
 
-import { EquippedTool, ToolCallInput, ToolCallResponse } from '../../domain/types.js'
+import {
+  EquippedTool,
+  ToolCallInput,
+  ToolCallResponse
+} from './../../../types.js'
 import { MCPToolCache } from '../toolcache.js'
 import { ConnectedClientManager } from '../client.js'
 
 export const ToolNamespaceDelimiter = '.'
 
 const asGatewayTool = (equippedTool: EquippedTool): Tool => {
-  const inputSchema = equippedTool.metadata.inputSchema
+  const inputSchema = equippedTool.details.inputSchema
   log.info(`Input schema: ${JSON.stringify(inputSchema)}`)
   try {
     return {
-      name: `${equippedTool.metadata.integrationName}${ToolNamespaceDelimiter}${equippedTool.metadata.id}`,
-      description: equippedTool.metadata.description,
-      inputSchema: equippedTool.metadata.inputSchema
+      name: `${equippedTool.details.integrationName}${ToolNamespaceDelimiter}${equippedTool.details.id}`,
+      description: equippedTool.details.description,
+      inputSchema: equippedTool.details.inputSchema
     } as Tool
   } catch (error) {
     log.error(`Error creating gateway tool: ${error}`)

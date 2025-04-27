@@ -7,12 +7,14 @@ import { log } from '@repo/utils'
 import {
   BaseToolbox,
   EquippedTool,
+  FilterOptions,
   jsonSchemaUtils,
   ScoredResult,
   Toolbox,
   ToolCallOutput,
   ToolCallResponse,
-  ToolMetadata
+  ToolDetails,
+  ToolId
 } from '../index.js'
 import { z, ZodTypeAny } from 'zod'
 
@@ -33,7 +35,7 @@ const convertToStructuredTool = (
 ): StructuredTool => {
   // Input zod type is required for Langchain to enforce input schema
   const zodInputType: ZodTypeAny = jsonSchemaUtils.toZodType(
-    equippedTool.metadata.inputSchema
+    equippedTool.details.inputSchema
   )
 
   // Output zod type is required for Langchain to provide structured output (we use z.any() if not provided)
@@ -65,11 +67,12 @@ const convertToStructuredTool = (
 
   // Create the dynamic structured tool
   const dynamicToolInput: DynamicStructuredToolInput<ToolInputType> = {
-    name: equippedTool.metadata.name,
-    description: equippedTool.metadata.description,
+    name: equippedTool.details.name,
+    description: equippedTool.details.description,
     schema: inputZodObject,
     func: toolcallFunc
   }
+
   return new DynamicStructuredTool(dynamicToolInput)
 }
 
@@ -83,8 +86,14 @@ export class LangchainToolbox implements BaseToolbox<StructuredTool> {
     this.toolbox = toolbox
   }
 
-  async metadata(): Promise<Map<string, ToolMetadata>> {
-    return this.toolbox.metadata()
+  async filterTools(
+    filterOptions?: FilterOptions
+  ): Promise<Map<ToolId, ToolDetails>> {
+    return this.toolbox.filterTools(filterOptions)
+  }
+
+  async listIntegrations(): Promise<string[]> {
+    return this.toolbox.listIntegrations()
   }
 
   async get(toolId: string): Promise<StructuredTool> {

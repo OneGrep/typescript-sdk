@@ -10,10 +10,11 @@ import {
 import { IServerClientManager } from '../domain/types.js'
 
 export class BlaxelClientManager
-  implements IServerClientManager<BlaxelMcpServer> {
+  implements IServerClientManager<BlaxelMcpServer>
+{
   private serverNameMap: Map<string, BlaxelMcpServer> = new Map()
 
-  constructor() { }
+  constructor() {}
 
   private async cleanupToolServers(): Promise<void> {
     this.serverNameMap.forEach((server: BlaxelMcpServer) => {

@@ -10,7 +10,7 @@ export type JsonSchema = Record<string, any> | boolean
  * Schemas that represent how to pass inputs to a tool.
  */
 export type ToolCallArgs = Record<string, any>
-export interface ToolCallApproval {}
+export interface ToolCallApproval { }
 export interface ToolCallInput {
   args: ToolCallArgs
   approval: ToolCallApproval | undefined
@@ -54,9 +54,10 @@ export interface ToolCallOutput<T> {
 export type ToolCallResponse<T> = ToolCallOutput<T> | ToolCallError
 
 /**
- * The core resource object that is used to describe a tool.
+ * The core set of details about a tool without additional profile-specific 
+ * properties
  */
-export interface ToolDetails {
+export interface BasicToolDetails {
   id: ToolId
   name: string
   description: string
@@ -70,7 +71,13 @@ export interface ToolDetails {
 
   // Cosmetic properties
   iconUrl?: URL
+}
 
+/**
+ * Details about a tool including metadata that is specific to the
+ * profile of the caller.
+ */
+export interface ToolDetails extends BasicToolDetails {
   // User-defined properties to describe this tool.
   properties: ToolProperties
 

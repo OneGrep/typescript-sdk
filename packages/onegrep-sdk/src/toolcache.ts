@@ -4,7 +4,6 @@ import { z } from 'zod'
 import { jsonSchemaUtils } from './schema.js'
 import { CallToolResult } from '@modelcontextprotocol/sdk/types.js'
 
-
 import { OneGrepApiClient } from './core/api/client.js'
 import { OneGrepApiHighLevelClient } from './core/api/high.js'
 import {
@@ -234,7 +233,8 @@ export class UniversalToolCache implements ToolCache {
       log.warn('No filter options provided, fetching all tools')
       const integrations = await this.listIntegrations()
       for (const integration of integrations) {
-        const toolResources = await this.highLevelClient.getToolResourcesForIntegration(integration)
+        const toolResources =
+          await this.highLevelClient.getToolResourcesForIntegration(integration)
         for (const toolResource of toolResources) {
           const toolDetails = await this.getToolDetails(toolResource.tool.id)
           result.set(toolDetails.id, toolDetails)

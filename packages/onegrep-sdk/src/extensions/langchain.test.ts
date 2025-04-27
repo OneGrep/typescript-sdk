@@ -73,7 +73,7 @@ describe('Toolbox Tests', () => {
   })
 
   it('should be able to make a structured tool call with invalid input', async () => {
-    const metadata = await langchainToolbox.metadata()
+    const metadata = await langchainToolbox.filterTools()
     expect(metadata.size).toBeGreaterThan(0)
 
     const structuredToolMetadata = Array.from(metadata.values()).find(
