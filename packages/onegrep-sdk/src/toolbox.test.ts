@@ -8,6 +8,7 @@ import {
   ToolCallOutput
 } from './types.js'
 import { jsonSchemaUtils } from './schema.js'
+import 'dotenv/config'
 
 describe('Toolbox Tests', () => {
   let toolbox: Toolbox

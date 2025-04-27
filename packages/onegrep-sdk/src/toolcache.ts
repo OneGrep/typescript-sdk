@@ -371,9 +371,6 @@ export class UniversalToolCache implements ToolCache {
     this.serverNameCache.clear()
     const servers: Map<ToolServerId, ToolServer> =
       await this.highLevelClient.getAllServers()
-    console.debug(
-      `Found ${servers.size} server names -> ${JSON.stringify(servers)}`
-    )
 
     for (const [serverId, server] of servers.entries()) {
       this.serverNameCache.set(serverId as ToolServerId, server.name)
@@ -383,41 +380,7 @@ export class UniversalToolCache implements ToolCache {
   }
 
   async refresh(): Promise<boolean> {
-    // /**
-    //  * Refresh the toolcache using a pipeline pattern.
-    //  *
-    //  * The pipeline executes steps in sequence:
-    //  * 1. Refresh server names (by server id)
-    //  * 2. Clear server clients (by server id)
-    //  * 3. Clear tool metadata (by tool id)
-    //  * 4. Clear tool properties (by tool id)
-    //  *
-    //  * If any step fails or raises an exception, the refresh process stops and returns False.
-    //  */
-    // const pipeline = [
-    //   this.refreshServerNameCache.bind(this),
-    //   this.clearServerClientCache.bind(this),
-    //   this.clearToolMetadataCache.bind(this),
-    // ]
-
-    // for (const step of pipeline) {
-    //   const stepName = step.name
-    //   log.debug(`Starting toolcache refresh step: ${stepName}`)
-
-    //   try {
-    //     if (!(await step())) {
-    //       log.error(`Failed at step: ${stepName}, aborting toolcache refresh`)
-    //       return false
-    //     }
-    //     log.debug(`Successfully completed step: ${stepName}`)
-    //   } catch (e) {
-    //     log.error(`Exception in ${stepName}`, e)
-    //     return false
-    //   }
-    // }
-
     await this.refreshServerNameCache()
-
     log.info('Toolcache refresh completed successfully')
     return true
   }
