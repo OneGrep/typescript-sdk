@@ -1,6 +1,6 @@
 import { OneGrepApiClient } from './core/api/client.js'
 // import { ConnectedClientManager } from './mcp/client.js'; // ! Add back when MCP is supported
-import { McpCallToolResultContent, parseMcpContent } from './mcp/toolcall.js'
+import { McpCallToolResultContent, parseMcpContent } from './providers/mcp/toolcall.js'
 
 import {
   McpTool as BlaxelMcpServer,
@@ -16,13 +16,12 @@ import {
   ToolCallResponse,
   ToolHandle,
   ToolId,
-  ToolMetadata,
   ToolServerId,
-  ToolTags,
   JsonSchema,
   EquippedTool,
-  ToolFilter,
-  ToolCallError
+  FilterOptions,
+  ToolCallError,
+  ToolDetails
 } from './types.js'
 
 import {
@@ -31,7 +30,8 @@ import {
   ToolServerClient,
   SearchResponseScoredItemTool,
   // MCPToolServerClient, // ! Add back when MCP is supported
-  BlaxelToolServerClient
+  BlaxelToolServerClient,
+  ToolResource
 } from './core/api/types.js'
 
 import { OneGrepApiHighLevelClient } from './core/api/high.js'
@@ -41,15 +41,19 @@ import { Keyv } from 'keyv'
 import { log } from '@repo/utils'
 import { z } from 'zod'
 import { jsonSchemaUtils } from './schema.js'
+import { BlaxelClientManager } from 'providers/blaxel/client.js'
 
 export class UniversalToolCache implements ToolCache {
   private highLevelClient: OneGrepApiHighLevelClient
+
+  // * Client managers take care of the low-level details of server connections.
+  // Lazy loaded in case we don't actually use Blaxel.
+  private blaxelClientManager?: BlaxelClientManager
   // private connectedClientManager: ConnectedClientManager; // ! Add back when MCP is supported
 
   private serverNameCache: Cache
   private serverClientCache: Cache
-  private toolPropertiesCache: Cache
-  private toolMetadataCache: Cache
+  private toolDetailsCache: Cache
 
   constructor(apiClient: OneGrepApiClient) {
     this.highLevelClient = new OneGrepApiHighLevelClient(apiClient)
@@ -69,82 +73,20 @@ export class UniversalToolCache implements ToolCache {
       ]
     })
 
-    this.toolPropertiesCache = createCache({
-      cacheId: 'tool-properties-cache',
-      stores: [
-        new Keyv({ ttl: 1000 * 60 }) // 60 seconds
-      ]
-    })
-
-    this.toolMetadataCache = createCache({
-      cacheId: 'tool-metadata-cache',
+    this.toolDetailsCache = createCache({
+      cacheId: 'tool-details-cache',
       stores: [
         new Keyv({ ttl: 1000 * 30 }) // 30 seconds
       ]
     })
   }
 
-  async refresh(): Promise<boolean> {
-    /**
-     * Refresh the toolcache using a pipeline pattern.
-     *
-     * The pipeline executes steps in sequence:
-     * 1. Refresh server names (by server id)
-     * 2. Clear server clients (by server id)
-     * 3. Clear tool metadata (by tool id)
-     * 4. Clear tool properties (by tool id)
-     *
-     * If any step fails or raises an exception, the refresh process stops and returns False.
-     */
-    const pipeline = [
-      this.refreshServerNameCache.bind(this),
-      this.clearServerClientCache.bind(this),
-      this.clearToolMetadataCache.bind(this),
-      this.clearToolPropertiesCache.bind(this)
-    ]
-
-    for (const step of pipeline) {
-      const stepName = step.name
-      log.debug(`Starting toolcache refresh step: ${stepName}`)
-
-      try {
-        if (!(await step())) {
-          log.error(`Failed at step: ${stepName}, aborting toolcache refresh`)
-          return false
-        }
-        log.debug(`Successfully completed step: ${stepName}`)
-      } catch (e) {
-        log.error(`Exception in ${stepName}`, e)
-        return false
-      }
+  private async cleanupServerManagers(): Promise<void> {
+    if (this.blaxelClientManager) {
+      await this.blaxelClientManager.cleanup()
     }
 
-    log.info('Toolcache refresh completed successfully')
-    return true
-  }
-
-  private async getServerName(serverId: ToolServerId): Promise<string> {
-    return await this.serverNameCache.wrap(serverId, async () => {
-      return await this.highLevelClient.getServerName(serverId)
-    })
-  }
-
-  async refreshServerNameCache(): Promise<boolean> {
-    /**
-     * Refresh the server ids by fetching server ids from the API.
-     * Returns true if successful, false otherwise.
-     */
-    this.serverNameCache.clear()
-    const serverNames = this.highLevelClient.getAllServerNames()
-
-    for (const [serverId, serverName] of Object.entries(serverNames)) {
-      this.serverNameCache.set(serverId as ToolServerId, serverName)
-    }
-
-    log.info(
-      `Refreshed server name cache with ${Object.keys(serverNames).length} server names`
-    )
-    return true
+    // Add other manager cleanups here.
   }
 
   private async getServerClient(
@@ -155,86 +97,10 @@ export class UniversalToolCache implements ToolCache {
     })
   }
 
-  async clearServerClientCache(): Promise<boolean> {
-    /**
-     * Clear the server client cache.
-     * Returns true if successful, false otherwise.
-     */
-    this.serverClientCache.clear()
-    log.info('Cleared server client cache')
-    return true
-  }
-
-  // In order to keep this performant, we cache this server name for integration name and make no other API calls
-  private async hydrateMetadata(tool: Tool): Promise<ToolMetadata> {
-    const serverName: string = await this.getServerName(tool.server_id)
-
-    // ! This is the python version for parsing the input schema
-    // If input_schema is not present, we default to "always valid"
-    // const parseInputSchema = (schema: JsonSchema | null): JsonSchema => {
-    //   if (!schema) {
-    //     return true;
-    //   } else if (schema.anyof_schema_1_validator) {
-    //     return schema.anyof_schema_1_validator;
-    //   } else if (schema.anyof_schema_2_validator) {
-    //     return schema.anyof_schema_2_validator;
-    //   } else {
-    //     return true;
-    //   }
-    // };
-
-    // ! Why are these generated types not correct?
-    const description: string = tool.description as string
-    const iconUrl: URL | undefined = tool.icon_url as URL | undefined
-
-    return {
-      id: tool.id,
-      name: tool.name,
-      description: description,
-      iconUrl: iconUrl,
-      serverId: tool.server_id,
-      integrationName: serverName,
-      inputSchema: tool.input_schema as JsonSchema // ! Do we need to parse the input schema?
-    }
-  }
-
-  private async hydrateToolMetadata(toolId: ToolId): Promise<ToolMetadata> {
-    return await this.toolMetadataCache.wrap(toolId, async () => {
-      const tool: Tool = await this.highLevelClient.getTool(toolId)
-      return await this.hydrateMetadata(tool)
-    })
-  }
-
-  async clearToolMetadataCache(): Promise<boolean> {
-    /**
-     * Clear the tool metadata cache.
-     * Returns true if successful, false otherwise.
-     */
-    this.toolMetadataCache.clear()
-    log.info('Cleared tool metadata cache')
-    return true
-  }
-
-  private async getToolProperties(toolId: ToolId): Promise<ToolProperties> {
-    return await this.toolPropertiesCache.wrap(toolId, async () => {
-      return await this.highLevelClient.getToolProperties(toolId)
-    })
-  }
-
-  async clearToolPropertiesCache(): Promise<boolean> {
-    /**
-     * Clear the tool properties cache.
-     * Returns true if successful, false otherwise.
-     */
-    this.toolPropertiesCache.clear()
-    log.info('Cleared tool properties cache')
-    return true
-  }
-
   private async getHandle(toolId: ToolId): Promise<ToolHandle> {
-    const toolMetadata: ToolMetadata = await this.hydrateToolMetadata(toolId)
+    const toolDetails: ToolDetails = await this.getToolDetails(toolId)
     const toolServerClient: ToolServerClient = await this.getServerClient(
-      toolMetadata.serverId
+      toolDetails.serverId
     )
 
     if (toolServerClient.client_type === 'mcp') {
@@ -246,35 +112,17 @@ export class UniversalToolCache implements ToolCache {
       }
 
       throw new Error('MCP tools are not yet supported')
-
-      // ! MCP is not supported yet
-      // // TODO: Deprecate RemoteClientConfig
-      // const clientConfig: RemoteClientConfig = {
-      //   org_id: "",
-      //   name: toolMetadata.integration_name,
-      //   display_name: "",
-      //   description: "",
-      //   endpoint: toolServerClient.url,
-      //   required_headers: {},
-      //   ready: true
-      // };
-
-      // const handleFactory = new MCPSSEHandleFactory(
-      //   toolMetadata,
-      //   clientConfig,
-      //   this.connectedClientManager
-      // );
-
-      // return handleFactory.newHandle();
     } else if (toolServerClient.client_type === 'blaxel') {
       const blaxelToolServerClient = toolServerClient as BlaxelToolServerClient
+      if (!this.blaxelClientManager) {
+        this.blaxelClientManager = new BlaxelClientManager()
+      }
 
-      const toolServer: BlaxelMcpServer = getBlaxelMcpServer(
+      const toolServer: BlaxelMcpServer = await this.blaxelClientManager.getServer(
         blaxelToolServerClient.blaxel_function
       )
-      await toolServer.refresh()
 
-      log.info(`Found blaxel tool server: ${toolServerClient.blaxel_function}`)
+      log.debug(`Found blaxel tool server: ${toolServerClient.blaxel_function}`)
 
       // TODO: How to determine the output type?
       const parseResultFunc = (
@@ -301,14 +149,14 @@ export class UniversalToolCache implements ToolCache {
         )
         try {
           const validator = jsonSchemaUtils.getValidator(
-            toolMetadata.inputSchema
+            toolDetails.inputSchema
           )
           const valid = validator(toolCallInput.args)
           if (!valid) {
             throw new Error('Invalid tool input arguments')
           }
           const result = (await toolServer.call(
-            toolMetadata.name,
+            toolDetails.name,
             toolCallInput.args
           )) as CallToolResult // ! Why does blaxel not return a CallToolResult?
           return parseResultFunc(result)
@@ -347,38 +195,73 @@ export class UniversalToolCache implements ToolCache {
     }
   }
 
-  async metadata(toolFilter?: ToolFilter): Promise<Map<ToolId, ToolMetadata>> {
-    // Consider passing filter instructions to the API client
-    const tools: Tool[] = await this.highLevelClient.listTools()
-    log.info(`Fetched ${tools.length} tools`)
+  async listIntegrations(): Promise<string[]> {
+    // TODO: Replace with endpoint which lists integration names
+    return await this.highLevelClient.getAllServerNames()
+  }
 
-    const result: Map<ToolId, ToolMetadata> = new Map()
+  async clearServerClientCache(): Promise<boolean> {
+    /**
+     * Clear the server client cache.
+     * Returns true if successful, false otherwise.
+     */
+    this.serverClientCache.clear()
+    log.info('Cleared server client cache')
+    return true
+  }
 
-    for (const tool of tools) {
-      const metadata = await this.hydrateMetadata(tool)
-      if (!toolFilter || toolFilter(metadata)) {
-        result.set(tool.id, metadata)
-      }
+  async clearToolDetailsCache(): Promise<boolean> {
+    /**
+     * Clear the tool metadata cache.
+     * Returns true if successful, false otherwise.
+     */
+    this.toolDetailsCache.clear()
+    log.info('Cleared tool metadata cache')
+    return true
+  }
+
+  async filterTools(toolFilter?: FilterOptions): Promise<Map<ToolId, ToolDetails>> {
+    return new Map<ToolId, ToolDetails>()
+    // // Consider passing filter instructions to the API client
+    // const tools: Tool[] = await this.highLevelClient.listTools()
+    // log.info(`Fetched ${tools.length} tools`)
+
+    // const result: Map<ToolId, ToolMetadata> = new Map()
+
+    // for (const tool of tools) {
+    //   const metadata = await this.hydrateMetadata(tool)
+    //   if (!toolFilter || toolFilter(metadata)) {
+    //     result.set(tool.id, metadata)
+    //   }
+    // }
+
+    // return result
+  }
+
+  private async getToolDetails(toolId: ToolId): Promise<ToolDetails> {
+    const resource: ToolResource = await this.highLevelClient.getToolResource(toolId)
+
+    return {
+      id: resource.tool.id,
+      name: resource.tool.name,
+      description: resource.description as string,
+      iconUrl: resource.tool.icon_url as URL | undefined,
+      serverId: resource.tool.server_id,
+      integrationName: resource.integration_name,
+      inputSchema: resource.tool.input_schema as JsonSchema,
+      properties: resource.properties as ToolProperties,
+      policy: resource.policy
     }
-
-    return result
   }
 
   async get(toolId: ToolId): Promise<EquippedTool> {
-    const toolMetadata: ToolMetadata = await this.hydrateToolMetadata(toolId)
-    log.debug(`Fetched tool metadata for ${toolId}`)
-
-    const toolProperties: ToolProperties = await this.getToolProperties(toolId)
-    log.debug(`Fetched tool properties for ${toolId}`)
-
-    const tags: ToolTags = toolProperties.tags
+    const toolDetails: ToolDetails = await this.getToolDetails(toolId)
 
     const handle: ToolHandle = await this.getHandle(toolId)
     log.debug(`Fetched tool handle for ${toolId}`)
 
     const equippedTool: EquippedTool = {
-      metadata: toolMetadata,
-      tags: tags,
+      details: toolDetails,
       handle: handle
     }
 
@@ -403,10 +286,72 @@ export class UniversalToolCache implements ToolCache {
     return results
   }
 
+  async refreshServerNameCache(): Promise<boolean> {
+    /**
+     * Refresh the server ids by fetching server ids from the API.
+     * Returns true if successful, false otherwise.
+     */
+    this.serverNameCache.clear()
+    const serverNames = this.highLevelClient.getAllServerNames()
+
+    for (const [serverId, serverName] of Object.entries(serverNames)) {
+      this.serverNameCache.set(serverId as ToolServerId, serverName)
+    }
+
+    log.info(
+      `Refreshed server name cache with ${Object.keys(serverNames).length} server names`
+    )
+    return true
+  }
+
+  async refresh(): Promise<boolean> {
+    // /**
+    //  * Refresh the toolcache using a pipeline pattern.
+    //  *
+    //  * The pipeline executes steps in sequence:
+    //  * 1. Refresh server names (by server id)
+    //  * 2. Clear server clients (by server id)
+    //  * 3. Clear tool metadata (by tool id)
+    //  * 4. Clear tool properties (by tool id)
+    //  *
+    //  * If any step fails or raises an exception, the refresh process stops and returns False.
+    //  */
+    // const pipeline = [
+    //   this.refreshServerNameCache.bind(this),
+    //   this.clearServerClientCache.bind(this),
+    //   this.clearToolMetadataCache.bind(this),
+    // ]
+
+    // for (const step of pipeline) {
+    //   const stepName = step.name
+    //   log.debug(`Starting toolcache refresh step: ${stepName}`)
+
+    //   try {
+    //     if (!(await step())) {
+    //       log.error(`Failed at step: ${stepName}, aborting toolcache refresh`)
+    //       return false
+    //     }
+    //     log.debug(`Successfully completed step: ${stepName}`)
+    //   } catch (e) {
+    //     log.error(`Exception in ${stepName}`, e)
+    //     return false
+    //   }
+    // }
+
+    await this.refreshServerNameCache()
+
+    log.info('Toolcache refresh completed successfully')
+    return true
+  }
+
+  async refreshTool(toolId: ToolId): Promise<EquippedTool> {
+    return await this.get(toolId)
+  }
+
   async cleanup(): Promise<void> {
     this.serverNameCache.clear()
     this.serverClientCache.clear()
-    this.toolMetadataCache.clear()
-    this.toolPropertiesCache.clear()
+    this.toolDetailsCache.clear()
+    await this.cleanupServerManagers()
   }
 }

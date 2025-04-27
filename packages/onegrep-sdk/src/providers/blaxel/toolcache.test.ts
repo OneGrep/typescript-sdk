@@ -1,4 +1,4 @@
-import { createApiClientFromParams } from '../core/api/client.js'
+import { createApiClientFromParams } from '../../core/api/client.js'
 import { BlaxelToolCache } from './toolcache.js'
 import { describe, expect, it } from 'vitest'
 

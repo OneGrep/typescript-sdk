@@ -4,22 +4,22 @@ import {
   ToolCache,
   ToolId,
   EquippedTool,
-  ToolFilter,
+  FilterOptions,
   ToolMetadata,
   ScoredResult
 } from 'types.js'
-import { BlaxelClient } from './client.js'
+import { BlaxelClientManager } from './client.js'
 import { Tool as BlaxelTool } from '@blaxel/sdk/tools/types'
 
 export class BlaxelToolCache implements ToolCache {
   private apiClient: OneGrepApiClient
-  private blaxelClient: BlaxelClient
+  private blaxelClient: BlaxelClientManager
   private toolIdToResource: Map<ToolId, EquippedTool> = new Map()
   private integrationToResources: Map<string, EquippedTool[]> = new Map()
 
   constructor(apiClient: OneGrepApiClient) {
     this.apiClient = apiClient
-    this.blaxelClient = new BlaxelClient()
+    this.blaxelClient = new BlaxelClientManager()
   }
 
   async refreshIntegration(
@@ -39,7 +39,7 @@ export class BlaxelToolCache implements ToolCache {
     }
 
     // Get the raw MCP tools from the blaxel server.
-    const server = await this.blaxelClient.getToolServer(blaxelServerName)
+    const server = await this.blaxelClient.getServer(blaxelServerName)
     const mcpTools = await server.listTools()
     const toolNameToMcpTool = new Map<string, BlaxelTool>()
     for (const tool of mcpTools) {
@@ -89,7 +89,7 @@ export class BlaxelToolCache implements ToolCache {
 
     // Generate a new tool for each of the tools in each of the tool servers in the blaxel client
     // after it refreshes.
-    const toolServers = await this.blaxelClient.getToolServers()
+    const toolServers = await this.blaxelClient.getServers()
     for (const [serverName, _] of toolServers) {
       await this.refreshIntegration(serverName)
     }
@@ -98,7 +98,7 @@ export class BlaxelToolCache implements ToolCache {
   }
 
   async getToolMetadata(
-    toolFilter?: ToolFilter
+    toolFilter?: FilterOptions
   ): Promise<Map<ToolId, ToolMetadata>> {
     const metadataMap = new Map<ToolId, ToolMetadata>()
     for (const [toolId, resource] of this.toolIdToResource) {

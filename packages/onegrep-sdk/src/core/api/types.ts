@@ -18,6 +18,7 @@ export type Tool = z.infer<typeof schemas.Tool>
 export type ToolProperties = z.infer<typeof schemas.ToolProperties>
 
 export type ToolResource = z.infer<typeof schemas.ToolResource>
+export type Policy = z.infer<typeof schemas.Policy>
 
 export type SearchResponseScoredItemTool = z.infer<
   typeof schemas.SearchResponse_ScoredItem_Tool__
