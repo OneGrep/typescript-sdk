@@ -226,7 +226,6 @@ export class UniversalToolCache implements ToolCache {
           iconUrl: t.icon_url as URL | undefined,
           inputSchema: t.input_schema as JsonSchema
         })
-
       } catch (e) {
         log.warn(`Error fetching tool details for ${t.id}`, e)
         continue
@@ -264,7 +263,8 @@ export class UniversalToolCache implements ToolCache {
   async filterTools(
     filterOptions?: FilterOptions
   ): Promise<Map<ToolId, ToolDetails>> {
-    console.info(`Filtering tools with options: ${JSON.stringify(filterOptions)}`
+    console.info(
+      `Filtering tools with options: ${JSON.stringify(filterOptions)}`
     )
     if (!filterOptions) {
       const result: Map<ToolId, ToolDetails> = new Map()
@@ -274,7 +274,9 @@ export class UniversalToolCache implements ToolCache {
       for (const integration of integrations) {
         const toolResources =
           await this.highLevelClient.getToolResourcesForIntegration(integration)
-        console.info(`Found ${toolResources.length} tools for integration ${integration}`)
+        console.info(
+          `Found ${toolResources.length} tools for integration ${integration}`
+        )
         for (const toolResource of toolResources) {
           const toolDetails = await this.getToolDetails(toolResource.tool.id)
           result.set(toolDetails.id, toolDetails)
@@ -367,8 +369,11 @@ export class UniversalToolCache implements ToolCache {
      * Returns true if successful, false otherwise.
      */
     this.serverNameCache.clear()
-    const servers: Map<ToolServerId, ToolServer> = await this.highLevelClient.getAllServers()
-    console.debug(`Found ${servers.size} server names -> ${JSON.stringify(servers)}`)
+    const servers: Map<ToolServerId, ToolServer> =
+      await this.highLevelClient.getAllServers()
+    console.debug(
+      `Found ${servers.size} server names -> ${JSON.stringify(servers)}`
+    )
 
     for (const [serverId, server] of servers.entries()) {
       this.serverNameCache.set(serverId as ToolServerId, server.name)
