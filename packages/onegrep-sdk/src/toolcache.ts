@@ -267,23 +267,9 @@ export class UniversalToolCache implements ToolCache {
       `Filtering tools with options: ${JSON.stringify(filterOptions)}`
     )
     if (!filterOptions) {
-      const result: Map<ToolId, ToolDetails> = new Map()
-      log.warn('No filter options provided, fetching all tools')
-      const integrations = await this.listIntegrations()
-      console.info(`Found ${integrations.length} integrations`)
-      for (const integration of integrations) {
-        const toolResources =
-          await this.highLevelClient.getToolResourcesForIntegration(integration)
-        console.info(
-          `Found ${toolResources.length} tools for integration ${integration}`
-        )
-        for (const toolResource of toolResources) {
-          const toolDetails = await this.getToolDetails(toolResource.tool.id)
-          result.set(toolDetails.id, toolDetails)
-        }
-      }
-
-      return result
+      throw new Error(
+        'No filter options provided. If you want to list tools, use the `.listTools()` method.'
+      )
     }
 
     const result: Map<ToolId, ToolDetails> = new Map()
