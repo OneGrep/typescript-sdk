@@ -94,13 +94,18 @@ export interface EquippedTool {
   handle: ToolHandle
 }
 
+export interface ToolFilter {
+  integrationName: string
+  toolName: string
+}
+
 /**
  * Filtering options that can be passed to the toolbox to filter down to a specific set of tools.
  */
 export interface FilterOptions {
   serverIds?: string[]
   integrationNames?: string[]
-  toolNames?: string[]
+  tools?: ToolFilter[]
 }
 
 /**

@@ -8,7 +8,7 @@ import {
   FilterOptions,
   ToolMetadata,
   ScoredResult
-} from '../types.js'
+} from '../domain/types.js'
 import { log } from '@repo/utils'
 import { RemoteClientConfig } from '../core/api/types.js'
 import { Tool as MCPTool, Tool } from '@modelcontextprotocol/sdk/types.js'
@@ -20,7 +20,7 @@ class IntegrationRefreshAttempt {
     public readonly integrationName: string,
     public readonly error?: any,
     public readonly refreshTs: number = getUnixTime(Date.now())
-  ) {}
+  ) { }
 }
 
 // ! Deprecate in favor of the UniversalToolCache

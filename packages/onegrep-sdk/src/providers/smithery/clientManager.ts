@@ -1,4 +1,4 @@
-import { ServerClientManager } from 'providers/types.js'
+import { IServerClientManager } from 'providers/domain/types.js'
 
 // class SmitheryClientManager implements ServerClientManager<McpServer> {
 // }

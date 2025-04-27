@@ -13,7 +13,7 @@ import {
 import { clientFromConfig } from '../../core/api/client.js'
 import { log } from '@repo/utils'
 
-import { EquippedTool, ToolCallInput, ToolCallResponse } from '../../types.js'
+import { EquippedTool, ToolCallInput, ToolCallResponse } from '../../domain/types.js'
 import { MCPToolCache } from '../toolcache.js'
 import { ConnectedClientManager } from '../client.js'
 

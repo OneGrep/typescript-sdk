@@ -7,10 +7,10 @@ import {
   McpTool as BlaxelMcpServer,
   retrieveMCPClient
 } from '@blaxel/sdk/tools/mcpTool'
-import { ServerClientManager } from '../types.js'
+import { IServerClientManager } from '../domain/types.js'
 
 export class BlaxelClientManager
-  implements ServerClientManager<BlaxelMcpServer> {
+  implements IServerClientManager<BlaxelMcpServer> {
   private serverNameMap: Map<string, BlaxelMcpServer> = new Map()
 
   constructor() { }

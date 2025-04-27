@@ -4,8 +4,6 @@ import { log } from '@repo/utils'
 import {
   ToolCallError,
   ToolCallResponse,
-  ToolId,
-  ToolMetadata,
   EquippedTool,
   ToolCallOutput
 } from './types.js'
@@ -29,27 +27,28 @@ describe('Toolbox Tests', () => {
   })
 
   it('should get all tool resources', async () => {
-    const toolMetadataMap = await toolbox.metadata()
-    expect(toolMetadataMap.size).toBeGreaterThan(0)
-    log.info(`fetched tool metadata: ${JSON.stringify(toolMetadataMap)}`)
+    const toolDetailsMap = await toolbox.filterTools()
+    expect(toolDetailsMap.size).toBeGreaterThan(0)
+    log.info(`fetched tool metadata: ${JSON.stringify(toolDetailsMap)}`)
   })
 
   it('should be able to get a zod schema from a tool', async () => {
-    const toolMetadataMap: Map<ToolId, ToolMetadata> = await toolbox.metadata()
-    expect(toolMetadataMap.size).toBeGreaterThan(0)
-    const toolMetadata = Array.from(toolMetadataMap.values()).find(
-      (metadata) => metadata.name === toolName
+    const toolDetailsMap = await toolbox.filterTools()
+    expect(toolDetailsMap.size).toBeGreaterThan(0)
+
+    const toolDetails = Array.from(toolDetailsMap.values()).find(
+      (details) => details.name === toolName
     )
-    expect(toolMetadata).toBeDefined()
-    if (!toolMetadata) {
+    expect(toolDetails).toBeDefined()
+    if (!toolDetails) {
       throw new Error(`Tool with name ${toolName} not found`)
     }
-    const tool: EquippedTool = await toolbox.get(toolMetadata.id)
+    const tool: EquippedTool = await toolbox.get(toolDetails.id)
     expect(tool).toBeDefined()
     if (!tool) {
       throw new Error('Tool not found')
     }
-    const zodInputType = jsonSchemaUtils.toZodType(tool.metadata.inputSchema)
+    const zodInputType = jsonSchemaUtils.toZodType(tool.details.inputSchema)
     log.info(`Zod input type: ${JSON.stringify(zodInputType)}`)
     if (!zodInputType) {
       throw new Error('Zod input type not found')
@@ -75,16 +74,16 @@ describe('Toolbox Tests', () => {
   })
 
   it('should be able to make a tool call with invalid input', async () => {
-    const toolMetadataMap: Map<ToolId, ToolMetadata> = await toolbox.metadata()
-    expect(toolMetadataMap.size).toBeGreaterThan(0)
-    const toolMetadata = Array.from(toolMetadataMap.values()).find(
-      (metadata) => metadata.name === toolName
+    const toolDetailsMap = await toolbox.filterTools()
+    expect(toolDetailsMap.size).toBeGreaterThan(0)
+    const toolDetails = Array.from(toolDetailsMap.values()).find(
+      (details) => details.name === toolName
     )
-    expect(toolMetadata).toBeDefined()
-    if (!toolMetadata) {
+    expect(toolDetails).toBeDefined()
+    if (!toolDetails) {
       throw new Error(`Tool with name ${toolName} not found`)
     }
-    const tool: EquippedTool = await toolbox.get(toolMetadata.id)
+    const tool: EquippedTool = await toolbox.get(toolDetails.id)
     expect(tool).toBeDefined()
     if (!tool) {
       throw new Error('Tool not found')
@@ -110,16 +109,16 @@ describe('Toolbox Tests', () => {
   })
 
   it('should be able to make a tool call with valid input', async () => {
-    const toolMetadataMap: Map<ToolId, ToolMetadata> = await toolbox.metadata()
-    expect(toolMetadataMap.size).toBeGreaterThan(0)
-    const toolMetadata = Array.from(toolMetadataMap.values()).find(
-      (metadata) => metadata.name === toolName
+    const toolDetailsMap = await toolbox.filterTools()
+    expect(toolDetailsMap.size).toBeGreaterThan(0)
+    const toolDetails = Array.from(toolDetailsMap.values()).find(
+      (details) => details.name === toolName
     )
-    expect(toolMetadata).toBeDefined()
-    if (!toolMetadata) {
+    expect(toolDetails).toBeDefined()
+    if (!toolDetails) {
       throw new Error(`Tool with name ${toolName} not found`)
     }
-    const tool: EquippedTool = await toolbox.get(toolMetadata.id)
+    const tool: EquippedTool = await toolbox.get(toolDetails.id)
     expect(tool).toBeDefined()
     if (!tool) {
       throw new Error('Tool not found')

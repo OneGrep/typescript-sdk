@@ -1,4 +1,20 @@
+import { Keyv } from 'keyv'
+import { log } from '@repo/utils'
+import { z } from 'zod'
+import { jsonSchemaUtils } from './schema.js'
+import { CallToolResult } from '@modelcontextprotocol/sdk/types.js'
+
+
 import { OneGrepApiClient } from './core/api/client.js'
+import { OneGrepApiHighLevelClient } from './core/api/high.js'
+import {
+  ToolProperties,
+  ToolServerClient,
+  SearchResponseScoredItemTool,
+  // MCPToolServerClient, // ! Add back when MCP is supported
+  BlaxelToolServerClient,
+  ToolResource
+} from './core/api/types.js'
 // import { ConnectedClientManager } from './mcp/client.js'; // ! Add back when MCP is supported
 import {
   McpCallToolResultContent,
@@ -6,8 +22,6 @@ import {
 } from './providers/mcp/toolcall.js'
 
 import { McpTool as BlaxelMcpServer } from '@blaxel/sdk/tools/mcpTool'
-
-import { CallToolResult } from '@modelcontextprotocol/sdk/types.js'
 
 import {
   ScoredResult,
@@ -24,23 +38,9 @@ import {
   ToolDetails
 } from './types.js'
 
-import {
-  ToolProperties,
-  ToolServerClient,
-  SearchResponseScoredItemTool,
-  // MCPToolServerClient, // ! Add back when MCP is supported
-  BlaxelToolServerClient,
-  ToolResource
-} from './core/api/types.js'
+import { BlaxelClientManager } from './providers/blaxel/clientManager.js'
 
-import { OneGrepApiHighLevelClient } from './core/api/high.js'
 import { Cache, createCache } from 'cache-manager'
-import { Keyv } from 'keyv'
-
-import { log } from '@repo/utils'
-import { z } from 'zod'
-import { jsonSchemaUtils } from './schema.js'
-import { BlaxelClientManager } from 'providers/blaxel/clientManager.js'
 
 export class UniversalToolCache implements ToolCache {
   private highLevelClient: OneGrepApiHighLevelClient
@@ -117,10 +117,16 @@ export class UniversalToolCache implements ToolCache {
         this.blaxelClientManager = new BlaxelClientManager()
       }
 
-      const toolServer: BlaxelMcpServer =
+      const toolServer: BlaxelMcpServer | undefined =
         await this.blaxelClientManager.getServer(
           blaxelToolServerClient.blaxel_function
         )
+
+      if (!toolServer) {
+        throw new Error(
+          `No tool server was discovered for blaxel: ${toolServerClient.blaxel_function}`
+        )
+      }
 
       log.debug(`Found blaxel tool server: ${toolServerClient.blaxel_function}`)
 
@@ -221,13 +227,31 @@ export class UniversalToolCache implements ToolCache {
   }
 
   async filterTools(
-    filterOptions: FilterOptions
+    filterOptions?: FilterOptions
   ): Promise<Map<ToolId, ToolDetails>> {
+    if (!filterOptions) {
+      const result: Map<ToolId, ToolDetails> = new Map()
+      log.warn('No filter options provided, fetching all tools')
+      const integrations = await this.listIntegrations()
+      for (const integration of integrations) {
+        const toolResources = await this.highLevelClient.getToolResourcesForIntegration(integration)
+        for (const toolResource of toolResources) {
+          const toolDetails = await this.getToolDetails(toolResource.tool.id)
+          result.set(toolDetails.id, toolDetails)
+        }
+      }
+
+      return result
+    }
+
     const result: Map<ToolId, ToolDetails> = new Map()
 
     if (filterOptions.integrationNames) {
       for (const integrationName of filterOptions.integrationNames) {
-        const toolResources = await this.highLevelClient.getToolResourcesForIntegration(integrationName)
+        const toolResources =
+          await this.highLevelClient.getToolResourcesForIntegration(
+            integrationName
+          )
         for (const toolResource of toolResources) {
           const toolDetails = await this.getToolDetails(toolResource.tool.id)
           result.set(toolDetails.id, toolDetails)
@@ -239,7 +263,9 @@ export class UniversalToolCache implements ToolCache {
   }
 
   private async getToolDetails(toolId: ToolId): Promise<ToolDetails> {
-    const cachedToolDetails = await this.toolDetailsCache.get(toolId) as ToolDetails | null
+    const cachedToolDetails = (await this.toolDetailsCache.get(
+      toolId
+    )) as ToolDetails | null
     if (cachedToolDetails && cachedToolDetails !== null) {
       return cachedToolDetails
     }

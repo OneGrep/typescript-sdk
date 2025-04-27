@@ -24,9 +24,9 @@ export class Toolbox implements BaseToolbox<EquippedTool> {
   }
 
   async filterTools(
-    toolFilter?: FilterOptions
+    options?: FilterOptions
   ): Promise<Map<ToolId, ToolDetails>> {
-    return this.toolCache.filterTools(toolFilter)
+    return this.toolCache.filterTools(options)
   }
 
   async get(toolId: ToolId): Promise<EquippedTool> {
