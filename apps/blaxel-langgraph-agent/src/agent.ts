@@ -13,6 +13,7 @@ export default async function agent(
   input: string,
   stream: Stream
 ): Promise<void> {
+  console.log('input', input)
   // Search for tools that match the input
   const searchResults = await toolbox.search(input)
 
