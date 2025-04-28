@@ -1,8 +1,7 @@
 import { blModel } from '@blaxel/sdk'
 import { HumanMessage } from '@langchain/core/messages'
-import { StructuredTool } from '@langchain/core/tools'
 import { createReactAgent } from '@langchain/langgraph/prebuilt'
-import { LangchainToolbox, ScoredResult } from '@onegrep/sdk'
+import { LangchainToolbox } from '@onegrep/sdk'
 
 interface Stream {
   write: (data: string) => void
@@ -15,16 +14,16 @@ export default async function agent(
   stream: Stream
 ): Promise<void> {
   // Search for tools that match the input
-  const searchResults: ScoredResult<StructuredTool>[] =
-    await toolbox.search(input)
+  const searchResults = await toolbox.search(input)
 
-  // Convert the search results to Langchain StructuredTools
-  const structuredTools = searchResults.map((result) => result.result)
+  // Extract the tools from the search results
+  const tools = searchResults.map(result => result.result)
 
+  // Use a type assertion at the point of use to handle version differences
   const streamResponse = await createReactAgent({
     llm: await blModel('sandbox-openai').ToLangChain(),
     prompt: 'If the user ask for the weather, use the weather tool.',
-    tools: structuredTools
+    tools: tools
   }).stream({
     messages: [new HumanMessage(input)]
   })
