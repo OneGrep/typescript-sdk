@@ -17,7 +17,7 @@ export default async function agent(
   const searchResults = await toolbox.search(input)
 
   // Extract the tools from the search results
-  const tools = searchResults.map(result => result.result)
+  const tools = searchResults.map((result) => result.result)
 
   // Use a type assertion at the point of use to handle version differences
   const streamResponse = await createReactAgent({

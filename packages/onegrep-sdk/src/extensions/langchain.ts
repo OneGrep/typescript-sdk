@@ -1,7 +1,7 @@
 import {
   DynamicStructuredTool,
   DynamicStructuredToolInput,
-  StructuredTool,
+  StructuredTool
 } from '@langchain/core/tools'
 import { log } from '@repo/utils'
 import {
@@ -30,9 +30,7 @@ function ensureZodObject<T extends z.ZodTypeAny>(
 /**
  * Convert an EquippedTool to a DynamicStructuredTool that's compatible with LangChain agents
  */
-const convertToLangChainTool = (
-  equippedTool: EquippedTool
-): StructuredTool => {
+const convertToLangChainTool = (equippedTool: EquippedTool): StructuredTool => {
   // Input zod type is required for Langchain to enforce input schema
   const zodInputType: ZodTypeAny = jsonSchemaUtils.toZodType(
     equippedTool.details.inputSchema
