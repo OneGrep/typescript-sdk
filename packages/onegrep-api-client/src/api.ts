@@ -83,6 +83,100 @@ type ValidationError = {
   msg: string
   type: string
 }
+type InitializeResponse = {
+  org_id: string
+  providers: {}
+  servers: {}
+  tools: {}
+  clients: {}
+}
+type ToolServerProvider = {
+  id: string
+  name: string
+}
+type ToolServer = {
+  provider_id: string
+  name: string
+  properties?: {} | undefined
+  id: string
+}
+type Tool = {
+  server_id: string
+  /**
+   * The name of the tool (should be unique within a server).
+   */
+  name: string
+  description?:
+    | /**
+     * A description of the tool.
+     */
+    ((string | null) | Array<string | null>)
+    | undefined
+  icon_url?:
+    | /**
+     * A URL to an icon for the tool.
+     */
+    (| /**
+         * @minLength 1
+         */
+        (string | null)
+        | Array<
+            /**
+             * @minLength 1
+             */
+            string | null
+          >
+      )
+    | undefined
+  input_schema?:
+    | /**
+     * A JSON schema for the tool's input (defaults to 'always valid').
+     *
+     * @default true
+     */
+    (({} | boolean) | Array<{} | boolean>)
+    | undefined
+  id: string
+}
+type MCPToolServerClient = {
+  server_id: string
+  client_type: string
+  /**
+   * @enum sse, websocket
+   */
+  transport_type: 'sse' | 'websocket'
+  /**
+   * @minLength 1
+   */
+  url: string
+}
+type BlaxelToolServerClient = {
+  server_id: string
+  client_type: string
+  blaxel_workspace: string
+  blaxel_function: string
+}
+type SmitheryToolServerClient = {
+  server_id: string
+  client_type: string
+  connections: Array<SmitheryConnectionInfo>
+}
+type SmitheryConnectionInfo = {
+  /**
+   * @enum ws, http
+   */
+  type: 'ws' | 'http'
+  deployment_url?: /**
+   * @minLength 1
+   */
+  string | undefined
+  config_schema?:
+    | /**
+     * @default true
+     */
+    (({} | boolean) | Array<{} | boolean>)
+    | undefined
+}
 type IntegrationConfigDetails = {
   name: string
   configuration_state: IntegrationConfigurationState
@@ -264,44 +358,6 @@ type Recipe = {
   id?: string | undefined
   tools: Array<Tool>
 }
-type Tool = {
-  server_id: string
-  /**
-   * The name of the tool (should be unique within a server).
-   */
-  name: string
-  description?:
-    | /**
-     * A description of the tool.
-     */
-    ((string | null) | Array<string | null>)
-    | undefined
-  icon_url?:
-    | /**
-     * A URL to an icon for the tool.
-     */
-    (| /**
-         * @minLength 1
-         */
-        (string | null)
-        | Array<
-            /**
-             * @minLength 1
-             */
-            string | null
-          >
-      )
-    | undefined
-  input_schema?:
-    | /**
-     * A JSON schema for the tool's input (defaults to 'always valid').
-     *
-     * @default true
-     */
-    (({} | boolean) | Array<{} | boolean>)
-    | undefined
-  id: string
-}
 type ScoredItem_Recipe_ = {
   item: Recipe
   /**
@@ -429,15 +485,6 @@ type ToolResource = {
 }
 type ToolProperties = {
   tags: {}
-}
-type ToolServer = {
-  id: string
-  provider_id: string
-  name: string
-}
-type ToolServerProvider = {
-  id: string
-  name: string
 }
 type CanonicalResource = {
   org_id: string
@@ -628,9 +675,10 @@ const ToolProperties: z.ZodType<ToolProperties> = z
   .passthrough()
 const ToolServer: z.ZodType<ToolServer> = z
   .object({
-    id: z.string().uuid(),
     provider_id: z.string().uuid(),
-    name: z.string()
+    name: z.string(),
+    properties: z.object({}).partial().strict().passthrough().optional(),
+    id: z.string().uuid()
   })
   .strict()
   .passthrough()
@@ -851,19 +899,40 @@ const PaginatedResponse_AuditLog_: z.ZodType<PaginatedResponse_AuditLog_> = z
   })
   .strict()
   .passthrough()
-const MCPToolServerClient = z
+const MCPToolServerClient: z.ZodType<MCPToolServerClient> = z
   .object({
+    server_id: z.string().uuid(),
     client_type: z.string(),
     transport_type: z.enum(['sse', 'websocket']),
     url: z.string().min(1).url()
   })
   .strict()
   .passthrough()
-const BlaxelToolServerClient = z
+const BlaxelToolServerClient: z.ZodType<BlaxelToolServerClient> = z
   .object({
+    server_id: z.string().uuid(),
     client_type: z.string(),
     blaxel_workspace: z.string(),
     blaxel_function: z.string()
+  })
+  .strict()
+  .passthrough()
+const SmitheryConnectionInfo: z.ZodType<SmitheryConnectionInfo> = z
+  .object({
+    type: z.enum(['ws', 'http']),
+    deployment_url: z.string().min(1).url().optional(),
+    config_schema: z
+      .union([z.object({}).partial().strict().passthrough(), z.boolean()])
+      .optional()
+      .default(true)
+  })
+  .strict()
+  .passthrough()
+const SmitheryToolServerClient: z.ZodType<SmitheryToolServerClient> = z
+  .object({
+    server_id: z.string().uuid(),
+    client_type: z.string(),
+    connections: z.array(SmitheryConnectionInfo)
   })
   .strict()
   .passthrough()
@@ -976,6 +1045,22 @@ const SearchResponse_ScoredItem_Recipe__: z.ZodType<SearchResponse_ScoredItem_Re
     })
     .strict()
     .passthrough()
+const InitializeResponse: z.ZodType<InitializeResponse> = z
+  .object({
+    org_id: z.string(),
+    providers: z.record(ToolServerProvider),
+    servers: z.record(ToolServer),
+    tools: z.record(Tool),
+    clients: z.record(
+      z.union([
+        MCPToolServerClient,
+        BlaxelToolServerClient,
+        SmitheryToolServerClient
+      ])
+    )
+  })
+  .strict()
+  .passthrough()
 const CreateInvitationRequest = z
   .object({
     email: z.string().email(),
@@ -1143,6 +1228,8 @@ export const schemas = {
   PaginatedResponse_AuditLog_,
   MCPToolServerClient,
   BlaxelToolServerClient,
+  SmitheryConnectionInfo,
+  SmitheryToolServerClient,
   ToolResourceBase,
   RecipeTool,
   RecipeDetails_Output,
@@ -1154,6 +1241,7 @@ export const schemas = {
   SearchResponse_ScoredItem_Tool__,
   ScoredItem_Recipe_,
   SearchResponse_ScoredItem_Recipe__,
+  InitializeResponse,
   CreateInvitationRequest,
   IngressConfig,
   Invitation,
@@ -1875,6 +1963,27 @@ The recipe must belong to the user&#x27;s organization.`,
     ]
   },
   {
+    method: 'get',
+    path: '/api/v1/sdk/initialize',
+    alias: 'initialize_api_v1_sdk_initialize_get',
+    requestFormat: 'json',
+    parameters: [
+      {
+        name: 'X-ONEGREP-PROFILE-ID',
+        type: 'Header',
+        schema: X_ONEGREP_PROFILE_ID
+      }
+    ],
+    response: InitializeResponse,
+    errors: [
+      {
+        status: 422,
+        description: `Validation Error`,
+        schema: HTTPValidationError
+      }
+    ]
+  },
+  {
     method: 'post',
     path: '/api/v1/search/recipes',
     alias: 'search_recipes_api_v1_search_recipes_post',
@@ -1994,7 +2103,11 @@ along with a similarity score for each tool.`,
         schema: z.string()
       }
     ],
-    response: z.union([MCPToolServerClient, BlaxelToolServerClient]),
+    response: z.union([
+      MCPToolServerClient,
+      BlaxelToolServerClient,
+      SmitheryToolServerClient
+    ]),
     errors: [
       {
         status: 422,
