@@ -85,10 +85,13 @@ type ValidationError = {
 }
 type InitializeResponse = {
   org_id: string
-  providers: {}
-  servers: {}
-  tools: {}
-  clients: {}
+  doppler_service_token?: ((string | null) | Array<string | null>) | undefined
+  providers: Array<ToolServerProvider>
+  servers: Array<ToolServer>
+  tools: Array<Tool>
+  clients: Array<
+    MCPToolServerClient | BlaxelToolServerClient | SmitheryToolServerClient
+  >
 }
 type ToolServerProvider = {
   id: string
@@ -1048,10 +1051,11 @@ const SearchResponse_ScoredItem_Recipe__: z.ZodType<SearchResponse_ScoredItem_Re
 const InitializeResponse: z.ZodType<InitializeResponse> = z
   .object({
     org_id: z.string(),
-    providers: z.record(ToolServerProvider),
-    servers: z.record(ToolServer),
-    tools: z.record(Tool),
-    clients: z.record(
+    doppler_service_token: z.union([z.string(), z.null()]).optional(),
+    providers: z.array(ToolServerProvider),
+    servers: z.array(ToolServer),
+    tools: z.array(Tool),
+    clients: z.array(
       z.union([
         MCPToolServerClient,
         BlaxelToolServerClient,

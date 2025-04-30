@@ -1808,29 +1808,28 @@ components:
         org_id:
           type: string
           title: Org Id
+        doppler_service_token:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Doppler Service Token
         providers:
-          additionalProperties:
+          items:
             $ref: '#/components/schemas/ToolServerProvider'
-          propertyNames:
-            format: uuid
-          type: object
+          type: array
           title: Providers
         servers:
-          additionalProperties:
+          items:
             $ref: '#/components/schemas/ToolServer'
-          propertyNames:
-            format: uuid
-          type: object
+          type: array
           title: Servers
         tools:
-          additionalProperties:
+          items:
             $ref: '#/components/schemas/Tool'
-          propertyNames:
-            format: uuid
-          type: object
+          type: array
           title: Tools
         clients:
-          additionalProperties:
+          items:
             oneOf:
               - $ref: '#/components/schemas/MCPToolServerClient'
               - $ref: '#/components/schemas/BlaxelToolServerClient'
@@ -1841,9 +1840,7 @@ components:
                 blaxel: '#/components/schemas/BlaxelToolServerClient'
                 mcp: '#/components/schemas/MCPToolServerClient'
                 smithery: '#/components/schemas/SmitheryToolServerClient'
-          propertyNames:
-            format: uuid
-          type: object
+          type: array
           title: Clients
       type: object
       required:
