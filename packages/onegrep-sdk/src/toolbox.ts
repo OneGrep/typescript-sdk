@@ -1,4 +1,4 @@
-import { clientFromConfig, OneGrepApiClient } from './core/api/client.js'
+import { clientFromConfig, OneGrepApiClient } from '~/core/index.js'
 import {
   BaseToolbox,
   ToolCache,
@@ -7,8 +7,8 @@ import {
   ScoredResult,
   ToolDetails,
   BasicToolDetails
-} from './types.js'
-import { createToolCache } from './toolcache.js'
+} from '~/types.js'
+import { createToolCache } from '~/toolcache.js'
 
 export class Toolbox implements BaseToolbox<ToolDetails> {
   apiClient: OneGrepApiClient
