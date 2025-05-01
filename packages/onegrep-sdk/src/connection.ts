@@ -1,4 +1,3 @@
-import { SecretManager } from './secrets/types.js'
 import {
   BlaxelToolServerClient,
   SmitheryToolServerClient,
