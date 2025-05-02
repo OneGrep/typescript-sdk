@@ -1,20 +1,18 @@
 import { z } from 'zod'
 
-import { getEnv, getLogger, loggingSchema } from '@repo/utils'
+import { loggingSchema, getEnv, getLogger } from '@repo/utils'
 
-export const sdkLoggingSchema = z
-  .object({
-    ONEGREP_SDK_LOG_LEVEL: z.string().default('info')
-  })
-  .merge(loggingSchema)
+export const sdkLoggingSchema = loggingSchema.extend({
+  ONEGREP_SDK_LOG_LEVEL: z.string().default('info')
+})
 
-const env = getEnv(sdkLoggingSchema)
+const initSdkLogger = () => {
+  const env = getEnv(sdkLoggingSchema)
+
+  return getLogger(env.LOG_MODE, 'sdk', env.ONEGREP_SDK_LOG_LEVEL)
+}
 
 /**
  * The child logger for the onegrep-sdk.
  */
-export const log = getLogger(
-  env.LOG_MODE,
-  'onegrep-sdk',
-  env.ONEGREP_SDK_LOG_LEVEL
-)
+export const log = initSdkLogger()
