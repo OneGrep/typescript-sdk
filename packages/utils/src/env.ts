@@ -11,13 +11,11 @@ export const nodeEnv = z.object({
     .default('development')
 })
 
-export const loggingSchema = z.object({
-  LOG_MODE: z.enum(['off', 'console', 'file', 'all']).default('off'),
-  LOG_LEVEL: z.string().default('info')
-})
+export const logModes = z.enum(['off', 'console', 'file', 'all'])
 
-export const sdkLoggingSchema = z.object({
-  ONEGREP_SDK_LOG_LEVEL: z.string().default('info')
+export const loggingSchema = z.object({
+  LOG_MODE: logModes.default('off'),
+  LOG_LEVEL: z.string().default('info')
 })
 
 export const sdkApiSchema = z.object({
@@ -29,9 +27,7 @@ export const configSchema = z.object({
   ONEGREP_CONFIG_DIR: z.string().optional() // Default in config.ts to avoid importing filepath libs
 })
 
-export const loggingEnvSchema = nodeEnv
-  .merge(loggingSchema)
-  .merge(sdkLoggingSchema)
+export const loggingEnvSchema = nodeEnv.merge(loggingSchema)
 
 export const envSchema = loggingEnvSchema.merge(sdkApiSchema)
 

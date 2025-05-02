@@ -6,34 +6,36 @@ import { consoleLogger } from './loggers/console.js'
 import { fileLogger } from './loggers/file.js'
 import { multiLogger } from './loggers/multi.js'
 
-import { getEnv, loggingEnvSchema } from './env.js'
-
-type LoggingEnv = z.infer<typeof loggingEnvSchema>
+import { getEnv, loggingEnvSchema, logModes } from './env.js'
 
 function silentLogger(): Logger {
   return dummyLogger
 }
 
-async function getLoggerFromEnv(
-  env: LoggingEnv,
+export async function getLogger(
+  logMode: z.infer<typeof logModes>,
   loggerName?: string,
-  logLevel?: LogLevelDesc
+  logLevelName?: string
 ): Promise<Logger> {
   let logger: Logger
-  if (env.LOG_MODE === 'off') {
+
+  // Convert the string log level to a LogLevelDesc (so consumers don't need to import loglevel)
+  const logLevelDesc = logLevelName as LogLevelDesc | undefined
+
+  if (logMode === 'off') {
     logger = silentLogger()
-  } else if (env.LOG_MODE === 'console') {
-    logger = consoleLogger(loggerName, logLevel)
-  } else if (env.LOG_MODE === 'file') {
-    logger = await fileLogger(loggerName, logLevel)
-  } else if (env.LOG_MODE === 'all') {
+  } else if (logMode === 'console') {
+    logger = consoleLogger(loggerName, logLevelDesc)
+  } else if (logMode === 'file') {
+    logger = await fileLogger(loggerName, logLevelDesc)
+  } else if (logMode === 'all') {
     const allLoggers: Logger[] = [
-      consoleLogger(loggerName, logLevel),
-      await fileLogger(loggerName, logLevel)
+      consoleLogger(loggerName, logLevelDesc),
+      await fileLogger(loggerName, logLevelDesc)
     ]
     logger = multiLogger(allLoggers)
   } else {
-    throw new Error(`Unsupported log mode: ${env.LOG_MODE}`)
+    throw new Error(`Unsupported log mode: ${logMode}`)
   }
 
   return logger
@@ -43,7 +45,8 @@ export let log: Logger = silentLogger()
 
 function initRootLogger(): void {
   const env = getEnv(loggingEnvSchema)
-  getLoggerFromEnv(env)
+
+  getLogger(env.LOG_MODE, undefined, env.LOG_LEVEL)
     .then((logger) => {
       log = logger
     })
