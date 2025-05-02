@@ -33,22 +33,26 @@ export const envSchema = loggingEnvSchema.merge(sdkApiSchema)
 
 /**
  * Get the environment variables for the given schema.
+ * NOTE: Ensures any unrecognized environment variables are ignored.
  * @param envSchema - The schema to get the environment variables for.
  * @returns The environment variables for the given schema in a Zod inferred type.
  */
-export function getEnv<T extends z.ZodSchema>(envSchema: T): z.infer<T> {
-  return envSchema.parse(process.env)
+export function getEnv<T extends z.ZodObject<any, any>>(
+  envSchema: T
+): z.infer<T> {
+  return envSchema.strip().parse(process.env)
 }
 
 /**
  * Get the issues from the environment variables for the given schema.
  * Use at the beginning of your program to check if the environment variables are valid.
+ * NOTE: Ensures any unrecognized environment variables are ignored.
  * @param envSchema - The schema to get the issues from the environment variables for.
  * @returns The issues from the environment variables for the given schema.
  */
-export const getEnvIssues = <T extends z.ZodSchema>(
+export const getEnvIssues = <T extends z.ZodObject<any, any>>(
   envSchema: T
 ): z.ZodIssue[] | void => {
-  const result = envSchema.safeParse(process.env)
+  const result = envSchema.strip().safeParse(process.env)
   if (!result.success) return result.error.issues
 }

@@ -2,17 +2,17 @@ import { Logger } from 'ts-log'
 import loglevel from 'loglevel'
 import { LogLevelDesc } from 'loglevel'
 
+import fs from 'fs'
 import path from 'path'
 import { initConfigDir } from '../config.js'
 
-export const getLogFilepath = async (filename: string) => {
-  const configDir = await initConfigDir()
+export const getLogFilepath = (filename: string) => {
+  const configDir = initConfigDir()
   return path.join(configDir, filename)
 }
 
-export const clearLogFile = async (filename: string) => {
-  const fs = await import('fs')
-  const logFilepath = await getLogFilepath(filename)
+export const clearLogFile = (filename: string) => {
+  const logFilepath = getLogFilepath(filename)
 
   // Clear the log file by writing an empty string to it
   fs.writeFileSync(logFilepath, '')
@@ -56,23 +56,14 @@ const formatMessage = (
 /**
  * Custom file logger
  */
-export async function fileLogger(
+export function fileLogger(
   loggerName?: string,
   level: LogLevelDesc = loglevel.levels.INFO
-): Promise<Logger> {
-  let fs
-  try {
-    fs = await import('fs')
-  } catch (error) {
-    throw new Error(
-      'Failed to import fs module. This is required for file logging.'
-    )
-  }
-
+): Logger {
   // Construct the log file path based on the logger name
-  let logFilepath = await getLogFilepath('onegrep.log')
+  let logFilepath = getLogFilepath('onegrep.log')
   if (loggerName) {
-    logFilepath = await getLogFilepath(`onegrep.${loggerName}.log`)
+    logFilepath = getLogFilepath(`onegrep.${loggerName}.log`)
   }
 
   // Create a filter function to check if the message should be logged
