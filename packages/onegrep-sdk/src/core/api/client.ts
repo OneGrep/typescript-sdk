@@ -1,5 +1,5 @@
 import { type ZodiosOptions } from '@zodios/core'
-import { getEnv } from '@repo/utils'
+import { getEnv, sdkApiSchema } from '@repo/utils'
 import { createApiClient } from '@repo/onegrep-api-client'
 
 export type OneGrepApiClient = ReturnType<typeof createApiClient>
@@ -49,7 +49,7 @@ export function createApiClientFromParams(clientParams: {
  * @returns A client configured with the environment variables
  */
 export function clientFromConfig(): OneGrepApiClient {
-  const env = getEnv()
+  const env = getEnv(sdkApiSchema)
 
   if (!env.ONEGREP_API_KEY) {
     throw new Error('ONEGREP_API_KEY is not set')

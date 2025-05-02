@@ -1,30 +1,37 @@
 import { dummyLogger, Logger } from 'ts-log'
-import { Env, getEnv } from './env.js'
+import { LogLevelDesc } from 'loglevel'
+import { z } from 'zod'
+
+import { consoleLogger } from './loggers/console.js'
+import { getEnv, loggingEnvSchema } from './env.js'
+
+type LoggingEnv = z.infer<typeof loggingEnvSchema>
 
 function silentLogger(): Logger {
   return dummyLogger
 }
 
-function consoleLogger(): Logger {
-  return console
-}
-
-async function getLoggerFromEnv(env: Env): Promise<Logger> {
+async function getLoggerFromEnv(
+  env: LoggingEnv,
+  loggerName?: string,
+  logLevel?: LogLevelDesc
+): Promise<Logger> {
   let logger: Logger
-  if (env.LOG_MODE === 'silent') {
+  if (env.LOG_MODE === 'off') {
     logger = silentLogger()
   } else if (env.LOG_MODE === 'console') {
-    logger = consoleLogger()
+    logger = consoleLogger(loggerName, logLevel)
   } else {
     throw new Error(`Invalid log mode: ${env.LOG_MODE}`)
   }
+
   return logger
 }
 
 export let log: Logger = silentLogger()
 
-function initLogger(): void {
-  const env = getEnv()
+function initRootLogger(): void {
+  const env = getEnv(loggingEnvSchema)
   getLoggerFromEnv(env)
     .then((logger) => {
       log = logger
@@ -39,4 +46,4 @@ function initLogger(): void {
   log.info('Logger initialized')
 }
 
-initLogger()
+initRootLogger()
