@@ -86,6 +86,12 @@
     "publish:github": {
       "dependsOn": ["package"]
     },
+    "publish:npm": {
+      "dependsOn": ["package"]
+    },
+    "publish:npm:dry-run": {
+      "dependsOn": ["package"]
+    },
     "clean": {
       "cache": false,
       "dependsOn": ["^clean", "clean:dist", "clean:modules", "clean:pack"]

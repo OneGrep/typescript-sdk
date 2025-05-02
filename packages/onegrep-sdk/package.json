@@ -1,6 +1,6 @@
 {
   "name": "@onegrep/sdk",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "type": "module",
   "license": "MIT",
   "author": "OneGrep, Inc.",
@@ -41,7 +41,8 @@
     "licenses": "pnpm licenses list --prod --long > .licenses.txt",
     "package": "mkdir -p pack && pnpm pack --pack-destination pack",
     "version": "changeset version",
-    "publish:npm": "changeset publish",
+    "publish:npm": "pnpm publish",
+    "publish:npm:dry-run": "pnpm publish --dry-run",
     "clean:dist": "rimraf ./dist",
     "clean:modules": "rimraf ./node_modules",
     "clean:pack": "rimraf ./pack"

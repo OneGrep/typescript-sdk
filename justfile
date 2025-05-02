@@ -162,6 +162,11 @@ version-sdk:
 publish-sdk:
     pnpm turbo run publish:npm --filter=@onegrep/sdk
 
+# publish the sdk (dry run)
+[group('publish')]
+publish-sdk-dry-run:
+    pnpm turbo run publish:npm:dry-run --filter=@onegrep/sdk
+
 # clean dist folders
 [group('clean')]
 clean-dist:
