@@ -48,7 +48,8 @@
         "test/**/*.ts",
         "test/**/*.tsx"
       ],
-      "outputs": []
+      "outputs": [],
+      "cache": false
     },
     "test:watch": {
       "env": [
