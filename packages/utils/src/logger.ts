@@ -3,6 +3,9 @@ import { LogLevelDesc } from 'loglevel'
 import { z } from 'zod'
 
 import { consoleLogger } from './loggers/console.js'
+import { fileLogger } from './loggers/file.js'
+import { multiLogger } from './loggers/multi.js'
+
 import { getEnv, loggingEnvSchema } from './env.js'
 
 type LoggingEnv = z.infer<typeof loggingEnvSchema>
@@ -21,8 +24,16 @@ async function getLoggerFromEnv(
     logger = silentLogger()
   } else if (env.LOG_MODE === 'console') {
     logger = consoleLogger(loggerName, logLevel)
+  } else if (env.LOG_MODE === 'file') {
+    logger = await fileLogger(loggerName, logLevel)
+  } else if (env.LOG_MODE === 'all') {
+    const allLoggers: Logger[] = [
+      consoleLogger(loggerName, logLevel),
+      await fileLogger(loggerName, logLevel)
+    ]
+    logger = multiLogger(allLoggers)
   } else {
-    throw new Error(`Invalid log mode: ${env.LOG_MODE}`)
+    throw new Error(`Unsupported log mode: ${env.LOG_MODE}`)
   }
 
   return logger
@@ -39,11 +50,11 @@ function initRootLogger(): void {
     .catch((error) => {
       log = consoleLogger()
       log.error(
-        'Failed to initialize requested logger, using console logger',
+        'Failed to initialize requested log mode, using console log mode',
         error
       )
     })
-  log.info('Logger initialized')
+  log.info('Root logger initialized')
 }
 
 initRootLogger()

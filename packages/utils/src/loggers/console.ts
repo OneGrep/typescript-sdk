@@ -12,11 +12,12 @@ export function consoleLogger(
 ): Logger {
   let logger: loglevel.Logger = loglevel // root logger
 
-  // if a logger name is provided, get a child logger
+  // if a logger name is provided, get a child logger instead of the root logger
   if (loggerName) {
     logger = loglevel.getLogger(loggerName)
   }
 
+  // if a log level is provided, set the logger level
   if (logLevel) {
     logger.setLevel(logLevel)
   }

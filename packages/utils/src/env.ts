@@ -25,6 +25,10 @@ export const sdkApiSchema = z.object({
   ONEGREP_API_URL: z.string().url().default('https://test-sandbox.onegrep.dev')
 })
 
+export const configSchema = z.object({
+  ONEGREP_CONFIG_DIR: z.string().optional() // Default in config.ts to avoid importing filepath libs
+})
+
 export const loggingEnvSchema = nodeEnv
   .merge(loggingSchema)
   .merge(sdkLoggingSchema)
