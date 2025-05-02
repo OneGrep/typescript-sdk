@@ -1,15 +1,13 @@
-import { z } from 'zod'
-
-import { loggingSchema, getEnv, getLogger } from '@repo/utils'
-
-export const gatewayLoggingSchema = loggingSchema.extend({
-  ONEGREP_GATEWAY_LOG_LEVEL: z.string().default('info')
-})
+import { loggingSchema, getEnv, getLogger } from '@onegrep/sdk'
 
 const initGatewayLogger = () => {
-  const env = getEnv(gatewayLoggingSchema)
+  const env = getEnv(loggingSchema)
 
-  return getLogger(env.LOG_MODE, 'gateway', env.ONEGREP_GATEWAY_LOG_LEVEL)
+  return getLogger(
+    env.LOG_MODE,
+    'gateway',
+    process.env.ONEGREP_GATEWAY_LOG_LEVEL
+  )
 }
 
 /**
