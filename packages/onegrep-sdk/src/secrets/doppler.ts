@@ -40,9 +40,7 @@ export class DopplerSecretManager implements SecretManager {
   }
 
   private isInitialized(): boolean {
-    return (
-      this.client !== undefined
-    )
+    return this.client !== undefined
   }
 
   private async fetchSecrets(): Promise<Map<string, string>> {
