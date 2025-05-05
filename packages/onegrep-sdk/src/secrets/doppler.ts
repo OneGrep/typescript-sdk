@@ -28,8 +28,8 @@ export class DopplerSecretManager implements SecretManager {
   }
 
   async initialize(): Promise<void> {
-    const initResponse: InitializeResponse = await this.highLevelClient.initialize()
-    // const orgId = initResponse.org_id
+    const initResponse: InitializeResponse =
+      await this.highLevelClient.initialize()
 
     // ? If none of these get vended, this will error out.
     this.serviceToken = initResponse.doppler_service_token as string
@@ -41,9 +41,7 @@ export class DopplerSecretManager implements SecretManager {
 
   private isInitialized(): boolean {
     return (
-      this.client !== undefined && this.serviceToken !== undefined
-      // this.dopplerProject !== undefined &&
-      // this.dopplerConfig !== undefined
+      this.client !== undefined
     )
   }
 
@@ -66,7 +64,7 @@ export class DopplerSecretManager implements SecretManager {
     const secretsParsed = JSON.parse(secretsJson)
     /**
      * Structure of secretsParsed is:
-     * 
+     *
      * {
      *    secrets: {
      *        <secret_name>: { // ! This is the secret name.
@@ -75,7 +73,7 @@ export class DopplerSecretManager implements SecretManager {
      *        }
      *    }
      * }
-     * 
+     *
      * Parse this into a map of secret name to secret value.
      */
 
