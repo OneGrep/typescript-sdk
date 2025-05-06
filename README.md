@@ -62,10 +62,12 @@ _Import a single SDK to power your agents with semantic tool search, trainable c
 ### Join the Sandbox
 
 1. **Request Access**
+
    - Visit [onegrep.dev](https://www.onegrep.dev/) to join the waitlist
    - You'll receive an invite to the OneGrep sandbox environment
 
 2. **Install the CLI**
+
 ```bash
 # Install the OneGrep CLI
 npx -y @onegrep/cli onegrep-cli
@@ -78,6 +80,7 @@ npx @onegrep/cli account
 ### Sandbox Environment
 
 The OneGrep sandbox comes pre-configured with:
+
 - A collection of popular AI tools across different categories (chat, search, code analysis, etc.)
 - Example tool contexts trained for common agent scenarios
 - Pre-configured security policies and guardrails
@@ -88,7 +91,9 @@ The OneGrep sandbox comes pre-configured with:
 Let's try out some common workflows using the CLI:
 
 #### 1. Search for Tools
+
 Find tools that match your agent's goals using natural language:
+
 ```bash
 # Start the CLI tool explorer
 npx @onegrep/cli tools
@@ -101,7 +106,9 @@ npx @onegrep/cli tools
 ```
 
 #### 2. Execute Tools
+
 Try out tools directly from the CLI:
+
 ```bash
 # Start the CLI tool explorer
 npx @onegrep/cli tools
@@ -115,7 +122,9 @@ npx @onegrep/cli tools
 ```
 
 #### 3. Train Tool Context
+
 Improve tool selection by adding custom context:
+
 ```bash
 # Start the CLI tool explorer
 npx @onegrep/cli tools
@@ -155,6 +164,36 @@ npx @onegrep/cli account
 export ONEGREP_API_KEY="your_sandbox_api_key"
 ```
 
+#### Run an Agent
+
+Let's start with a complete example of running an agent that uses OneGrep for dynamic tool selection. This example uses LangChain for the agent loop and Blaxel for managing the agent runtime.
+
+First, install the Just command runner:
+```bash
+# macOS (using Homebrew)
+brew install just
+
+# Linux
+curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash
+
+# Windows (using Chocolatey)
+choco install just
+```
+
+Then run the example agent:
+```bash
+# Terminal 1: Start the agent server
+just bl-serve
+
+# Terminal 2: Open a chat session with the agent
+just bl-chat
+```
+
+This will start a local agent that:
+- Uses OneGrep SDK for intelligent tool selection
+- Implements a ReAct agent loop with LangChain
+- Runs in a secure Blaxel runtime environment
+
 #### LangChain Integration
 
 OneGrep seamlessly integrates with runtimes like `Langchain` and `CrewAI`, allowing your agents to discover and use tools intelligently:
@@ -168,7 +207,9 @@ const toolbox = await createToolbox()
 const langchainToolbox = await createLangchainToolbox(toolbox)
 
 // Search for relevant tools based on your agent's goals
-const searchResults = await toolbox.search('Find recent news about AI developments')
+const searchResults = await toolbox.search(
+  'Find recent news about AI developments'
+)
 
 // Convert to LangChain structured tools
 const tools = await Promise.all(
@@ -197,11 +238,9 @@ For more examples and detailed API documentation, check out our [Documentation](
 OneGrep integrates with the following tool providers:
 
 ### [Blaxel](https://blaxel.ai)
-
 The AI-first tool hosting platform with built-in security and scalability. Blaxel provides a wide range of pre-built tools and supports custom tool deployment.
 
 ### [Smithery](https://smithery.dev)
-
 A modern tool hosting platform focused on developer experience and enterprise features. Smithery offers extensive tool management capabilities and robust security controls.
 
 Want to add support for your tool hosting platform? [Get in touch](https://join.slack.com/t/onegrep-community/shared_invite/placeholder)!
