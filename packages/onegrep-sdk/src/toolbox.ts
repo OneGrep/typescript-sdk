@@ -54,13 +54,17 @@ export class Toolbox implements BaseToolbox<ToolDetails> {
   }
 }
 
-export async function createToolbox(apiClient: OneGrepApiClient) {
+export async function createToolbox(
+  apiClient: OneGrepApiClient,
+  providedToolCache?: ToolCache
+) {
   const secretManager = await getDopplerSecretManager()
   await secretManager.initialize()
   // Sync the process environment before initializing the tool cache.
   await secretManager.syncProcessEnvironment()
 
-  const toolCache: ToolCache = await createToolCache(apiClient)
+  const toolCache: ToolCache =
+    providedToolCache ?? (await createToolCache(apiClient))
 
   // Make sure the tool cache is initialized on bootstrap
   const ok = await toolCache.refresh()

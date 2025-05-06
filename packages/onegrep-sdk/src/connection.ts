@@ -26,7 +26,7 @@ import { log } from '~/core/log.js'
 /**
  * Creates a client session for a tool server based on the client type.
  */
-const toolServerSessionFactory: ClientSessionFactory<
+export const defaultToolServerSessionFactory: ClientSessionFactory<
   ToolServerClient,
   ClientSession
 > = {
@@ -56,10 +56,17 @@ const toolServerSessionFactory: ClientSessionFactory<
  *
  * Must use close() to clean up sessions
  */
-export const toolServerSessionManager = new ClientSessionManager<
-  ToolServerClient,
-  ClientSession
->(toolServerSessionFactory, (client) => Promise.resolve(client.server_id))
+export function createToolServerSessionManager(
+  factory: ClientSessionFactory<
+    ToolServerClient,
+    ClientSession
+  > = defaultToolServerSessionFactory
+): ClientSessionManager<ToolServerClient, ClientSession> {
+  return new ClientSessionManager<ToolServerClient, ClientSession>(
+    factory,
+    (client) => Promise.resolve(client.server_id)
+  )
+}
 
 /**
  * Manages connections to tool servers of different types.
@@ -69,9 +76,19 @@ export const toolServerSessionManager = new ClientSessionManager<
  * Must use close() to clean up connections
  */
 export class ToolServerConnectionManager implements ConnectionManager {
+  private toolServerSessionManager: ClientSessionManager<
+    ToolServerClient,
+    ClientSession
+  >
   private openConnections: Map<ToolServerId, ToolServerConnection>
 
-  constructor() {
+  constructor(
+    toolServerSessionManager: ClientSessionManager<
+      ToolServerClient,
+      ClientSession
+    > = createToolServerSessionManager()
+  ) {
+    this.toolServerSessionManager = toolServerSessionManager
     this.openConnections = new Map()
   }
 
@@ -101,7 +118,8 @@ export class ToolServerConnectionManager implements ConnectionManager {
       if (process.env.ONEGREP_SDK_BLAXEL_USE_SDK_SESSIONS) {
         return await createBlaxelConnection(client as BlaxelToolServerClient)
       }
-      const mcpClientSession = await toolServerSessionManager.getSession(client)
+      const mcpClientSession =
+        await this.toolServerSessionManager.getSession(client)
       extendOnClose(this, mcpClientSession)
 
       return await createBlaxelConnection(
@@ -110,7 +128,8 @@ export class ToolServerConnectionManager implements ConnectionManager {
       )
     }
     if (client.client_type === 'smithery') {
-      const mcpClientSession = await toolServerSessionManager.getSession(client)
+      const mcpClientSession =
+        await this.toolServerSessionManager.getSession(client)
       extendOnClose(this, mcpClientSession)
 
       return await createSmitheryConnection(

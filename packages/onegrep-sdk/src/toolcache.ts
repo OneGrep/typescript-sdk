@@ -450,7 +450,18 @@ export class UniversalToolCache implements ToolCache {
   }
 }
 
-export async function createToolCache(apiClient: OneGrepApiClient) {
-  const connectionManager = new ToolServerConnectionManager()
-  return new UniversalToolCache(apiClient, connectionManager)
+/**
+ * Create a ToolCache with the specified or default connection manager.
+ * @param apiClient - The OneGrepApiClient to use.
+ * @param connectionManager - The ConnectionManager to use.
+ * @returns A ToolCache.
+ */
+export async function createToolCache(
+  apiClient: OneGrepApiClient,
+  connectionManager?: ConnectionManager
+) {
+  return new UniversalToolCache(
+    apiClient,
+    connectionManager ?? new ToolServerConnectionManager()
+  )
 }
