@@ -154,6 +154,7 @@ pnpm add @onegrep/sdk
 ```
 
 Set up your environment:
+
 ```bash
 # Get your API key from the CLI
 npx @onegrep/cli account
@@ -169,6 +170,7 @@ export ONEGREP_API_KEY="your_sandbox_api_key"
 Let's start with a complete example of running an agent that uses OneGrep for dynamic tool selection. This example uses LangChain for the agent loop and Blaxel for managing the agent runtime.
 
 First, install the Just command runner:
+
 ```bash
 # macOS (using Homebrew)
 brew install just
@@ -181,6 +183,7 @@ choco install just
 ```
 
 Then run the example agent:
+
 ```bash
 # Terminal 1: Start the agent server
 just bl-serve
@@ -190,6 +193,7 @@ just bl-chat
 ```
 
 This will start a local agent that:
+
 - Uses OneGrep SDK for intelligent tool selection
 - Implements a ReAct agent loop with LangChain
 - Runs in a secure Blaxel runtime environment
@@ -238,12 +242,23 @@ For more examples and detailed API documentation, check out our [Documentation](
 OneGrep integrates with the following tool providers:
 
 ### [Blaxel](https://blaxel.ai)
+
 The AI-first tool hosting platform with built-in security and scalability. Blaxel provides a wide range of pre-built tools and supports custom tool deployment.
 
 ### [Smithery](https://smithery.dev)
+
 A modern tool hosting platform focused on developer experience and enterprise features. Smithery offers extensive tool management capabilities and robust security controls.
 
 Want to add support for your tool hosting platform? [Get in touch](https://join.slack.com/t/onegrep-community/shared_invite/placeholder)!
+
+## 📖 Next Steps
+
+Ready to explore more advanced capabilities? Check out our [API Reference](https://onegrep.github.io/typescript-sdk/api) to learn about:
+- Advanced filtering and search options
+- Custom tool context training
+- Batch operations and error handling
+- Security policy configuration
+- And more!
 
 ## 📝 License
 
