@@ -2,6 +2,9 @@ import { env } from 'process'
 
 import { BlaxelMcpClientTransport, settings } from '@blaxel/sdk'
 import { Transport } from '@modelcontextprotocol/sdk/shared/transport.js'
+import { log } from '~/core/log.js'
+
+export type BlaxelSettings = typeof settings
 
 /**
  * Utility class for getting the Blaxel MCP client transport URLs.
@@ -13,7 +16,7 @@ class BlaxelUrlUtils {
   // Name is the name of the Blaxel function
   constructor(
     private readonly name: string,
-    private readonly blaxelSettings: typeof settings = settings
+    private readonly blaxelSettings: BlaxelSettings
   ) {}
 
   get fallbackUrl() {
@@ -57,16 +60,22 @@ class BlaxelUrlUtils {
  */
 export function createBlaxelMcpClientTransports(
   functionName: string,
-  headers: Record<string, string> = settings.headers
+  providedSettings?: BlaxelSettings,
+  headerOverrides?: Record<string, string>
 ): Transport[] {
-  const urlUtils = new BlaxelUrlUtils(functionName)
-  const transports = [
-    new BlaxelMcpClientTransport(urlUtils.url.toString(), headers)
-  ]
-  if (urlUtils.fallbackUrl) {
-    transports.push(
-      new BlaxelMcpClientTransport(urlUtils.fallbackUrl.toString(), headers)
-    )
+  const useSettings = providedSettings ?? settings
+
+  const urlUtils = new BlaxelUrlUtils(functionName, useSettings)
+  const url = urlUtils.url.toString()
+  const fallbackUrl = urlUtils.fallbackUrl?.toString()
+  log.trace('BlaxelMcpClientTransports urls', { url, fallbackUrl })
+
+  const transportHeaders = headerOverrides ?? useSettings.headers
+  log.trace('BlaxelMcpClientTransports headers', transportHeaders)
+
+  const transports = [new BlaxelMcpClientTransport(url, transportHeaders)]
+  if (fallbackUrl) {
+    transports.push(new BlaxelMcpClientTransport(fallbackUrl, transportHeaders))
   }
   return transports
 }

@@ -94,6 +94,7 @@
     "zod": "^3.24.2"
   },
   "peerDependencies": {
-    "axios": "^1.7.9"
+    "axios": "^1.7.9",
+    "@hey-api/client-fetch": "0.5.7"
   }
 }

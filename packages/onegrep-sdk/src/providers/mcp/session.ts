@@ -270,6 +270,7 @@ export class MultiTransportClientSession implements AutoCloseableClientSession {
 
   private async connectTransport(transport: Transport): Promise<boolean> {
     try {
+      log.debug(`Connecting to transport ${typeof transport}`)
       await this.client.connect(transport)
       return true
     } catch (error) {
@@ -384,18 +385,22 @@ export class ClientSessionManager<C, V extends ClientSession> {
     // ! Add the session to the manager when it is connected
     session.onConnect = async () => {
       this.sessions.set(key, session)
-      log.debug(`Session ${session.sessionId} connected and added to manager`)
+      log.debug(
+        `Session ${session.sessionId} for key ${key} connected and added to manager`
+      )
     }
     // ! Remove the session from the manager when it is closed
     session.onClose = async () => {
       this.sessions.delete(key)
-      log.debug(`Session ${session.sessionId} closed and removed from manager`)
+      log.debug(
+        `Session ${session.sessionId} for key ${key} closed and removed from manager`
+      )
     }
 
     log.debug(`Connecting session: ${session.sessionId}`)
 
     await session.connect()
-    log.debug(`Session ${session.sessionId} connected`)
+    log.debug(`Session ${session.sessionId} for key ${key} connected`)
 
     return session
   }
