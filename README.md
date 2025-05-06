@@ -15,8 +15,8 @@
 
 _Import a single SDK to power your agents with semantic tool search, trainable contexts, and feedback-driven selection that gets smarter over time. Access tools from any provider through a unified API with configurable security policies and guardrails._
 
-[Documentation](https://onegrep.github.io/typescript-sdk/) |
-[API Reference](https://onegrep.github.io/typescript-sdk/api) |
+[Documentation](docs/apiSpec.md) |
+[API Reference](docs/apiSpec.md#api-methods) |
 [Getting Started](#getting-started) |
 [Join our Community](https://join.slack.com/t/onegrep-community/shared_invite/placeholder)
 
@@ -172,14 +172,7 @@ Let's start with a complete example of running an agent that uses OneGrep for dy
 First, install the Just command runner:
 
 ```bash
-# macOS (using Homebrew)
 brew install just
-
-# Linux
-curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash
-
-# Windows (using Chocolatey)
-choco install just
 ```
 
 Then run the example agent:
@@ -200,14 +193,14 @@ This will start a local agent that:
 
 #### LangChain Integration
 
-OneGrep seamlessly integrates with runtimes like `Langchain` and `CrewAI`, allowing your agents to discover and use tools intelligently:
+OneGrep seamlessly integrates with LangChain, providing type-safe tool bindings:
 
 ```typescript
-import { createToolbox } from '@onegrep/sdk'
+import { getToolbox } from '@onegrep/sdk'
 import { createLangchainToolbox } from '@onegrep/sdk/extensions/langchain'
 
-// Initialize the toolboxes
-const toolbox = await createToolbox()
+// Initialize toolboxes
+const toolbox = await getToolbox()
 const langchainToolbox = await createLangchainToolbox(toolbox)
 
 // Search for relevant tools based on your agent's goals
@@ -215,18 +208,14 @@ const searchResults = await toolbox.search(
   'Find recent news about AI developments'
 )
 
-// Convert to LangChain structured tools
-const tools = await Promise.all(
-  searchResults.map(async (result) => {
-    return langchainToolbox.get(result.id)
-  })
-)
+// Tools are already structured for LangChain
+const tools = searchResults.map(result => result.result)
 
-// Use tools in your LangChain agent
+// Use in your LangChain agent
 const agent = await createReactAgent({
-  llm: yourLLM,
+  llm: new ChatOpenAI(),
   tools: tools,
-  prompt: 'Use the most relevant tool to help the user.'
+  prompt: 'Use the most relevant tools to find and analyze AI news.'
 })
 
 // Tools are now available to your agent with proper typing and validation
@@ -235,7 +224,7 @@ const result = await agent.invoke({
 })
 ```
 
-For more examples and detailed API documentation, check out our [Documentation](https://onegrep.github.io/typescript-sdk/).
+For more examples and detailed API documentation, check out our [Documentation](docs/apiSpec.md).
 
 ## 🔗 Supported Providers
 
@@ -253,13 +242,104 @@ Want to add support for your tool hosting platform? [Get in touch](https://join.
 
 ## 📖 Next Steps
 
-Ready to explore more advanced capabilities? Check out our [API Reference](https://onegrep.github.io/typescript-sdk/api) to learn about:
-
+Ready to explore more advanced capabilities? Check out our [API Reference](docs/apiSpec.md#api-methods) to learn about:
 - Advanced filtering and search options
 - Custom tool context training
 - Batch operations and error handling
 - Security policy configuration
 - And more!
+
+## 🤝 Contributing
+
+We welcome contributions to the OneGrep TypeScript SDK! Here's how you can help:
+
+### Development Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/OneGrep/typescript-sdk.git
+cd typescript-sdk
+
+# Install dependencies
+pnpm install
+
+# Run tests
+pnpm test
+```
+
+### Making Changes
+
+1. Create an issue first to discuss the change
+2. Fork the repository
+3. Create a feature branch referencing the issue (`git checkout -b issue-123/amazing-feature`)
+4. Make your changes
+5. Run tests and ensure they pass (`pnpm test`)
+6. Commit your changes (`git commit -m 'Add amazing feature'`)
+7. Push to your branch (`git push origin issue-123/amazing-feature`)
+8. Open a Pull Request with:
+   - Title: `[Issue-123] Add amazing feature`
+   - Description: Include "Fixes #123" or "Resolves #123" to link the issue
+
+### Feature Requests
+
+Have an idea for a new feature? [Create a Feature Request](https://github.com/OneGrep/typescript-sdk/issues/new?template=feature_request.yml) using one of these types:
+
+- General SDK Enhancement
+- New Runtime Support
+- New Provider Support
+
+The template will guide you through providing:
+1. Feature type selection
+2. Use case description
+3. Proposed solution with example code
+4. Alternative approaches considered
+
+### Bug Reports
+
+Found a bug? [Create a Bug Report](https://github.com/OneGrep/typescript-sdk/issues/new?template=bug_report.yml) with:
+
+**Required Information:**
+- Bug severity (Critical/Minor)
+- Affected providers and runtimes
+- Clear description and reproduction steps
+- Code example
+- Environment details
+
+The template will guide you through providing all necessary information to help us resolve the issue quickly.
+
+## 🔧 Troubleshooting
+
+### Common Issues
+
+#### Authentication Errors
+```bash
+Error: Failed to authenticate with OneGrep API
+```
+- Ensure `ONEGREP_API_KEY` is set in your environment
+- Verify your API key is valid by running `npx @onegrep/cli account`
+- Check if your API URL is correct (`ONEGREP_API_URL`)
+
+#### Tool Not Found
+```typescript
+Error: Web search tool not found
+```
+- Confirm you have access to the required provider (Blaxel/Smithery)
+- Check if the tool name matches exactly
+- Try listing available tools: `await toolbox.listTools()`
+
+#### Tool Execution Failures
+```typescript
+Error: Tool execution failed: Invalid input
+```
+- Verify input matches the tool's schema
+- Check network connectivity to the tool provider
+- Ensure you have necessary permissions
+
+### Getting Help
+
+- Join our [Community Slack](https://join.slack.com/t/onegrep-community/shared_invite/placeholder)
+- Open an [Issue](https://github.com/OneGrep/typescript-sdk/issues)
+- Check our [API Reference](docs/apiSpec.md) for detailed documentation
 
 ## 📝 License
 

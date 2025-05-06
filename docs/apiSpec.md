@@ -218,3 +218,15 @@ _Coming Soon_
 ### Anthropic Claude
 
 _Coming Soon_
+
+Want to add support for your tool hosting platform? [Create a Provider Support Request](https://github.com/OneGrep/typescript-sdk/issues/new?template=feature_request.yml&title=[Provider]%3A+Add+support+for+) and select "New Provider Support" as the feature type.
+
+### [Blaxel](https://blaxel.ai)
+
+The AI-first tool hosting platform with built-in security and scalability. Blaxel provides a wide range of pre-built tools and supports custom tool deployment.
+
+### [Smithery](https://smithery.dev)
+
+A modern tool hosting platform focused on developer experience and enterprise features. Smithery offers extensive tool management capabilities and robust security controls.
+
+Want to add support for your tool hosting platform? [Create a Provider Support Request](https://github.com/OneGrep/typescript-sdk/issues/new?template=feature_request.yml&title=[Provider]%3A+Add+support+for+) and select "New Provider Support" as the feature type.

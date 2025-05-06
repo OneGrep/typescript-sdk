@@ -10,7 +10,7 @@ export type JsonSchema = Record<string, any> | boolean
  * Schemas that represent how to pass inputs to a tool.
  */
 export type ToolCallArgs = Record<string, any>
-export interface ToolCallApproval {}
+export interface ToolCallApproval { }
 export interface ToolCallInput {
   args: ToolCallArgs
   approval: ToolCallApproval | undefined
@@ -155,7 +155,7 @@ export interface ToolCache extends ToolDetailsStore {
 
   // Housekeeping methods
   refresh(): Promise<boolean>
-  refreshTool(toolId: ToolId): Promise<ToolDetails> // Potentially not needed
+  refreshTool(toolId: ToolId): Promise<ToolDetails> // Needed for when a tool's properties get updated its cached internally.
   cleanup(): Promise<void>
 }
 
