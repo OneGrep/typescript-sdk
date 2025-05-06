@@ -1,6 +1,7 @@
 # OneGrep SDK API Reference
 
 ## Table of Contents
+
 - [Authentication](#authentication)
 - [Core Concepts](#core-concepts)
   - [Creating a Toolbox](#creating-a-toolbox)
@@ -42,6 +43,7 @@ const toolbox = await getToolbox()
 ```
 
 That's all you need to do! The toolbox will automatically:
+
 - Set up the API client with your environment configuration
 - Initialize the tool cache
 - Handle secret management
@@ -53,32 +55,42 @@ That's all you need to do! The toolbox will automatically:
 OneGrep organizes tools in a hierarchical structure:
 
 #### Tools
+
 Individual functions or capabilities that your agent can use. Each tool has:
+
 - A unique identifier
 - Input/output specifications
 - Guardrails in the form of Policies
 
 #### Integrations
+
 Collections of related tools that work together. For example:
+
 - GitHub Integration: Issues, PRs, and repository management tools
 - Trello Integration: Board, list, and card management tools
 - Slack Integration: Message, channel, and user management tools
 
 #### Providers
+
 Platforms that host and serve tools:
+
 - [Blaxel](https://blaxel.ai): AI-first tool hosting platform
 - [Smithery](https://smithery.dev): Enterprise tool management platform
 
 Each provider can host multiple integrations, and each integration can contain multiple tools.
 
 ### Tool Selection & Execution Steps (Simplest Example)
+
 1. Search or list available tools
+
 ```typescript
 const searchPrompt = 'Find weather information for a city'
 const searchResults = await toolbox.search(searchPrompt)
 console.log('Ranked tools:', searchResults.map(r => `${r.result.name)} | Score: ${r.score}`)
 ```
+
 2. "Equip" the selected tools (which will create connections to the underlying provider)
+
 ```typescript
 const tools = searchResults.map((r) => await r.result.equip())
 ```
@@ -89,16 +101,18 @@ const tools = searchResults.map((r) => await r.result.equip())
 
 ### Tool Discovery Methods
 
-| Method | Description | Return Type |
-|--------|-------------|-------------|
-| `search(query: string)` | Search for tools using natural language queries. Returns ranked results based on relevance to the query. | `Promise<Array<ScoredResult<ToolDetails>>>` |
-| `listTools()` | List all available tools across all integrations. Returns a map of tool IDs to their basic details. | `Promise<Map<ToolId, BasicToolDetails>>` |
-| `listIntegrations()` | Get a list of all available tool integrations (e.g., "GitHub", "Trello", "Slack"). | `Promise<string[]>` |
-| `get(toolId: ToolId)` | Get comprehensive details about a specific tool, including its configuration, permissions, and usage metrics. | `Promise<ToolDetails>` |
-| `filterTools(options?: FilterOptions)` | Filter tools based on criteria like integration name, permissions, or custom metadata. | `Promise<Map<ToolId, ToolDetails>>` |
+| Method                                 | Description                                                                                                   | Return Type                                 |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| `search(query: string)`                | Search for tools using natural language queries. Returns ranked results based on relevance to the query.      | `Promise<Array<ScoredResult<ToolDetails>>>` |
+| `listTools()`                          | List all available tools across all integrations. Returns a map of tool IDs to their basic details.           | `Promise<Map<ToolId, BasicToolDetails>>`    |
+| `listIntegrations()`                   | Get a list of all available tool integrations (e.g., "GitHub", "Trello", "Slack").                            | `Promise<string[]>`                         |
+| `get(toolId: ToolId)`                  | Get comprehensive details about a specific tool, including its configuration, permissions, and usage metrics. | `Promise<ToolDetails>`                      |
+| `filterTools(options?: FilterOptions)` | Filter tools based on criteria like integration name, permissions, or custom metadata.                        | `Promise<Map<ToolId, ToolDetails>>`         |
 
 ### Tool Equip Methods
+
 Most toolbox operations will give you metadata around a tool in order to improve performance. When you decide that you want to use a tool, you **equip** the tool to spawn the connection to the provider.
+
 ```typescript
 let tool: ToolDetails
 
@@ -114,17 +128,16 @@ const equippedTool = await tool.equip()
 
 ### Tool Filtering Methods
 
-| Method | Description | Return Type |
-|--------|-------------|-------------|
+| Method                                 | Description                             | Return Type                         |
+| -------------------------------------- | --------------------------------------- | ----------------------------------- |
 | `filterTools(options?: FilterOptions)` | Filter tools based on specific criteria | `Promise<Map<ToolId, ToolDetails>>` |
-
 
 ### Resource Management Methods
 
-| Method | Description | Return Type |
-|--------|-------------|-------------|
+| Method      | Description                                             | Return Type        |
+| ----------- | ------------------------------------------------------- | ------------------ |
 | `refresh()` | Refresh the tool cache to ensure up-to-date information | `Promise<boolean>` |
-| `close()` | Clean up resources and close connections | `Promise<void>` |
+| `close()`   | Clean up resources and close connections                | `Promise<void>`    |
 
 #### Usage Examples
 
@@ -140,23 +153,26 @@ await toolbox.close()
 ```
 
 ## Agent Runtime Integration
+
 A toolbox can be instantiated in the runtime integration of your choice. Below are the runtimes that we currently support.
 
 Each runtime integration provides:
+
 - Type-safe tool bindings
 - Runtime-specific optimizations
 
 > Want support for a different runtime? [Open an issue](https://github.com/OneGrep/typescript-sdk/issues/new?assignees=&labels=enhancement&projects=&template=runtime_request.md&title=%5BRuntime+Request%5D%3A+) with the following template:
+>
 > ```md
 > ## Runtime Support Request
-> 
+>
 > **Runtime Name**: [e.g., AutoGPT, BabyAGI]
-> 
+>
 > **Runtime Repository**: [Link to the runtime's repository]
-> 
+>
 > **Use Case**:
 > Brief description of how you'd use OneGrep tools with this runtime
-> 
+>
 > **Example Integration Code**:
 > Code example for how you would like to use it
 > ```
@@ -175,7 +191,9 @@ const langchainToolbox = await createLangchainToolbox(toolbox)
 
 // Search for relevant tools
 const searchResults = await toolbox.search('Find recent news about AI')
-const tools = await Promise.all(searchResults.map(r => langchainToolbox.get(r.result.id)))
+const tools = await Promise.all(
+  searchResults.map((r) => langchainToolbox.get(r.result.id))
+)
 
 // Use in your LangChain agent
 const agent = await createReactAgent({
@@ -190,11 +208,13 @@ const result = await agent.invoke({
 ```
 
 ### CrewAI
+
 _Coming Soon_
 
 ### OpenAI Assistants
+
 _Coming Soon_
 
 ### Anthropic Claude
-_Coming Soon_
 
+_Coming Soon_

@@ -254,6 +254,7 @@ Want to add support for your tool hosting platform? [Get in touch](https://join.
 ## 📖 Next Steps
 
 Ready to explore more advanced capabilities? Check out our [API Reference](https://onegrep.github.io/typescript-sdk/api) to learn about:
+
 - Advanced filtering and search options
 - Custom tool context training
 - Batch operations and error handling
