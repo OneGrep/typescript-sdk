@@ -71,13 +71,20 @@ export async function syncBlaxelSettings(): Promise<void> {
   await blaxelSettings.authenticate()
   // We have to see if the blaxelsettings object is a validApiKey credential or a clientcredential.
   // If either is valid, we can skip the sync.
-  const blaxelCredentials = JSON.parse(JSON.stringify(blaxelSettings.credentials))
+  const blaxelCredentials = JSON.parse(
+    JSON.stringify(blaxelSettings.credentials)
+  )
   if (blaxelCredentials.apiKey && blaxelCredentials.workspace) {
     console.log('Blaxel settings already loaded from api key. Skipping sync.')
     // It correctly loaded existing settings therefore we don't need to forcibly manipulate the blaxel settings.
     return
-  } else if (blaxelCredentials.clientCredentials && blaxelCredentials.workspace) {
-    console.log('Blaxel settings already loaded from client credentials. Skipping sync.')
+  } else if (
+    blaxelCredentials.clientCredentials &&
+    blaxelCredentials.workspace
+  ) {
+    console.log(
+      'Blaxel settings already loaded from client credentials. Skipping sync.'
+    )
     // It correctly loaded existing settings therefore we don't need to forcibly manipulate the blaxel settings.
     return
   }
@@ -208,7 +215,7 @@ export async function createBlaxelConnection(
   try {
     await syncBlaxelSettings()
     await blaxelSettings.authenticate()
-    console.log("Create blaxel connection settings", blaxelSettings)
+    console.log('Create blaxel connection settings', blaxelSettings)
   } catch (error) {
     log.error(
       `Blaxel authentication failed in connection attempt for tool server ${client.server_id}`,
