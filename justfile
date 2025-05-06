@@ -98,12 +98,12 @@ clear-logs:
 # blaxel serve agent
 [group('blaxel')]
 bl-serve:
-    pnpm turbo run bl:serve --filter=@repo/blaxel-langgraph-agent
+    cd apps/blaxel-langgraph-agent && pnpm bl:serve
 
 # open blaxel chat for local agent
 [group('blaxel')]
 bl-chat:
-    pnpm turbo run bl:chat --filter=@repo/blaxel-langgraph-agent
+    cd apps/blaxel-langgraph-agent && pnpm bl:chat
 
 # start the gateway
 [group('gateway')]
