@@ -209,7 +209,7 @@ const searchResults = await toolbox.search(
 )
 
 // Tools are already structured for LangChain
-const tools = searchResults.map(result => result.result)
+const tools = searchResults.map((result) => result.result)
 
 // Use in your LangChain agent
 const agent = await createReactAgent({
@@ -243,6 +243,7 @@ Want to add support for your tool hosting platform? [Get in touch](https://join.
 ## 📖 Next Steps
 
 Ready to explore more advanced capabilities? Check out our [API Reference](docs/apiSpec.md#api-methods) to learn about:
+
 - Advanced filtering and search options
 - Custom tool context training
 - Batch operations and error handling
@@ -289,6 +290,7 @@ Have an idea for a new feature? [Create a Feature Request](https://github.com/On
 - New Provider Support
 
 The template will guide you through providing:
+
 1. Feature type selection
 2. Use case description
 3. Proposed solution with example code
@@ -299,6 +301,7 @@ The template will guide you through providing:
 Found a bug? [Create a Bug Report](https://github.com/OneGrep/typescript-sdk/issues/new?template=bug_report.yml) with:
 
 **Required Information:**
+
 - Bug severity (Critical/Minor)
 - Affected providers and runtimes
 - Clear description and reproduction steps
@@ -312,25 +315,31 @@ The template will guide you through providing all necessary information to help 
 ### Common Issues
 
 #### Authentication Errors
+
 ```bash
 Error: Failed to authenticate with OneGrep API
 ```
+
 - Ensure `ONEGREP_API_KEY` is set in your environment
 - Verify your API key is valid by running `npx @onegrep/cli account`
 - Check if your API URL is correct (`ONEGREP_API_URL`)
 
 #### Tool Not Found
+
 ```typescript
 Error: Web search tool not found
 ```
+
 - Confirm you have access to the required provider (Blaxel/Smithery)
 - Check if the tool name matches exactly
 - Try listing available tools: `await toolbox.listTools()`
 
 #### Tool Execution Failures
+
 ```typescript
 Error: Tool execution failed: Invalid input
 ```
+
 - Verify input matches the tool's schema
 - Check network connectivity to the tool provider
 - Ensure you have necessary permissions
