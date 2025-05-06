@@ -235,13 +235,13 @@ export class UniversalToolCache implements ToolCache {
     const basicToolDetails: BasicToolDetails =
       await this.getToolBasicDetails(toolId)
 
-    log.info(`Got tool basic details`, basicToolDetails)
+    log.trace(`Got tool basic details`, basicToolDetails)
 
     // Getting the ToolResource will get the Properties and Policy for the tool
     const resource: ToolResource =
       await this.highLevelClient.getToolResource(toolId)
 
-    log.info(`Got tool resource`, resource)
+    log.trace(`Got tool resource`, resource)
 
     const serverClient: ToolServerClient = await this.getServerClient(
       resource.tool.server_id
@@ -251,9 +251,7 @@ export class UniversalToolCache implements ToolCache {
     const convertToEquippedTool = async (
       basicToolDetails: BasicToolDetails
     ): Promise<EquippedTool> => {
-      log.info(
-        `Converting to equipped tool ${JSON.stringify(basicToolDetails)}`
-      )
+      log.trace(`Converting to equipped tool`)
 
       const getHandle = async (): Promise<ToolHandle> => {
         try {
@@ -286,7 +284,7 @@ export class UniversalToolCache implements ToolCache {
       equip: () => convertToEquippedTool(basicToolDetails)
     }
 
-    log.info(`Got tool details ${JSON.stringify(toolDetails)}`)
+    log.trace(`Got tool details`, toolDetails)
 
     return toolDetails
   }

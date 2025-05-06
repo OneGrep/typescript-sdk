@@ -8,6 +8,8 @@ import {
 } from '~/types.js'
 import { jsonSchemaUtils } from '~/schema.js'
 import { parseResultFunc } from '~/providers/mcp/toolcall.js'
+import { mcpCallTool } from '~/providers/mcp/toolcall.js'
+import { ClientSession } from '~/providers/mcp/session.js'
 
 import { BlaxelToolServerClient } from '~/core/index.js'
 
@@ -115,10 +117,15 @@ export async function syncBlaxelSettings(): Promise<void> {
  */
 export class BlaxelToolServerConnection implements ToolServerConnection {
   private toolServerClient: BlaxelToolServerClient
+  private mcpClientSession: ClientSession | undefined
   private toolsByName: Map<string, BlaxelTool>
 
-  constructor(toolServerClient: BlaxelToolServerClient) {
+  constructor(
+    toolServerClient: BlaxelToolServerClient,
+    mcpClientSession?: ClientSession
+  ) {
     this.toolServerClient = toolServerClient
+    this.mcpClientSession = mcpClientSession
     this.toolsByName = new Map()
   }
 
@@ -146,6 +153,20 @@ export class BlaxelToolServerConnection implements ToolServerConnection {
 
     if (!this.toolNames.has(toolDetails.name)) {
       throw new Error(`Tool not found: ${toolDetails.name}`)
+    }
+
+    const callDirect = async (
+      toolCallInput: ToolCallInput
+    ): Promise<ToolCallResponse<any>> => {
+      return await mcpCallTool(
+        this.mcpClientSession!.client,
+        toolDetails,
+        toolCallInput
+      )
+    }
+
+    const callSyncDirect = (_: ToolCallInput): ToolCallResponse<any> => {
+      throw new Error('Blaxel tools do not support sync calls')
     }
 
     const call = async (
@@ -191,9 +212,16 @@ export class BlaxelToolServerConnection implements ToolServerConnection {
       // return parseResultFunc(result);
     }
 
-    return {
-      call: call.bind(this),
-      callSync: callSync.bind(this)
+    if (this.mcpClientSession) {
+      return {
+        call: callDirect.bind(this),
+        callSync: callSyncDirect.bind(this)
+      }
+    } else {
+      return {
+        call: call.bind(this),
+        callSync: callSync.bind(this)
+      }
     }
   }
 
@@ -201,13 +229,23 @@ export class BlaxelToolServerConnection implements ToolServerConnection {
     log.info(
       `Closing connection to Blaxel Server ${this.toolServerClient.server_id}`
     )
-    // ! No need to close the Blaxel MCP client manually, it manages its own sessions.
+    // Only close if we have a direct MCP session
+    // When using Blaxel SDK's MCP client it manages its own sessions.
+    if (this.mcpClientSession) {
+      await this.mcpClientSession.close()
+    }
   }
 }
 
 export async function createBlaxelConnection(
-  client: BlaxelToolServerClient
+  client: BlaxelToolServerClient,
+  mcpClientSession?: ClientSession
 ): Promise<ToolServerConnection> {
+  // If we've been given a direct session, use it instead of the Blaxel SDK's.
+  if (mcpClientSession) {
+    return new BlaxelToolServerConnection(client, mcpClientSession)
+  }
+
   // NOTE: Using the Blaxel SDK to retrieve their MCP client
   // will automatically use their auth mechanism pulling from the environment.
   // This is not currently easy to override, so it is important to ensure Blaxel is authenticated
@@ -239,7 +277,5 @@ export async function createBlaxelConnection(
       `Incorrect Blaxel workspace: ${workspace} !== ${client.blaxel_workspace}`
     )
   }
-  const instance = new BlaxelToolServerConnection(client)
-  await instance.initialize()
-  return instance
+  return new BlaxelToolServerConnection(client)
 }

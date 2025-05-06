@@ -79,6 +79,22 @@ dev:
 dev-n8n:
     pnpm turbo run dev --filter=@onegrep/sdk/n8n-nodes-onegrep
 
+# tail all onegrep logs
+[group('logs')]
+tail-logs:
+    tail -f ~/.onegrep/*.log
+
+# tail the sdk log
+[group('logs')]
+tail-sdk-logs:
+    touch ~/.onegrep/onegrep.sdk.log
+    tail -f ~/.onegrep/onegrep.sdk.log
+
+# clear logs
+[group('logs')]
+clear-logs:
+    rm -f ~/.onegrep/*.log
+
 # blaxel serve agent
 [group('blaxel')]
 bl-serve:

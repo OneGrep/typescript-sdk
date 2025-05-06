@@ -117,6 +117,10 @@ export interface ClientSession {
 
   connect(): Promise<void>
   close(): Promise<void>
+
+  // ! Optional Callbacks
+  onConnect?(): Promise<void>
+  onClose?(): Promise<void>
 }
 
 export interface AutoCloseableClientSession extends ClientSession {
@@ -188,6 +192,7 @@ export class SingleTransportClientSession
   async connect(): Promise<void> {
     try {
       await this.client.connect(this.transport)
+      await this.onConnect()
     } catch (error) {
       log.error(
         `Failed to connect with transport ${typeof this.transport}:`,
@@ -197,13 +202,22 @@ export class SingleTransportClientSession
     }
   }
 
+  onConnect = async () => {
+    log.debug('SingleTransportClientSession onConnect callback')
+  }
+
   resetAutoCloseTimer() {
     this.autoCloseTimer.reset()
   }
 
   async close(): Promise<void> {
     this.autoCloseTimer.stop()
-    return this.client.close()
+    await this.client.close()
+    return this.onClose()
+  }
+
+  onClose = async () => {
+    log.debug('SingleTransportClientSession onClose callback')
   }
 }
 
@@ -272,7 +286,7 @@ export class MultiTransportClientSession implements AutoCloseableClientSession {
 
     for (const transport of this.transports) {
       if (await this.connectTransport(transport)) {
-        // TODO: callbacks?
+        await this.onConnect()
         log.info(
           `MCP session ${transport.sessionId} connected via ${typeof transport}`
         )
@@ -283,13 +297,22 @@ export class MultiTransportClientSession implements AutoCloseableClientSession {
     throw new Error('Failed to connect to any transport')
   }
 
+  onConnect = async () => {
+    log.debug('MultiTransportClientSession onConnect callback')
+  }
+
   resetAutoCloseTimer() {
     this.autoCloseTimer.reset()
   }
 
   async close(): Promise<void> {
     this.autoCloseTimer.stop()
-    return this.client.close()
+    await this.client.close()
+    return this.onClose()
+  }
+
+  onClose = async () => {
+    log.debug('MultiTransportClientSession onClose callback')
   }
 }
 
@@ -358,10 +381,22 @@ export class ClientSessionManager<C, V extends ClientSession> {
     log.debug(`Creating new session for key: ${key}`)
 
     const session = await this.factory.create(config)
+    // ! Add the session to the manager when it is connected
+    session.onConnect = async () => {
+      this.sessions.set(key, session)
+      log.debug(`Session ${session.sessionId} connected and added to manager`)
+    }
+    // ! Remove the session from the manager when it is closed
+    session.onClose = async () => {
+      this.sessions.delete(key)
+      log.debug(`Session ${session.sessionId} closed and removed from manager`)
+    }
+
+    log.debug(`Connecting session: ${session.sessionId}`)
+
     await session.connect()
     log.debug(`Session ${session.sessionId} connected`)
 
-    this.sessions.set(key, session)
     return session
   }
 
