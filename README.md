@@ -3,13 +3,11 @@
 
 # OneGrep TypeScript SDK
 
-[![Release](https://img.shields.io/github/v/release/OneGrep/typescript-sdk)](https://img.shields.io/github/v/release/OneGrep/typescript-sdk)
-[![Build status](https://img.shields.io/github/actions/workflow/status/OneGrep/typescript-sdk/main.yml?branch=main)](https://github.com/OneGrep/typescript-sdk/actions/workflows/main.yml?query=branch%3Amain)
-[![codecov](https://codecov.io/gh/OneGrep/typescript-sdk/branch/main/graph/badge.svg)](https://codecov.io/gh/OneGrep/typescript-sdk)
+[![Release](https://img.shields.io/github/v/release/OneGrep/typescript-sdk)](https://github.com/OneGrep/typescript-sdk/releases/latest)
 [![PNPM](https://img.shields.io/badge/pnpm-v10.4.1-orange)](https://pnpm.io)
 [![Node](https://img.shields.io/badge/node-%3E%3D22.14.0-brightgreen)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/typescript-5.x-blue)](https://www.typescriptlang.org)
-[![License](https://img.shields.io/github/license/OneGrep/typescript-sdk)](https://img.shields.io/github/license/OneGrep/typescript-sdk)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **Build agents that pick tools like experts, secure by default**
 
@@ -238,7 +236,7 @@ The AI-first tool hosting platform with built-in security and scalability. Blaxe
 
 A modern tool hosting platform focused on developer experience and enterprise features. Smithery offers extensive tool management capabilities and robust security controls.
 
-Want to add support for your tool hosting platform? [Get in touch](https://join.slack.com/t/onegrep-community/shared_invite/placeholder)!
+Want to add support for your tool hosting platform? [Create a Provider Support Request](https://github.com/OneGrep/typescript-sdk/issues/new?template=feature_request.yml&title=[Provider]%3A+Add+support+for+)!
 
 ## 📖 Next Steps
 

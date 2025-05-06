@@ -157,25 +157,10 @@ await toolbox.close()
 A toolbox can be instantiated in the runtime integration of your choice. Below are the runtimes that we currently support.
 
 Each runtime integration provides:
-
 - Type-safe tool bindings
 - Runtime-specific optimizations
 
-> Want support for a different runtime? [Open an issue](https://github.com/OneGrep/typescript-sdk/issues/new?assignees=&labels=enhancement&projects=&template=runtime_request.md&title=%5BRuntime+Request%5D%3A+) with the following template:
->
-> ```md
-> ## Runtime Support Request
->
-> **Runtime Name**: [e.g., AutoGPT, BabyAGI]
->
-> **Runtime Repository**: [Link to the runtime's repository]
->
-> **Use Case**:
-> Brief description of how you'd use OneGrep tools with this runtime
->
-> **Example Integration Code**:
-> Code example for how you would like to use it
-> ```
+> Want support for a different runtime? [Create a Runtime Support Request](https://github.com/OneGrep/typescript-sdk/issues/new?template=feature_request.yml&title=[Runtime]%3A+Add+support+for+) and select "New Runtime Support" as the feature type.
 
 ### LangChain
 
@@ -185,21 +170,23 @@ OneGrep seamlessly integrates with LangChain, providing type-safe tool bindings:
 import { getToolbox } from '@onegrep/sdk'
 import { createLangchainToolbox } from '@onegrep/sdk/extensions/langchain'
 
-// Initialize the toolboxes
+// Initialize toolboxes
 const toolbox = await getToolbox()
 const langchainToolbox = await createLangchainToolbox(toolbox)
 
-// Search for relevant tools
-const searchResults = await toolbox.search('Find recent news about AI')
-const tools = await Promise.all(
-  searchResults.map((r) => langchainToolbox.get(r.result.id))
+// Search for relevant tools based on your agent's goals
+const searchResults = await toolbox.search(
+  'Find recent news about AI developments'
 )
+
+// Tools are already structured for LangChain
+const tools = searchResults.map(result => result.result)
 
 // Use in your LangChain agent
 const agent = await createReactAgent({
   llm: new ChatOpenAI(),
   tools: tools,
-  prompt: 'Use the most relevant tool to help the user.'
+  prompt: 'Use the most relevant tools to find and analyze AI news.'
 })
 
 const result = await agent.invoke({
@@ -208,25 +195,20 @@ const result = await agent.invoke({
 ```
 
 ### CrewAI
-
 _Coming Soon_
 
 ### OpenAI Assistants
-
 _Coming Soon_
 
 ### Anthropic Claude
-
 _Coming Soon_
 
 Want to add support for your tool hosting platform? [Create a Provider Support Request](https://github.com/OneGrep/typescript-sdk/issues/new?template=feature_request.yml&title=[Provider]%3A+Add+support+for+) and select "New Provider Support" as the feature type.
 
 ### [Blaxel](https://blaxel.ai)
-
 The AI-first tool hosting platform with built-in security and scalability. Blaxel provides a wide range of pre-built tools and supports custom tool deployment.
 
 ### [Smithery](https://smithery.dev)
-
 A modern tool hosting platform focused on developer experience and enterprise features. Smithery offers extensive tool management capabilities and robust security controls.
 
 Want to add support for your tool hosting platform? [Create a Provider Support Request](https://github.com/OneGrep/typescript-sdk/issues/new?template=feature_request.yml&title=[Provider]%3A+Add+support+for+) and select "New Provider Support" as the feature type.
