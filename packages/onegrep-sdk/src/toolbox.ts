@@ -8,10 +8,11 @@ import {
   ToolDetails,
   BasicToolDetails
 } from '~/types.js'
+import { getDopplerSecretManager } from './secrets/doppler.js'
+
 import { createToolCache } from '~/toolcache.js'
 
 import { log } from '~/core/log.js'
-import { getDopplerSecretManager } from './secrets/doppler.js'
 
 export class Toolbox implements BaseToolbox<ToolDetails> {
   apiClient: OneGrepApiClient

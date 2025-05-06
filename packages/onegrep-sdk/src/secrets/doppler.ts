@@ -93,6 +93,7 @@ export class DopplerSecretManager implements SecretManager {
 
     // Forcibly export it to the environment so that a subsequent library can pick it up.
     for (const [secretName, secretValue] of secretsMap.entries()) {
+      console.log(`Syncing secret ${secretName} to process environment`)
       process.env[secretName] = secretValue
     }
   }

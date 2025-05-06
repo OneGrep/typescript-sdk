@@ -18,6 +18,11 @@ import { CallToolResult } from '@modelcontextprotocol/sdk/types.js'
 
 import { log } from '~/core/log.js'
 
+import os from 'os'
+import fs from 'fs'
+import { join } from 'path'
+import { getDopplerSecretManager } from '~/secrets/doppler.js'
+
 /**
  * A tool from the Blaxel MCP server.
  *
@@ -27,6 +32,71 @@ interface BlaxelTool {
   name: string
   description: string
   call(input: unknown): Promise<unknown>
+}
+
+class BlaxelSettingsOverrider {
+  private workspace: string | undefined
+  private apiKey: string | undefined
+
+  constructor(apiKey: string, workspace: string) {
+    this.apiKey = apiKey
+    this.workspace = workspace
+  }
+
+  private constructConfigYaml(): string {
+    return `
+    context:
+      workspace: ${this.workspace}
+    workspaces:
+      - name: ${this.workspace}
+        credentials:
+          apiKey: ${this.apiKey}
+    `
+  }
+
+  sync() {
+    const configYaml = this.constructConfigYaml()
+
+    const homeDir = os.homedir()
+    fs.writeFileSync(join(homeDir, '.blaxel/config.yaml'), configYaml)
+
+    console.log('Synced Blaxel settings', configYaml)
+  }
+}
+
+export async function syncBlaxelSettings(): Promise<void> {
+  /** Syncs the config yaml used by the blaxel SDK with the environment variables a secrets
+   * manager may have set in case the environment variables don't exist.
+   */
+  await blaxelSettings.authenticate()
+  // We have to see if the blaxelsettings object is a validApiKey credential or a clientcredential.
+  // If either is valid, we can skip the sync.
+  const blaxelCredentials = JSON.parse(JSON.stringify(blaxelSettings.credentials))
+  if (blaxelCredentials.apiKey && blaxelCredentials.workspace) {
+    console.log('Blaxel settings already loaded from api key. Skipping sync.')
+    // It correctly loaded existing settings therefore we don't need to forcibly manipulate the blaxel settings.
+    return
+  } else if (blaxelCredentials.clientCredentials && blaxelCredentials.workspace) {
+    console.log('Blaxel settings already loaded from client credentials. Skipping sync.')
+    // It correctly loaded existing settings therefore we don't need to forcibly manipulate the blaxel settings.
+    return
+  }
+
+  console.log('No existing blaxel settings found. Syncing Blaxel settings...')
+
+  const secretManager = await getDopplerSecretManager()
+  await secretManager.initialize()
+  const bl_workspace = await secretManager.getSecret('BL_WORKSPACE')
+  const bl_api_key = await secretManager.getSecret('BL_API_KEY')
+  console.log('Blaxel workspace', bl_workspace)
+  const obfuscated_api_key = bl_api_key?.replace(/./g, '*')
+  console.log('Blaxel api key', obfuscated_api_key)
+
+  const override = new BlaxelSettingsOverrider(bl_api_key!, bl_workspace!)
+  override.sync()
+
+  // Force it to reload the settings
+  await blaxelSettings.authenticate()
 }
 
 /**
@@ -47,6 +117,7 @@ export class BlaxelToolServerConnection implements ToolServerConnection {
 
   async initialize(): Promise<void> {
     // ! For now the Blaxel Function name is the same as the integration name.
+    await syncBlaxelSettings()
     const tools = await getBlaxelServerTools(
       this.toolServerClient.blaxel_function
     )
@@ -135,7 +206,9 @@ export async function createBlaxelConnection(
   // This is not currently easy to override, so it is important to ensure Blaxel is authenticated
   // and the current workspace matches the tool server's workspace.
   try {
-    blaxelSettings.authenticate()
+    await syncBlaxelSettings()
+    await blaxelSettings.authenticate()
+    console.log("Create blaxel connection settings", blaxelSettings)
   } catch (error) {
     log.error(
       `Blaxel authentication failed in connection attempt for tool server ${client.server_id}`,
