@@ -57,6 +57,141 @@ _Import a single SDK to power your agents with semantic tool search, trainable c
 - **Audit Logging**: Comprehensive logging of all tool selections and executions
 - **Network Security**: Secure HTTPS connections with JWT and API key-based authentication schemes
 
+## 🚀 Getting Started
+
+### Join the Sandbox
+
+1. **Request Access**
+   - Visit [onegrep.dev](https://www.onegrep.dev/) to join the waitlist
+   - You'll receive an invite to the OneGrep sandbox environment
+
+2. **Install the CLI**
+```bash
+# Install the OneGrep CLI
+npx -y @onegrep/cli onegrep-cli
+
+# Create your account
+npx @onegrep/cli account
+# Select "Create Account" when prompted
+```
+
+### Sandbox Environment
+
+The OneGrep sandbox comes pre-configured with:
+- A collection of popular AI tools across different categories (chat, search, code analysis, etc.)
+- Example tool contexts trained for common agent scenarios
+- Pre-configured security policies and guardrails
+- Sample agent implementations using different frameworks
+
+### Exploring the Sandbox
+
+Let's try out some common workflows using the CLI:
+
+#### 1. Search for Tools
+Find tools that match your agent's goals using natural language:
+```bash
+# Start the CLI tool explorer
+npx @onegrep/cli tools
+
+# Select "search" from the menu
+# Enter your query when prompted:
+"I want to be able to find recent issues in the MCP repository and what the web says about how to fix them"
+
+# The CLI will return ranked tools matching your query
+```
+
+#### 2. Execute Tools
+Try out tools directly from the CLI:
+```bash
+# Start the CLI tool explorer
+npx @onegrep/cli tools
+
+# Select "Explore integrations"
+# Select "exa" from the list
+# Enter your query when prompted:
+"what are the recent developments in MCP"
+
+# The tool will execute and return results
+```
+
+#### 3. Train Tool Context
+Improve tool selection by adding custom context:
+```bash
+# Start the CLI tool explorer
+npx @onegrep/cli tools
+
+# Select "Explore integrations"
+# Select any tool
+# Choose "Add property"
+# Create a new property (e.g., "use_case")
+# Add a value (e.g., "mcp monitoring")
+
+# Now search again:
+npx @onegrep/cli tools
+# Select "search"
+# Try a query related to your tag:
+"I need to monitor MCP status"
+
+# Your trained tool should appear at the top of the results
+```
+
+### Using the SDK
+
+Once you have sandbox access, install the SDK:
+
+```bash
+# Install using PNPM
+pnpm add @onegrep/sdk
+```
+
+Set up your environment:
+```bash
+# Get your API key from the CLI
+npx @onegrep/cli account
+# Select "Show authentication status"
+# Your API key will be displayed
+
+# Set the API key in your environment
+export ONEGREP_API_KEY="your_sandbox_api_key"
+```
+
+#### LangChain Integration
+
+OneGrep seamlessly integrates with runtimes like `Langchain` and `CrewAI`, allowing your agents to discover and use tools intelligently:
+
+```typescript
+import { createToolbox } from '@onegrep/sdk'
+import { createLangchainToolbox } from '@onegrep/sdk/extensions/langchain'
+
+// Initialize the toolboxes
+const toolbox = await createToolbox()
+const langchainToolbox = await createLangchainToolbox(toolbox)
+
+// Search for relevant tools based on your agent's goals
+const searchResults = await toolbox.search('Find recent news about AI developments')
+
+// Convert to LangChain structured tools
+const tools = await Promise.all(
+  searchResults.map(async (result) => {
+    return langchainToolbox.get(result.id)
+  })
+)
+
+// Use tools in your LangChain agent
+const agent = await createReactAgent({
+  llm: yourLLM,
+  tools: tools,
+  prompt: 'Use the most relevant tool to help the user.'
+})
+
+// Tools are now available to your agent with proper typing and validation
+const result = await agent.invoke({
+  input: "What's the latest news about LangChain?"
+})
+```
+
+For more examples and detailed API documentation, check out our [Documentation](https://onegrep.github.io/typescript-sdk/).
+
 ## 🔗 Supported Providers
 
 OneGrep integrates with the following tool providers:
