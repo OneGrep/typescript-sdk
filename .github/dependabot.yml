@@ -15,7 +15,7 @@ updates:
       - "security"
     # Set reviewers for pull requests
     reviewers:
-      - "achintyaashok"
+      - "@onegrep/admins"
     # Group all updates together
     groups:
       dependencies:
@@ -26,27 +26,16 @@ updates:
 
   # Also check for updates in the packages directory
   - package-ecosystem: "npm"
-    directory: "/packages"
+    directory: "/packages/onegrep-sdk"
     schedule:
       interval: "weekly"
     labels:
       - "dependencies"
       - "security"
     reviewers:
-      - "achintyaashok"
+      - "@onegrep/admins"
     groups:
       dependencies:
         patterns:
           - "*"
     open-pull-requests-limit: 10
-
-  # Enable version updates for GitHub Actions
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    labels:
-      - "dependencies"
-      - "github-actions"
-    reviewers:
-      - "achintyaashok" 
