@@ -1,7 +1,8 @@
-import { blModel } from '@blaxel/sdk'
+import { blModel } from "@blaxel/langgraph";
 import { HumanMessage } from '@langchain/core/messages'
 import { createReactAgent } from '@langchain/langgraph/prebuilt'
 import { LangchainToolbox } from '@onegrep/sdk'
+
 
 interface Stream {
   write: (data: string) => void
@@ -22,9 +23,9 @@ export default async function agent(
 
   // Use a type assertion at the point of use to handle version differences
   const streamResponse = await createReactAgent({
-    llm: await blModel('sandbox-openai').ToLangChain(),
+    llm: await blModel('sandbox-openai'),
     prompt: 'If the user ask for the weather, use the weather tool.',
-    tools: tools
+    tools: tools as unknown
   }).stream({
     messages: [new HumanMessage(input)]
   })
