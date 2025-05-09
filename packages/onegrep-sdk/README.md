@@ -81,8 +81,6 @@ The OneGrep sandbox comes pre-configured with:
 - Pre-configured security policies and guardrails
 - Sample agent implementations using different frameworks
 
-
-
 > _A special thanks to [**Blaxel**](https://blaxel.ai/) for providing hosting services for MCP servers for the OneGrep Sandbox._
 
 ### Exploring the Sandbox
@@ -217,7 +215,6 @@ A computing platform for agentic AI that delivers the services and infrastructur
 ### [Smithery](https://smithery.ai)
 
 Smithery is a platform that helps developers find and deploy AI agent-compatible services that follow the Model Context Protocols (MCP) specification. It serves as a central hub for discovering and hosting MCP servers, with the goal of making agentic services more accessible.
-
 
 > Want to add support for your tool hosting platform? Please reach out to us at support@onegrep.dev or [Create a Provider Support Request](https://github.com/OneGrep/typescript-sdk/issues/new?template=feature_request.yml&title=[Provider]%3A+Add+support+for+)!
 
