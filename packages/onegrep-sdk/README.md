@@ -65,7 +65,7 @@ _Import a single SDK to power your agents with semantic tool search, trainable c
 
 ```bash
 # Install the OneGrep CLI
-npx -y @onegrep/cli onegrep-cli
+npx -y @onegrep/cli
 
 # Create your account
 npx @onegrep/cli account
@@ -210,11 +210,11 @@ OneGrep integrates with the following tool providers:
 
 ### [Blaxel](https://blaxel.ai)
 
-A computing platform for agentic AI that delivers the services and infrastructure needed to build and deploy AI agents. Blaxel has a wide range of pre-built tool servers and supports custom tool deployment.
+The AI-first tool hosting platform with built-in security and scalability. Blaxel provides a wide range of pre-built tools and supports custom tool deployment.
 
-### [Smithery](https://smithery.ai)
+### [Smithery](https://smithery.dev)
 
-Smithery is a platform that helps developers find and deploy AI agent-compatible services that follow the Model Context Protocols (MCP) specification. It serves as a central hub for discovering and hosting MCP servers, with the goal of making agentic services more accessible.
+A modern tool hosting platform focused on developer experience and enterprise features. Smithery offers extensive tool management capabilities and robust security controls.
 
 > Want to add support for your tool hosting platform? Please reach out to us at support@onegrep.dev or [Create a Provider Support Request](https://github.com/OneGrep/typescript-sdk/issues/new?template=feature_request.yml&title=[Provider]%3A+Add+support+for+)!
 
@@ -235,15 +235,13 @@ We welcome contributions to the OneGrep TypeScript SDK! Here's how you can help:
 ### Development Setup
 
 ```bash
-# Clone the repository
+# Fork the repository & clone it
 git clone https://github.com/OneGrep/typescript-sdk.git
 cd typescript-sdk
 
-# Install dependencies
-pnpm install
-
-# Run tests
-pnpm test
+# Install dependencies & build
+just install
+just build
 ```
 
 ### Making Changes
