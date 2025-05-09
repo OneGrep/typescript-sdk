@@ -81,6 +81,10 @@ The OneGrep sandbox comes pre-configured with:
 - Pre-configured security policies and guardrails
 - Sample agent implementations using different frameworks
 
+
+
+> _A special thanks to [**Blaxel**](https://blaxel.ai/) for providing hosting services for MCP servers for the OneGrep Sandbox._
+
 ### Exploring the Sandbox
 
 Let's try out some common workflows using the CLI:
@@ -141,9 +145,9 @@ export ONEGREP_API_URL="https://test-sandbox.onegrep.dev"
 
 #### Run an Agent
 
-Let's start with a complete example of running an agent that uses OneGrep for dynamic tool selection. This example uses LangChain for the agent loop and Blaxel for managing the agent runtime.
+Let's start with a complete example of running an agent that uses OneGrep for dynamic tool selection. This example uses [**Langchain**](https://github.com/langchain-ai/langchain) for the agent loop and [**Blaxel**](https://blaxel.ai/) for managing the agent runtime.
 
-First, install the Just command runner:
+First, install the [**Just**](https://github.com/casey/just) command runner:
 
 ```bash
 brew install just
@@ -208,13 +212,14 @@ OneGrep integrates with the following tool providers:
 
 ### [Blaxel](https://blaxel.ai)
 
-The AI-first tool hosting platform with built-in security and scalability. Blaxel provides a wide range of pre-built tools and supports custom tool deployment.
+A computing platform for agentic AI that delivers the services and infrastructure needed to build and deploy AI agents. Blaxel has a wide range of pre-built tool servers and supports custom tool deployment.
 
-### [Smithery](https://smithery.dev)
+### [Smithery](https://smithery.ai)
 
-A modern tool hosting platform focused on developer experience and enterprise features. Smithery offers extensive tool management capabilities and robust security controls.
+Smithery is a platform that helps developers find and deploy AI agent-compatible services that follow the Model Context Protocols (MCP) specification. It serves as a central hub for discovering and hosting MCP servers, with the goal of making agentic services more accessible.
 
-Want to add support for your tool hosting platform? [Create a Provider Support Request](https://github.com/OneGrep/typescript-sdk/issues/new?template=feature_request.yml&title=[Provider]%3A+Add+support+for+)!
+
+> Want to add support for your tool hosting platform? Please reach out to us at support@onegrep.dev or [Create a Provider Support Request](https://github.com/OneGrep/typescript-sdk/issues/new?template=feature_request.yml&title=[Provider]%3A+Add+support+for+)!
 
 ## 📖 Next Steps
 
