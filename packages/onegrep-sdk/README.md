@@ -118,29 +118,6 @@ npx @onegrep/cli tools
 
 #### 3. Train Tool Context
 
-Improve tool selection by adding custom context:
-
-```bash
-# Start the CLI tool explorer
-npx @onegrep/cli tools
-
-# Select "Explore integrations"
-# Select any tool
-# Choose "Add property"
-# Create a new property (e.g., "use_case")
-# Add a value (e.g., "mcp monitoring")
-
-# Now search again:
-npx @onegrep/cli tools
-# Select "search"
-# Try a query related to your tag:
-"I need to monitor MCP status"
-
-# Your trained tool should appear at the top of the results
-```
-
-### Using the SDK
-
 Once you have sandbox access, install the SDK:
 
 ```bash
@@ -158,6 +135,8 @@ npx @onegrep/cli account
 
 # Set the API key in your environment
 export ONEGREP_API_KEY="your_sandbox_api_key"
+# Set the URL to your onegrep deployment (or the public sandbox)
+export ONEGREP_API_URL="https://test-sandbox.onegrep.dev"
 ```
 
 #### Run an Agent
@@ -168,6 +147,8 @@ First, install the Just command runner:
 
 ```bash
 brew install just
+just install
+just build
 ```
 
 Then run the example agent:
