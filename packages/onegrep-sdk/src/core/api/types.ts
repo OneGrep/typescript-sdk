@@ -56,4 +56,3 @@ export type SearchResponseScoredRegisteredToolprint = z.infer<
 export type SearchResponse =
   | SearchResponseScoredItemTool
   | SearchResponseScoredRegisteredToolprint
-
