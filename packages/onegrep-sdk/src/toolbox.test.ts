@@ -277,6 +277,17 @@ describe('Blaxel Toolbox Tests', () => {
 
     await new Promise((resolve) => setTimeout(resolve, 1000))
   })
+
+  it('should be able to recommend tools', async () => {
+    const recommendation = await toolbox.recommend('What is the capital of the moon?')
+    expect(recommendation).toBeDefined()
+    if (!recommendation) {
+      throw new Error('Recommendation not found')
+    }
+
+    expect(recommendation.tools.length).toBeGreaterThan(0)
+    log.info(`Recommendation: ${JSON.stringify(recommendation)}`)
+  })
 })
 
 describe('Smithery Toolbox Tests', () => {

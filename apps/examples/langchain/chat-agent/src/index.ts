@@ -25,7 +25,19 @@ interface ChatPrompt {
   message: string
 }
 
-async function createAgent(model: ChatOpenAI, tools: any[]) {
+async function createAgent(tools: any[]) {
+  const model = new ChatOpenAI({
+    modelName: OPENAI_MODEL,
+    streaming: true,
+    callbacks: [
+      {
+        handleLLMNewToken(token: string) {
+          process.stdout.write(token)
+        }
+      }
+    ]
+  })
+
   // Create the React agent
   return createReactAgent({
     llm: model,
@@ -33,7 +45,7 @@ async function createAgent(model: ChatOpenAI, tools: any[]) {
   })
 }
 
-async function getIntent(message: string) {
+async function getAgentGoal(message: string) {
   const spinner = ora('Extracting goal...').start()
   // First, use a separate LLM call to understand the intent and search for relevant tools
   const intentModel = new ChatOpenAI({
@@ -62,40 +74,35 @@ async function processMessage(
   toolbox: LangchainToolbox,
   message: string,
   chatHistory: BaseMessage[] = []
-): Promise<string> {
+): Promise<void> {
   const spinner = ora('Thinking...').start()
   try {
     // First, use a separate LLM call to understand the intent and search for relevant tools
-    const intentResult = await getIntent(message)
+    const goal = await getAgentGoal(message)
+    const query = typeof goal === 'string' ? goal : message
 
-    // Search and select the most relevant tools based on the goal.
     spinner.text = 'Searching for relevant tools...'
-    const searchResult = await toolbox.search(
-      typeof intentResult === 'string' ? intentResult : message
-    )
-    const selectedTools = searchResult.map((r) => r.result)
-    console.debug(`Tools found: ${selectedTools.map((t) => t.name).join(', ')}`)
+
+    // Option 1 - Get a more comprehensive recommendation with a rich instruction set as well as specifc tools
+    const recommendation = await toolbox.recommend(query)
+    const selectedTools = recommendation.tools
+    const recommendationPrompts = recommendation.messages
+
+    // Option 2 - Get a list of tools based on the goal
+    // const searchResult = await toolbox.search(query)
+    // const selectedTools = searchResult.map((r) => r.result)
+    // console.debug(`Tools found: ${selectedTools.map((t) => t.name).join(', ')}`)
 
     // Create the agent with the discovered tools
     spinner.text = 'Generating conclusions...'
-    const model = new ChatOpenAI({
-      modelName: OPENAI_MODEL,
-      streaming: true,
-      callbacks: [
-        {
-          handleLLMNewToken(token: string) {
-            process.stdout.write(token)
-          }
-        }
-      ]
-    })
 
-    const agent = await createAgent(model, selectedTools)
+    const agent = await createAgent(selectedTools)
 
     // Execute the agent
     const result = await agent.invoke(
       {
-        messages: [...chatHistory, new HumanMessage(message)]
+        // Add the chat history, the user's message, and additional instructions from the recommendation
+        messages: [...chatHistory, new HumanMessage(message), ...recommendationPrompts]
       },
       {
         recursionLimit: 10 // Equivalent to maxIterations in old AgentExecutor
@@ -103,13 +110,17 @@ async function processMessage(
     )
 
     const aiResponse = result.messages[result.messages.length - 1].content
+    const aiMessage = aiResponse ? typeof aiResponse === 'string' ? aiResponse : aiResponse.join('\n') : 'No response generated'
+
+    // Add the interaction to chat history
+    chatHistory.push(new HumanMessage(message))
+    chatHistory.push(new AIMessage(aiMessage))
 
     spinner.succeed('Done')
-    return typeof aiResponse === 'string' ? aiResponse : 'No response generated'
   } catch (error) {
     if (error instanceof Error && error.name === 'GraphRecursionError') {
       spinner.fail('Agent reached maximum number of steps')
-      return 'I reached my step limit. Could you try breaking down your request into smaller parts?'
+      throw new Error('I reached my step limit. Could you try breaking down your request into smaller parts?')
     }
     spinner.fail('Error processing message')
     console.error('Full error:', error)
@@ -121,8 +132,9 @@ async function start() {
   console.log(chalk.cyan('\n🤖 Welcome to the AI Agent!\n'))
 
   const initSpinner = ora('Initializing toolbox...').start()
-  let toolbox: LangchainToolbox | undefined
 
+  // OneGrep toolbox initialization
+  let toolbox: LangchainToolbox | undefined
   try {
     toolbox = await createLangchainToolbox(await getToolbox())
     initSpinner.succeed('Ready to chat')
@@ -137,13 +149,14 @@ async function start() {
     process.exit(1)
   }
 
-  // Maintain chat history
+  // Persistent Message History
   const chatHistory: BaseMessage[] = [
     new SystemMessage(
       `You are a helpful assistant that can answer questions and help with tasks.`
     )
   ]
 
+  // Interaction Loop
   while (true) {
     try {
       const response = await inquirer.prompt<ChatPrompt>({
@@ -163,17 +176,16 @@ async function start() {
         continue
       }
 
-      const result = await processMessage(
+      // Doing the bread and butter
+      await processMessage(
         toolbox!,
         response.message,
         chatHistory
       )
 
-      // Add the interaction to chat history
-      chatHistory.push(new HumanMessage(response.message))
-      chatHistory.push(new AIMessage(result))
-
-      console.log('\n' + chalk.blue('🤖 Assistant:'), result, '\n')
+      // Display the last message
+      const lastMessage = chatHistory[chatHistory.length - 1]
+      console.log('\n' + chalk.blue('🤖 Assistant:'), lastMessage.content, '\n')
     } catch (error) {
       console.error(chalk.red('\nError:'), error)
       console.log(chalk.yellow('Please try again or type "exit" to quit.\n'))

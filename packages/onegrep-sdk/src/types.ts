@@ -1,4 +1,4 @@
-import { Policy, ToolProperties, ToolServerClient } from '~/core/api/types.js'
+import { Policy, Prompt, ToolProperties, ToolServerClient } from '~/core/api/types.js'
 
 export type ToolServerProviderId = string
 export type ToolServerId = string
@@ -10,7 +10,7 @@ export type JsonSchema = Record<string, any> | boolean
  * Schemas that represent how to pass inputs to a tool.
  */
 export type ToolCallArgs = Record<string, any>
-export interface ToolCallApproval {}
+export interface ToolCallApproval { }
 export interface ToolCallInput {
   args: ToolCallArgs
   approval: ToolCallApproval | undefined
@@ -89,6 +89,17 @@ export interface ToolDetails extends BasicToolDetails {
 }
 
 /**
+ * A generic recommendation type that is composed of a list of unordered
+ * tools and a list of messages that sequentially describe the best way for
+ * a model / LLM / agent to use the tools to achieve a goal.
+ */
+export interface Recommendation {
+  goal: string
+  tools: ToolDetails[]
+  messages: Prompt[]
+}
+
+/**
  * A handle to a tool that is used to call the tool.
  */
 export interface ToolHandle {
@@ -152,6 +163,7 @@ export interface ToolDetailsStore {
 export interface ToolCache extends ToolDetailsStore {
   get(toolId: ToolId): Promise<ToolDetails>
   search(query: string): Promise<Array<ScoredResult<ToolDetails>>>
+  recommend(goal: string): Promise<Recommendation>
 
   // Housekeeping methods
   refresh(): Promise<boolean>
@@ -159,8 +171,24 @@ export interface ToolCache extends ToolDetailsStore {
   cleanup(): Promise<void>
 }
 
-export interface BaseToolbox<T> extends ToolDetailsStore {
+export interface BaseToolbox<T, R> extends ToolDetailsStore {
+  /** Returns a recommendation comprising of tools and messages describing the best way to use them given
+   * the goal at hand.
+   */
+  recommend(goal: string): Promise<R>
+
+  /**
+   * Returns a tool by its id.
+   */
   get(toolId: ToolId): Promise<T>
+
+  /**
+   * Searches for tools based on a query.
+   */
   search(query: string): Promise<Array<ScoredResult<T>>>
+
+  /**
+   * Closes the toolbox and releases all associated resources.
+   */
   close(): Promise<void>
 }

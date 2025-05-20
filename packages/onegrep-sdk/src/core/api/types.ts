@@ -43,6 +43,7 @@ export type SearchResponseScoredItemTool = z.infer<
 export type Policy = z.infer<typeof schemas.Policy>
 
 // Toolprint models
+export type Prompt = z.infer<typeof schemas.Prompt>
 export type Toolprint = z.infer<typeof schemas.Toolprint_Input>
 export type RegisteredToolprint = z.infer<typeof schemas.RegisteredToolprint>
 export type ToolprintRecommendation = z.infer<
