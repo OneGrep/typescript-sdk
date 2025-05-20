@@ -189,12 +189,17 @@ describe('Blaxel Toolbox Tests', () => {
 
   it('should be able to make a tool call with invalid input', async () => {
     const toolDetailsMap = await toolbox.listTools()
-    console.log(Array.from(toolDetailsMap.values()).filter((d) => d.integrationName === integrationName || d.integrationName === "blaxel-search"))
+    console.log(
+      Array.from(toolDetailsMap.values()).filter(
+        (d) =>
+          d.integrationName === integrationName ||
+          d.integrationName === 'blaxel-search'
+      )
+    )
     expect(toolDetailsMap.size).toBeGreaterThan(0)
     const basicToolDetails = Array.from(toolDetailsMap.values()).find(
       (details) =>
-        details.integrationName === integrationName &&
-        details.name === toolName
+        details.integrationName === integrationName && details.name === toolName
     )
     expect(basicToolDetails).toBeDefined()
     if (!basicToolDetails) {
@@ -235,8 +240,7 @@ describe('Blaxel Toolbox Tests', () => {
     expect(toolDetailsMap.size).toBeGreaterThan(0)
     const basicToolDetails = Array.from(toolDetailsMap.values()).find(
       (details) =>
-        details.integrationName === integrationName &&
-        details.name === toolName
+        details.integrationName === integrationName && details.name === toolName
     )
     expect(basicToolDetails).toBeDefined()
     if (!basicToolDetails) {
