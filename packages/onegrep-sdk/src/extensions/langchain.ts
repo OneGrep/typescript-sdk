@@ -14,7 +14,7 @@ import { jsonSchemaUtils } from '~/schema.js'
 import {
   DynamicStructuredTool,
   DynamicStructuredToolInput,
-  StructuredTool,
+  StructuredTool
 } from '@langchain/core/tools'
 
 import { z, ZodTypeAny } from 'zod'
@@ -80,7 +80,9 @@ const convertToLangChainMessages = (prompts: Prompt[]): SystemMessage[] => {
  * interface that break Blaxel.  We will need to find better ways to manage
  * Toolbox interfaces to let us extend the Toolbox for various agent frameworks.
  */
-export class LangchainToolbox implements BaseToolbox<StructuredTool, StructuredToolsRecommendation> {
+export class LangchainToolbox
+  implements BaseToolbox<StructuredTool, StructuredToolsRecommendation>
+{
   toolbox: Toolbox
 
   constructor(toolbox: Toolbox) {
@@ -109,11 +111,15 @@ export class LangchainToolbox implements BaseToolbox<StructuredTool, StructuredT
 
   async recommend(goal: string): Promise<StructuredToolsRecommendation> {
     const recommendation = await this.toolbox.recommend(goal)
-    const structuredTools: StructuredTool[] = await Promise.all(recommendation.tools.map(async (t) => {
-      const et = await t.equip()
-      return convertToLangChainTool(et)
-    }))
-    const messages: SystemMessage[] = convertToLangChainMessages(recommendation.messages)
+    const structuredTools: StructuredTool[] = await Promise.all(
+      recommendation.tools.map(async (t) => {
+        const et = await t.equip()
+        return convertToLangChainTool(et)
+      })
+    )
+    const messages: SystemMessage[] = convertToLangChainMessages(
+      recommendation.messages
+    )
     return {
       goal,
       tools: structuredTools,

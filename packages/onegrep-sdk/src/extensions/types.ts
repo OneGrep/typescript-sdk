@@ -1,5 +1,5 @@
-import { StructuredTool } from "@langchain/core/tools";
-import { SystemMessage } from "@langchain/core/messages";
+import { StructuredTool } from '@langchain/core/tools'
+import { SystemMessage } from '@langchain/core/messages'
 
 export interface StructuredToolsRecommendation {
   goal: string

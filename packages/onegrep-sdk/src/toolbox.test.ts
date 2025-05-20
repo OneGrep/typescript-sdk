@@ -279,7 +279,9 @@ describe('Blaxel Toolbox Tests', () => {
   })
 
   it('should be able to recommend tools', async () => {
-    const recommendation = await toolbox.recommend('What is the capital of the moon?')
+    const recommendation = await toolbox.recommend(
+      'What is the capital of the moon?'
+    )
     expect(recommendation).toBeDefined()
     if (!recommendation) {
       throw new Error('Recommendation not found')

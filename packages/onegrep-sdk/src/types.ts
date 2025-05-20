@@ -1,4 +1,9 @@
-import { Policy, Prompt, ToolProperties, ToolServerClient } from '~/core/api/types.js'
+import {
+  Policy,
+  Prompt,
+  ToolProperties,
+  ToolServerClient
+} from '~/core/api/types.js'
 
 export type ToolServerProviderId = string
 export type ToolServerId = string
@@ -10,7 +15,7 @@ export type JsonSchema = Record<string, any> | boolean
  * Schemas that represent how to pass inputs to a tool.
  */
 export type ToolCallArgs = Record<string, any>
-export interface ToolCallApproval { }
+export interface ToolCallApproval {}
 export interface ToolCallInput {
   args: ToolCallArgs
   approval: ToolCallApproval | undefined

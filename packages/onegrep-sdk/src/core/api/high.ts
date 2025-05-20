@@ -19,7 +19,7 @@ import {
 import { makeApiCallWithResult } from './utils.js'
 
 export class OneGrepApiHighLevelClient {
-  constructor(private readonly apiClient: OneGrepApiClient) { }
+  constructor(private readonly apiClient: OneGrepApiClient) {}
 
   async healthCheck(): Promise<boolean> {
     const result = await makeApiCallWithResult<void>(async () => {
@@ -248,11 +248,15 @@ export class OneGrepApiHighLevelClient {
   }
 
   async recommendToolprint(goal: string): Promise<ToolprintRecommendation> {
-    const result = await makeApiCallWithResult<ToolprintRecommendation>(async () => {
-      return await this.apiClient.get_toolprint_recommendation_api_v1_search_toolprints_recommendation_post({
-        query: goal
-      })
-    })
+    const result = await makeApiCallWithResult<ToolprintRecommendation>(
+      async () => {
+        return await this.apiClient.get_toolprint_recommendation_api_v1_search_toolprints_recommendation_post(
+          {
+            query: goal
+          }
+        )
+      }
+    )
     if (result.error) {
       throw result.error
     }

@@ -102,7 +102,11 @@ async function processMessage(
     const result = await agent.invoke(
       {
         // Add the chat history, the user's message, and additional instructions from the recommendation
-        messages: [...chatHistory, new HumanMessage(message), ...recommendationPrompts]
+        messages: [
+          ...chatHistory,
+          new HumanMessage(message),
+          ...recommendationPrompts
+        ]
       },
       {
         recursionLimit: 10 // Equivalent to maxIterations in old AgentExecutor
@@ -110,7 +114,11 @@ async function processMessage(
     )
 
     const aiResponse = result.messages[result.messages.length - 1].content
-    const aiMessage = aiResponse ? typeof aiResponse === 'string' ? aiResponse : aiResponse.join('\n') : 'No response generated'
+    const aiMessage = aiResponse
+      ? typeof aiResponse === 'string'
+        ? aiResponse
+        : aiResponse.join('\n')
+      : 'No response generated'
 
     // Add the interaction to chat history
     chatHistory.push(new HumanMessage(message))
@@ -120,7 +128,9 @@ async function processMessage(
   } catch (error) {
     if (error instanceof Error && error.name === 'GraphRecursionError') {
       spinner.fail('Agent reached maximum number of steps')
-      throw new Error('I reached my step limit. Could you try breaking down your request into smaller parts?')
+      throw new Error(
+        'I reached my step limit. Could you try breaking down your request into smaller parts?'
+      )
     }
     spinner.fail('Error processing message')
     console.error('Full error:', error)
@@ -177,11 +187,7 @@ async function start() {
       }
 
       // Doing the bread and butter
-      await processMessage(
-        toolbox!,
-        response.message,
-        chatHistory
-      )
+      await processMessage(toolbox!, response.message, chatHistory)
 
       // Display the last message
       const lastMessage = chatHistory[chatHistory.length - 1]

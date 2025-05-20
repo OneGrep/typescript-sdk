@@ -381,18 +381,21 @@ export class UniversalToolCache implements ToolCache {
    * simplified Recommendation object. If no toolprint is found for the goal,
    * it will perform a traditional search and return a list of tools but no
    * prompts in the recommendation.
-   * 
+   *
    * @param goal - The goal to get a recommendation for
    * @returns A recommendation for the goal
    */
   @handleErrors()
   async recommend(goal: string): Promise<Recommendation> {
     try {
-      const recommendedToolprint = await this.highLevelClient.recommendToolprint(goal)
+      const recommendedToolprint =
+        await this.highLevelClient.recommendToolprint(goal)
       const tools: Tool[] = recommendedToolprint.toolprint.tools
-      const toolDetails: ToolDetails[] = await Promise.all(tools.map(async (tool) => {
-        return await this.getToolDetails(tool.id)
-      }))
+      const toolDetails: ToolDetails[] = await Promise.all(
+        tools.map(async (tool) => {
+          return await this.getToolDetails(tool.id)
+        })
+      )
       const messages: Prompt[] = recommendedToolprint.prompts
 
       return {
@@ -401,7 +404,9 @@ export class UniversalToolCache implements ToolCache {
         messages
       }
     } catch (_) {
-      log.debug(`No toolprint found for goal: ${goal}, performing traditional search`)
+      log.debug(
+        `No toolprint found for goal: ${goal}, performing traditional search`
+      )
       // If no toolprint is found, perform a traditional search
       const searchResult = await this.search(goal)
       const tools = searchResult.map((result) => result.result)
