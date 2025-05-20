@@ -158,6 +158,9 @@ async function start() {
       ) {
         console.log(chalk.yellow('\nGoodbye! 👋\n'))
         process.exit(0)
+      } else if (response.message.length === 0) {
+        console.log(chalk.yellow('\nPlease enter a message.\n'))
+        continue
       }
 
       const result = await processMessage(
