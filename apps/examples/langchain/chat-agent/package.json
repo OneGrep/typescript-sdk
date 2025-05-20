@@ -1,7 +1,7 @@
 {
-  "name": "@repo/langchain-chat-llm",
+  "name": "@repo/langchain-chat-agent",
   "version": "0.0.1",
-  "description": "Chat with a basic LLM using Langchain",
+  "description": "Chat agent using Langchain",
   "main": "src/index.ts",
   "type": "module",
   "keywords": [],
