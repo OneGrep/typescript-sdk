@@ -24,14 +24,7 @@ interface ChatPrompt {
 async function createAgent(tools: any[]) {
   const model = new ChatOpenAI({
     modelName: OPENAI_MODEL,
-    streaming: true,
-    callbacks: [
-      {
-        handleLLMNewToken(token: string) {
-          process.stdout.write(token)
-        }
-      }
-    ]
+    streaming: false
   })
 
   // Create the React agent
@@ -96,9 +89,6 @@ async function processMessage(
           new AIMessage(query), // the intent we extracted from the user's message
           ...recommendationPrompts // the recommendation prompts
         ]
-      },
-      {
-        recursionLimit: 10 // Equivalent to maxIterations in old AgentExecutor
       }
     )
 
