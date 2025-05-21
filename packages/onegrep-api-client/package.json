@@ -36,18 +36,18 @@
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
-    "@types/node": "^22.13.4",
+    "@types/node": "^22.15.21",
     "openapi-endpoint-trimmer": "^2.0.1",
     "openapi-zod-client": "^1.18.3",
     "rimraf": "^6.0.1",
     "typescript": "latest",
-    "vitest": "^3.0.5"
+    "vitest": "^3.1.4"
   },
   "dependencies": {
     "@repo/utils": "workspace:*",
     "@zodios/core": "^10.9.6",
-    "zod": "^3.24.2",
-    "dotenv": "^16.4.7"
+    "zod": "^3.25.17",
+    "dotenv": "^16.5.0"
   },
   "peerDependencies": {
     "axios": "^1.7.9"
