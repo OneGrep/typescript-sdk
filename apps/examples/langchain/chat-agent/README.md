@@ -21,6 +21,7 @@ A goal-oriented ReAct agent powered by LangChain and OneGrep SDK that dynamicall
     export ONEGREP_API_URL="https://test-sandbox.onegrep.dev"
     ```
 - OpenAI API key
+
   - Set your OpenAI API key:
     ```bash
     export OPENAI_API_KEY="your_openai_api_key"
@@ -32,10 +33,13 @@ A goal-oriented ReAct agent powered by LangChain and OneGrep SDK that dynamicall
 
 1. Clone the repository
 2. Navigate to the project directory:
+
 ```bash
 cd apps/examples/langchain/chat-agent
 ```
+
 3. Install dependencies:
+
 ```bash
 pnpm install
 ```
@@ -75,12 +79,12 @@ The main logic is in `src/index.ts`:
 - `@langchain/core`, `@langchain/langgraph`, `@langchain/openai`: LangChain framework components
 - `@onegrep/sdk`: OneGrep SDK for tool discovery and management
 
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 For more information about OneGrep SDK and its capabilities, check out:
+
 - [Main Project Documentation](../../../README.md)
 - [API Reference](../../../packages/onegrep-sdk/docs/apiSpec.md)
-- [Getting Started Guide](../../../README.md#-getting-started) 
+- [Getting Started Guide](../../../README.md#-getting-started)
