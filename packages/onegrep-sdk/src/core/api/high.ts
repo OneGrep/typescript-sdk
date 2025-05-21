@@ -13,13 +13,15 @@ import {
   UpsertSecretResponse,
   FlagsResponse,
   AuthenticationStatus,
-  ToolprintRecommendation
+  ToolprintRecommendation,
+  Toolprint,
+  RegisteredToolprint
 } from './types.js'
 
 import { makeApiCallWithResult } from './utils.js'
 
 export class OneGrepApiHighLevelClient {
-  constructor(private readonly apiClient: OneGrepApiClient) {}
+  constructor(private readonly apiClient: OneGrepApiClient) { }
 
   async healthCheck(): Promise<boolean> {
     const result = await makeApiCallWithResult<void>(async () => {
@@ -257,6 +259,20 @@ export class OneGrepApiHighLevelClient {
         )
       }
     )
+    if (result.error) {
+      throw result.error
+    }
+    return result.data!
+  }
+
+  async newToolprint(toolprint: Toolprint): Promise<Toolprint> {
+    const result = await makeApiCallWithResult<Toolprint>(async () => {
+      const registeredToolprint: RegisteredToolprint =
+        await this.apiClient.create_toolprint_api_v1_toolprints__post(
+          toolprint
+        )
+      return registeredToolprint.toolprint
+    })
     if (result.error) {
       throw result.error
     }
