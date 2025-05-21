@@ -21,7 +21,7 @@ import {
 import { makeApiCallWithResult } from './utils.js'
 
 export class OneGrepApiHighLevelClient {
-  constructor(private readonly apiClient: OneGrepApiClient) { }
+  constructor(private readonly apiClient: OneGrepApiClient) {}
 
   async healthCheck(): Promise<boolean> {
     const result = await makeApiCallWithResult<void>(async () => {
@@ -279,7 +279,9 @@ export class OneGrepApiHighLevelClient {
 
   async validateToolprint(toolprint: Toolprint): Promise<boolean> {
     const result = await makeApiCallWithResult<unknown>(async () => {
-      return await this.apiClient.validate_toolprint_api_v1_toolprints_validate_post(toolprint)
+      return await this.apiClient.validate_toolprint_api_v1_toolprints_validate_post(
+        toolprint
+      )
     })
     if (result.error) {
       throw result.error
