@@ -81,16 +81,14 @@ async function processMessage(
     const agent = await createAgent(selectedTools)
 
     // Execute the agent
-    const result = await agent.invoke(
-      {
-        messages: [
-          ...chatHistory, // the historical chat history
-          new HumanMessage(message), // the user's message
-          new AIMessage(query), // the intent we extracted from the user's message
-          ...recommendationPrompts // the recommendation prompts
-        ]
-      }
-    )
+    const result = await agent.invoke({
+      messages: [
+        ...chatHistory, // the historical chat history
+        new HumanMessage(message), // the user's message
+        new AIMessage(query), // the intent we extracted from the user's message
+        ...recommendationPrompts // the recommendation prompts
+      ]
+    })
 
     const aiResponse = result.messages[result.messages.length - 1].content
     const aiMessage = aiResponse
