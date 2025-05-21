@@ -11,10 +11,6 @@ import {
   BaseMessage,
   SystemMessage
 } from '@langchain/core/messages'
-import {
-  ChatPromptTemplate,
-  MessagesPlaceholder
-} from '@langchain/core/prompts'
 import inquirer from 'inquirer'
 import ora from 'ora'
 import chalk from 'chalk'
@@ -50,14 +46,7 @@ async function getAgentGoal(message: string) {
   // First, use a separate LLM call to understand the intent and search for relevant tools
   const intentModel = new ChatOpenAI({
     modelName: OPENAI_MODEL,
-    streaming: true,
-    callbacks: [
-      {
-        handleLLMNewToken(token: string) {
-          process.stdout.write(token)
-        }
-      }
-    ]
+    streaming: false
   })
 
   const intentResult = await intentModel.invoke([
@@ -101,11 +90,11 @@ async function processMessage(
     // Execute the agent
     const result = await agent.invoke(
       {
-        // Add the chat history, the user's message, and additional instructions from the recommendation
         messages: [
-          ...chatHistory,
-          new HumanMessage(message),
-          ...recommendationPrompts
+          ...chatHistory, // the historical chat history
+          new HumanMessage(message), // the user's message
+          new AIMessage(query), // the intent we extracted from the user's message
+          ...recommendationPrompts // the recommendation prompts
         ]
       },
       {
@@ -120,7 +109,7 @@ async function processMessage(
         : aiResponse.join('\n')
       : 'No response generated'
 
-    // Add the interaction to chat history
+    // Only store the user's message and the final response.
     chatHistory.push(new HumanMessage(message))
     chatHistory.push(new AIMessage(aiMessage))
 
