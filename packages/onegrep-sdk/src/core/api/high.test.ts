@@ -12,7 +12,7 @@ describe('OneGrepApiHighLevelClient', () => {
     it('should get toolprint JSON schema', async () => {
       const schema = await client.getToolprintJsonSchema()
       expect(schema).toBeDefined()
-      expect(typeof schema).toBe("object")
+      expect(typeof schema).toBe('object')
       log.info('Retrieved toolprint schema:', schema)
     })
 
