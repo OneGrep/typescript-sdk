@@ -2459,7 +2459,7 @@ The process:
     alias: 'get_toolprint_schema_api_v1_toolprints__well_known_schema_get',
     description: `Returns the schema for toolprint definitions.`,
     requestFormat: 'json',
-    response: z.unknown()
+    response: z.object({}).partial().strict().passthrough()
   },
   {
     method: 'get',

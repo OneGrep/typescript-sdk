@@ -3246,7 +3246,11 @@ paths:
         '200':
           content:
             application/json:
-              schema: {}
+              schema:
+                title: >-
+                  Response Get Toolprint Schema Api V1 Toolprints  Well Known
+                  Schema Get
+                type: object
           description: Successful Response
       security:
         - APIKeyHeader: []
