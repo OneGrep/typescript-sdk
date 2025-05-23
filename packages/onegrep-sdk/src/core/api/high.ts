@@ -21,7 +21,7 @@ import {
 import { makeApiCallWithResult } from './utils.js'
 
 export class OneGrepApiHighLevelClient {
-  constructor(private readonly apiClient: OneGrepApiClient) { }
+  constructor(private readonly apiClient: OneGrepApiClient) {}
 
   async healthCheck(): Promise<boolean> {
     const result = await makeApiCallWithResult<void>(async () => {
@@ -279,11 +279,10 @@ export class OneGrepApiHighLevelClient {
 
   async newToolprintFromJson(json: string): Promise<Toolprint> {
     const result = await makeApiCallWithResult<Toolprint>(async () => {
-      const registeredToolprint: RegisteredToolprint = await this.apiClient.create_toolprint_json_api_v1_toolprints_json_post(
-        {
+      const registeredToolprint: RegisteredToolprint =
+        await this.apiClient.create_toolprint_json_api_v1_toolprints_json_post({
           content: json
-        }
-      )
+        })
       return registeredToolprint.toolprint
     })
     if (result.error) {
@@ -294,9 +293,10 @@ export class OneGrepApiHighLevelClient {
 
   async newToolprintFromYaml(yaml: string): Promise<Toolprint> {
     const result = await makeApiCallWithResult<Toolprint>(async () => {
-      const registeredToolprint: RegisteredToolprint = await this.apiClient.create_toolprint_yaml_api_v1_toolprints_yaml_post(
-        yaml
-      )
+      const registeredToolprint: RegisteredToolprint =
+        await this.apiClient.create_toolprint_yaml_api_v1_toolprints_yaml_post(
+          yaml
+        )
       return registeredToolprint.toolprint
     })
     if (result.error) {
