@@ -22,7 +22,7 @@ interface ChatPrompt {
 }
 
 /**
- * Calculates the time taken to execute a function and returns the result and the time taken 
+ * Calculates the time taken to execute a function and returns the result and the time taken
  * @param fn - The function to wrap
  * @returns The result of the function and the time taken
  */
@@ -88,14 +88,18 @@ async function processMessage(
   try {
     // First, use a separate LLM call to understand the intent and search for relevant tools
     let spinner = ora('Extracting goal...').start()
-    const { result: goal, taken: goalTaken } = await timeIt(() => getAgentGoal(message))
+    const { result: goal, taken: goalTaken } = await timeIt(() =>
+      getAgentGoal(message)
+    )
     const query = typeof goal === 'string' ? goal : message
     spinner.succeed(`Done ${chalk.gray(goalTaken)}ms`)
 
     spinner = ora('Searching for relevant tools...').start()
 
     // Option 1 - Get a more comprehensive recommendation with a rich instruction set as well as specifc tools
-    const { result: recommendation, taken: searchTaken } = await timeIt(() => toolbox.recommend(query))
+    const { result: recommendation, taken: searchTaken } = await timeIt(() =>
+      toolbox.recommend(query)
+    )
     const selectedTools = recommendation.tools
     const recommendationPrompts = recommendation.messages
 
@@ -106,22 +110,25 @@ async function processMessage(
 
     spinner.succeed(`Done ${chalk.gray(searchTaken)}ms`)
 
-    // Create the agent with the discovered tools 
+    // Create the agent with the discovered tools
     spinner = ora('Generating response...').start()
 
     const agent = await createAgent(selectedTools)
 
     // Execute the agent
-    const { result: agentResult, taken: agentTaken } = await timeIt(() => agent.invoke({
-      messages: [
-        ...chatHistory, // the historical chat history
-        new HumanMessage(message), // the user's message
-        new AIMessage(query), // the intent we extracted from the user's message
-        ...recommendationPrompts // the recommendation prompts
-      ]
-    }))
+    const { result: agentResult, taken: agentTaken } = await timeIt(() =>
+      agent.invoke({
+        messages: [
+          ...chatHistory, // the historical chat history
+          new HumanMessage(message), // the user's message
+          new AIMessage(query), // the intent we extracted from the user's message
+          ...recommendationPrompts // the recommendation prompts
+        ]
+      })
+    )
 
-    const aiResponse = agentResult.messages[agentResult.messages.length - 1].content
+    const aiResponse =
+      agentResult.messages[agentResult.messages.length - 1].content
     const aiMessage = aiResponse
       ? typeof aiResponse === 'string'
         ? aiResponse
