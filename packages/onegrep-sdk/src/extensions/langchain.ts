@@ -81,8 +81,7 @@ const convertToLangChainMessages = (prompts: Prompt[]): SystemMessage[] => {
  * Toolbox interfaces to let us extend the Toolbox for various agent frameworks.
  */
 export class LangchainToolbox
-  implements BaseToolbox<StructuredTool, StructuredToolsRecommendation>
-{
+  implements BaseToolbox<StructuredTool, StructuredToolsRecommendation> {
   toolbox: Toolbox
 
   constructor(toolbox: Toolbox) {
@@ -107,6 +106,17 @@ export class LangchainToolbox
     const toolDetails = await this.toolbox.get(toolId)
     const tool = await toolDetails.equip()
     return convertToLangChainTool(tool)
+  }
+
+  async getMultiple(toolIds: ToolId[]): Promise<Map<ToolId, StructuredTool>> {
+    const toolDetailsMap = await this.toolbox.getMultiple(toolIds)
+    const structuredToolById: Map<ToolId, StructuredTool> = new Map()
+    for (const [toolId, toolDetails] of toolDetailsMap) {
+      const tool = await toolDetails.equip()
+      structuredToolById.set(toolId, convertToLangChainTool(tool))
+    }
+
+    return structuredToolById
   }
 
   async recommend(goal: string): Promise<StructuredToolsRecommendation> {

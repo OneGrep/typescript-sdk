@@ -21,7 +21,7 @@ import {
 import { makeApiCallWithResult } from './utils.js'
 
 export class OneGrepApiHighLevelClient {
-  constructor(private readonly apiClient: OneGrepApiClient) {}
+  constructor(private readonly apiClient: OneGrepApiClient) { }
 
   async healthCheck(): Promise<boolean> {
     const result = await makeApiCallWithResult<void>(async () => {
@@ -215,6 +215,26 @@ export class OneGrepApiHighLevelClient {
       throw result.error
     }
     return result.data!
+  }
+
+  async getToolResourcesBatch(toolIds: string[]): Promise<Map<string, ToolResource>> {
+    const result = await makeApiCallWithResult<ToolResource[]>(async () => {
+      const toolResources = await this.apiClient.get_tool_resources_batch_api_v1_tools_resources_batch_post(
+        {
+          ids: toolIds
+        }
+      )
+      return toolResources
+    })
+    if (result.error) {
+      throw result.error
+    }
+
+    const toolResourcesMap: Map<string, ToolResource> = new Map()
+    for (const toolResource of result.data!) {
+      toolResourcesMap.set(toolResource.tool.id, toolResource)
+    }
+    return toolResourcesMap
   }
 
   async getToolResourcesForIntegration(
