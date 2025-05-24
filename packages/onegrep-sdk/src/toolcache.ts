@@ -240,7 +240,9 @@ export class UniversalToolCache implements ToolCache {
         log.trace(`Converting to equipped tool`)
         try {
           const connection = await this.connectionManager.connect(serverClient)
-          log.info(`Got connection to tool server ${toolResource.tool.server_id}`)
+          log.info(
+            `Got connection to tool server ${toolResource.tool.server_id}`
+          )
 
           const toolHandle = await connection.getHandle(basicToolDetails)
           log.info(`Got tool handle for ${toolResource.tool.id}`)
@@ -258,16 +260,25 @@ export class UniversalToolCache implements ToolCache {
     return details
   }
 
-  private async getToolDetailsBatch(toolIds: ToolId[]): Promise<Map<ToolId, ToolDetails>> {
-    const toolResources = await this.highLevelClient.getToolResourcesBatch(toolIds)
+  private async getToolDetailsBatch(
+    toolIds: ToolId[]
+  ): Promise<Map<ToolId, ToolDetails>> {
+    const toolResources =
+      await this.highLevelClient.getToolResourcesBatch(toolIds)
 
     const toolDetails: Map<ToolId, ToolDetails> = new Map()
     for (const toolId of toolIds) {
       const toolResource = toolResources.get(toolId)
       if (toolResource) {
         const basicToolDetails = await this.getToolBasicDetails(toolId)
-        const serverClient = await this.getServerClient(toolResource.tool.server_id)
-        const details = this.createToolDetails(basicToolDetails, toolResource, serverClient)
+        const serverClient = await this.getServerClient(
+          toolResource.tool.server_id
+        )
+        const details = this.createToolDetails(
+          basicToolDetails,
+          toolResource,
+          serverClient
+        )
         toolDetails.set(toolId, details)
       }
     }
