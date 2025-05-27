@@ -23,6 +23,20 @@ function axiosToOneGrepApiError(error: AxiosError): OneGrepApiError {
   )
 }
 
+function createAndLogApiError(error: unknown): OneGrepApiError {
+  const returnError =
+    error instanceof AxiosError
+      ? axiosToOneGrepApiError(error)
+      : new OneGrepApiError(`An unknown error occurred: ${error}`)
+
+  // Log the error for debugging (NOTE: it's sometimes expected that the API call fails and we handle it upwards)
+  log.error(
+    `API call failed with error ${typeof error}: ${returnError.message}`
+  )
+
+  return returnError
+}
+
 /**
  * Makes an API call and handles errors by calling a callback instead of throwing exceptions.
  * @param apiCall - The async function that makes the API call
@@ -39,15 +53,7 @@ export async function makeApiCallWithCallback<T>(
     const response = await apiCall()
     onSuccess?.(response)
   } catch (error) {
-    // Log the error
-    log.error(`API call failed: ${typeof error}`)
-
-    if (error instanceof AxiosError) {
-      log.error(`API call failed: ${error.config?.method} ${error.config?.url}`)
-      onError?.(axiosToOneGrepApiError(error))
-    } else {
-      onError?.(new OneGrepApiError(`An unknown error occurred: ${error}`))
-    }
+    onError?.(createAndLogApiError(error))
   }
 }
 
@@ -63,19 +69,9 @@ export async function makeApiCallWithResult<T>(
     const response = await apiCall()
     return { success: true, data: response }
   } catch (error) {
-    // Log the error for debugging
-    log.error(`API call failed: ${typeof error}`)
-
-    if (error instanceof AxiosError) {
-      return {
-        success: false,
-        error: axiosToOneGrepApiError(error)
-      }
-    } else {
-      return {
-        success: false,
-        error: new OneGrepApiError(`An unknown error occurred: ${error}`)
-      }
+    return {
+      success: false,
+      error: createAndLogApiError(error)
     }
   }
 }
