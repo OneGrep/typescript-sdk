@@ -19,7 +19,7 @@ export class OneGrepApiError extends Error {
  */
 function axiosToOneGrepApiError(error: AxiosError): OneGrepApiError {
   return new OneGrepApiError(
-    `An axios error occurred: ${error.code} ${error.config?.method} ${error.config?.url} ${error.response?.status} ${error.message} ${error.response?.data}`
+    `The API call failed: ${error.code} ${error.config?.method} ${error.config?.url} ${error.response?.status} ${error.message} ${JSON.stringify(error.response?.data)}`
   )
 }
 
