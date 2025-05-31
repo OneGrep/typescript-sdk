@@ -9,7 +9,8 @@ import {
   RegisteredToolprintReadable,
   ToolprintInput,
   ToolprintOutput,
-  ProvidersService
+  ProvidersService,
+  AccountInformation
 } from '@repo/onegrep-api-client'
 import { ToolProperties } from '@repo/onegrep-api-client'
 import { ToolResource } from '@repo/onegrep-api-client'
@@ -63,6 +64,36 @@ export class OneGrepApiHighLevelClient {
         })) as unknown as AuthenticationStatus
       }
     )
+    if (result.error) {
+      throw result.error
+    }
+    return result.data!
+  }
+
+  async getAccountInformation(): Promise<AccountInformation> {
+    const result = await makeApiCallWithResult<AccountInformation>(async () => {
+      return await AccountService.getAccountInformationApiV1AccountGet({
+        client: this.apiClient
+      })
+    })
+    if (result.error) {
+      throw result.error
+    }
+    return result.data!
+  }
+
+  async createAccountByInvitation(
+    invitationCode: string,
+    email: string
+  ): Promise<AccountInformation> {
+    const result = await makeApiCallWithResult<AccountInformation>(async () => {
+      return await AccountService.createAccountByInvitationApiV1AccountInvitationCodePost(
+        {
+          client: this.apiClient,
+          body: { invitation_code: invitationCode, email: email }
+        }
+      )
+    })
     if (result.error) {
       throw result.error
     }
