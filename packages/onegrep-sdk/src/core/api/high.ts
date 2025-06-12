@@ -371,7 +371,10 @@ export class OneGrepApiHighLevelClient {
     return result.data!
   }
 
-  async searchTools(query: string, options?: SearchRequest): Promise<SearchResponseScoredItemTool> {
+  async searchTools(
+    query: string,
+    options?: SearchRequest
+  ): Promise<SearchResponseScoredItemTool> {
     const result = await makeApiCallWithResult<SearchResponseScoredItemTool>(
       async () => {
         return await SearchService.searchToolsApiV1SearchToolsPost({
