@@ -10,7 +10,9 @@ import {
   ToolprintInput,
   ToolprintOutput,
   ProvidersService,
-  AccountInformation
+  AccountInformation,
+  SearchResponseScoredItemRegisteredToolprintReadable,
+  SearchRequest
 } from '@onegrep/api-client'
 import { ToolProperties } from '@onegrep/api-client'
 import { ToolResource } from '@onegrep/api-client'
@@ -33,7 +35,7 @@ import { makeApiCallWithResult } from './utils.js'
 import { OneGrepApiClient, ToolServerClient } from './types.js'
 
 export class OneGrepApiHighLevelClient {
-  constructor(private readonly apiClient: OneGrepApiClient) {}
+  constructor(private readonly apiClient: OneGrepApiClient) { }
 
   async healthCheck(): Promise<boolean> {
     const result = await makeApiCallWithResult<void>(async () => {
@@ -376,6 +378,30 @@ export class OneGrepApiHighLevelClient {
           client: this.apiClient,
           body: {
             query: query
+          }
+        })
+      }
+    )
+    if (result.error) {
+      throw result.error
+    }
+    return result.data!
+  }
+
+  /**
+   * Search for toolprints.
+   * @param query - The query to search for.
+   * @returns The search results.
+   */
+  async searchToolprints(query: string, options?: SearchRequest): Promise<SearchResponseScoredItemRegisteredToolprintReadable> {
+    const result = await makeApiCallWithResult<SearchResponseScoredItemRegisteredToolprintReadable>(
+      async () => {
+        return await SearchService.searchToolprintsApiV1SearchToolprintsPost({
+          client: this.apiClient,
+          body: {
+            // the query parameter takes precedence over options.query
+            ...options,
+            query: query,
           }
         })
       }
