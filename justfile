@@ -129,7 +129,7 @@ test-api-client name=".*":
 
 # test the sdk package (use `test-sdk ".*"` to filter by test name regex)
 # * Note that "name" isn't the file name but the name of the test class within a file.
-# Example to filter to langchain tests: `just test-sdk ".*Langchain.*"` or `just test-sdk ".*Blaxel.*"`
+# Example to filter to langchain tests: `just test-sdk ".*Langchain.*"` or `just test-sdk ".*Blaxel.*"` or `just test-sdk ".*HighLevelClient.*"`
 [group('test')]
 test-sdk name=".*":
     pnpm turbo run test --filter=@onegrep/sdk -- --testNamePattern={{name}}

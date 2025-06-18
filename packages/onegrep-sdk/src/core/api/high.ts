@@ -35,7 +35,7 @@ import { makeApiCallWithResult } from './utils.js'
 import { OneGrepApiClient, ToolServerClient } from './types.js'
 
 export class OneGrepApiHighLevelClient {
-  constructor(private readonly apiClient: OneGrepApiClient) {}
+  constructor(private readonly apiClient: OneGrepApiClient) { }
 
   async healthCheck(): Promise<boolean> {
     const result = await makeApiCallWithResult<void>(async () => {
@@ -588,7 +588,7 @@ export class OneGrepApiHighLevelClient {
   }
 
   /** Returns the "ai.txt" instruction set for toolprint generation. */
-  async getToolprintInstructions(): Promise<string> {
+  async getToolprintAiTxt(): Promise<string> {
     const result = await makeApiCallWithResult<string>(async () => {
       return await ToolprintsService.getToolprintInstructionsApiV1ToolprintsWellKnownAiTxtGet(
         {
