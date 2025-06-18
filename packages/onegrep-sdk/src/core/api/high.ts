@@ -35,7 +35,7 @@ import { makeApiCallWithResult } from './utils.js'
 import { OneGrepApiClient, ToolServerClient } from './types.js'
 
 export class OneGrepApiHighLevelClient {
-  constructor(private readonly apiClient: OneGrepApiClient) {}
+  constructor(private readonly apiClient: OneGrepApiClient) { }
 
   async healthCheck(): Promise<boolean> {
     const result = await makeApiCallWithResult<void>(async () => {
@@ -44,6 +44,20 @@ export class OneGrepApiHighLevelClient {
       })
     })
     return result.success
+  }
+
+  /** Returns the global "ai.txt" for an agent to gather details on what the API can do. */
+  async getAiTxt(): Promise<string> {
+    const result = await makeApiCallWithResult<string>(async () => {
+      return await DefaultService.getAiDocumentationAiTxtGet({
+        client: this.apiClient
+      })
+    })
+
+    if (result.error) {
+      throw result.error
+    }
+    return result.data!
   }
 
   async initialize(): Promise<InitializeResponse> {
@@ -562,6 +576,21 @@ export class OneGrepApiHighLevelClient {
   async getToolprintTemplate(): Promise<string> {
     const result = await makeApiCallWithResult<string>(async () => {
       return await ToolprintsService.getToolprintTemplateApiV1ToolprintsWellKnownTemplateGet(
+        {
+          client: this.apiClient
+        }
+      )
+    })
+    if (result.error) {
+      throw result.error
+    }
+    return result.data!
+  }
+
+  /** Returns the "ai.txt" instruction set for toolprint generation. */
+  async getToolprintInstructions(): Promise<string> {
+    const result = await makeApiCallWithResult<string>(async () => {
+      return await ToolprintsService.getToolprintInstructionsApiV1ToolprintsWellKnownAiTxtGet(
         {
           client: this.apiClient
         }

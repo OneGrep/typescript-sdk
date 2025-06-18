@@ -20,7 +20,7 @@ reinstall:
 
 # update the api client spec
 [group('openapi')]
-update-openapi-spec base-url="https://www.test-sandbox.onegrep.dev":
+update-openapi-spec base-url="https://dev.sandbox.onegrep.dev":
     curl {{base-url}}/openapi/sdk-client.yaml --output ./packages/onegrep-api-client/openapi/onegrep-api.yaml
 
 [group('openapi')]
@@ -66,7 +66,7 @@ build-utils:
 # build the api client package
 [group('build')]
 build-api-client:
-    pnpm turbo run build --force --filter=@repo/onegrep-api-client
+    pnpm turbo run build --force --filter=@onegrep/api-client
 
 # build the sdk package
 [group('build')]
